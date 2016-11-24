@@ -1,0 +1,38 @@
+# Project file for OpenHAM: Hamstad Benchmark 4
+
+# Convergence options
+maxNonLinIters = 10
+variableMapping = yz_Trh
+
+maxDt = 10
+minDt = 1e-4
+
+
+# Simulation time options
+tEnd = 432000  # = 24*3600*5
+dt0 = 1
+dtOutput = 3600
+
+
+# Grid, all layers follow below
+layer:0 = (mode = equidistant, nElements = 100, dx = 0.001, materialId = 0)
+layer:1 = (mode = equidistant, nElements = 20, dx = 0.001, materialId = 1)
+
+
+# Boundary conditions
+alphaLeft = 25
+betaLeft = 2e-7
+
+alphaRight = 8
+betaRight = 3e-8
+
+#TLeft = 263.15   # = -10 + 273.15
+TLeftFile = Te.ccd
+rhLeft = 0.3
+
+TRight = 293.15  # = 25 + 273.15
+rhRight = 0.6
+
+RainFluxFile = rain.ccd
+
+

@@ -1,0 +1,34 @@
+# Project file for OpenHAM: Blubb.bla
+
+# Convergence options
+maxNonLinIters = 10
+variableMapping = yz_Tpc
+
+maxDt = 1800
+minDt = 1e-4
+
+
+# Simulation time options
+tEnd = 432000  # = 24*3600*5
+dt0 = 1
+dtOutput = 3600
+
+
+# Grid, all layers follow below
+layer:0 = (mode = equidistant, nElements = 100, dx = 0.001, materialId = 0)
+
+
+# Boundary conditions
+alphaLeft = 17
+betaLeft = 7.5e-8
+
+alphaRight = 8
+betaRight = 3e-8
+
+TLeft = 263.15   # = -10 + 273.15
+rhLeft = 0.8
+
+TRight = 298.15  # = 25 + 273.15
+rhRight = 0.6
+
+

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<PostProc xmlns="http://www.bauklimatik-dresden.de" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:IBK="http://www.bauklimatik-dresden.de/IBK" xsi:schemaLocation="http://www.bauklimatik-dresden.de PostProc.xsd" fileVersion="1.0">
+	<!--List of all directories-->
+    <Directories>
+        <Directory>
+            <Path>/home/ghorwin/svn/_private/OpenHAM_trunk/data/tests</Path>
+            <SubDir Color="#45ad45" Checked="1"></SubDir>
+            <SubDir Color="#ce4145" Checked="0">HB4.TpC.1E-5</SubDir>
+            <SubDir Color="#416fce" Checked="0">HB4.TpC.1E-5.delta</SubDir>
+            <SubDir Color="#cacc26" Checked="1">HB4.TpC.1E-6</SubDir>
+            <SubDir Color="#45ad45" Checked="0">HB4.Tpc.1E-5</SubDir>
+            <SubDir Color="#416fce" Checked="1">HB4.Tpc.1E-6</SubDir>
+            <SubDir Color="#7141d1" Checked="0">HB4.Trh.1E-5</SubDir>
+            <SubDir Color="#ffffff" Checked="0">HB4.Trh.1E-5.delta</SubDir>
+            <SubDir Color="#ffffff" Checked="1">HB4.Trh.1E-6</SubDir>
+            <SubDir Color="#416fce" Checked="1">HB4.reference</SubDir>
+            <ExpandedSubDir></ExpandedSubDir>
+        </Directory>
+    </Directories>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Panel states.-->
+    <Panels>
+        <EastPanel>0</EastPanel>
+        <WestPanel>1</WestPanel>
+        <SouthPanel>1</SouthPanel>
+    </Panels>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--All mappers.-->
+    <Mappers>
+        <Mapper name="Relative Humidity">
+            <Quantities>
+                <Quantity>Relative Humidity</Quantity>
+            </Quantities>
+            <Extractors>
+                <Extractor>
+                    <DataIOFileName>/home/ghorwin/svn/_private/OpenHAM_trunk/data/tests/HB4.TpC.1E-6/results/RelativeHumidity.d6o</DataIOFileName>
+                    <CutType>TimeCut</CutType>
+                    <DataFormat>DF_3D</DataFormat>
+                    <CutIndexT>51</CutIndexT>
+                </Extractor>
+                <Extractor>
+                    <DataIOFileName>/home/ghorwin/svn/_private/OpenHAM_trunk/data/tests/HB4.Tpc.1E-6/results/RelativeHumidity.d6o</DataIOFileName>
+                    <CutType>TimeCut</CutType>
+                    <DataFormat>DF_3D</DataFormat>
+                    <CutIndexT>51</CutIndexT>
+                </Extractor>
+                <Extractor>
+                    <DataIOFileName>/home/ghorwin/svn/_private/OpenHAM_trunk/data/tests/HB4.Trh.1E-6/results/RelativeHumidity.d6o</DataIOFileName>
+                    <CutType>TimeCut</CutType>
+                    <DataFormat>DF_3D</DataFormat>
+                    <CutIndexT>51</CutIndexT>
+                </Extractor>
+                <Extractor>
+                    <DataIOFileName>/home/ghorwin/svn/_private/OpenHAM_trunk/data/tests/HB4.reference/results/RelativeHumidity.d6o</DataIOFileName>
+                    <CutType>TimeCut</CutType>
+                    <DataFormat>DF_3D</DataFormat>
+                    <CutIndexT>51</CutIndexT>
+                </Extractor>
+            </Extractors>
+            <ChartModel chartType="2D">
+                <LineInformationMap>
+                    <Line index="0" leftAxis="1" inverted="0" fitted="0">
+                        <TitleText>$filepath</TitleText>
+                        <Quantity>Relative Humidity</Quantity>
+                        <LineStyle>1</LineStyle>
+                        <MarkerStyle>-1</MarkerStyle>
+                        <PenWidth>0</PenWidth>
+                        <PenSytle>1</PenSytle>
+                        <PenColor>#000000</PenColor>
+                    </Line>
+                    <Line index="1" leftAxis="1" inverted="0" fitted="0">
+                        <TitleText>$filepath</TitleText>
+                        <Quantity>Relative Humidity</Quantity>
+                        <LineStyle>1</LineStyle>
+                        <MarkerStyle>-1</MarkerStyle>
+                        <PenWidth>0</PenWidth>
+                        <PenSytle>1</PenSytle>
+                        <PenColor>#ff0000</PenColor>
+                    </Line>
+                    <Line index="2" leftAxis="1" inverted="0" fitted="0">
+                        <TitleText>$filepath</TitleText>
+                        <Quantity>Relative Humidity</Quantity>
+                        <LineStyle>1</LineStyle>
+                        <MarkerStyle>-1</MarkerStyle>
+                        <PenWidth>0</PenWidth>
+                        <PenSytle>1</PenSytle>
+                        <PenColor>#0000ff</PenColor>
+                    </Line>
+                    <Line index="3" leftAxis="1" inverted="0" fitted="0">
+                        <TitleText>$filepath</TitleText>
+                        <Quantity>Relative Humidity</Quantity>
+                        <LineStyle>1</LineStyle>
+                        <MarkerStyle>-1</MarkerStyle>
+                        <PenWidth>0</PenWidth>
+                        <PenSytle>1</PenSytle>
+                        <PenColor>#00ff00</PenColor>
+                    </Line>
+                </LineInformationMap>
+                <AxisProperties>
+                    <Axis index="0" enabled="1" logarithmic="0" autoscale="1">
+                        <TitleText>Coordinate [$unit]</TitleText>
+                        <TitleFont>Ubuntu,9,-1,5,50,0,0,0,0,0</TitleFont>
+                        <LabelFont>Ubuntu,9,-1,5,50,0,0,0,0,0</LabelFont>
+                        <LabelHAlignment>2</LabelHAlignment>
+                        <LabelVAlignment>1</LabelVAlignment>
+                        <LabelRotation>0</LabelRotation>
+                        <IBK:Unit name="AxisUnit">m</IBK:Unit>
+                        <Maximum>0</Maximum>
+                        <Minimum>0</Minimum>
+                        <MaxMinorScale>5</MaxMinorScale>
+                        <MaxMajorScale>8</MaxMajorScale>
+                        <GridVisible>1</GridVisible>
+                        <MinorGridVisible>1</MinorGridVisible>
+                    </Axis>
+                    <Axis index="1" enabled="1" logarithmic="0" autoscale="1">
+                        <TitleText>Relative Humidity [$unit]</TitleText>
+                        <TitleFont>Ubuntu,9,-1,5,50,0,0,0,0,0</TitleFont>
+                        <LabelFont>Ubuntu,9,-1,5,50,0,0,0,0,0</LabelFont>
+                        <LabelHAlignment>0</LabelHAlignment>
+                        <LabelVAlignment>2</LabelVAlignment>
+                        <LabelRotation>0</LabelRotation>
+                        <IBK:Unit name="AxisUnit">%</IBK:Unit>
+                        <Maximum>0</Maximum>
+                        <Minimum>0</Minimum>
+                        <MaxMinorScale>5</MaxMinorScale>
+                        <MaxMajorScale>8</MaxMajorScale>
+                        <GridVisible>1</GridVisible>
+                        <MinorGridVisible>1</MinorGridVisible>
+                    </Axis>
+                    <Axis index="2" enabled="1" logarithmic="0" autoscale="1">
+                        <TitleFont>Ubuntu,9,-1,5,50,0,0,0,0,0</TitleFont>
+                        <LabelFont>Ubuntu,9,-1,5,50,0,0,0,0,0</LabelFont>
+                        <LabelHAlignment>1</LabelHAlignment>
+                        <LabelVAlignment>2</LabelVAlignment>
+                        <LabelRotation>0</LabelRotation>
+                        <IBK:Unit name="AxisUnit">undefined</IBK:Unit>
+                        <Maximum>0</Maximum>
+                        <Minimum>0</Minimum>
+                        <MaxMinorScale>5</MaxMinorScale>
+                        <MaxMajorScale>8</MaxMajorScale>
+                        <GridVisible>1</GridVisible>
+                        <MinorGridVisible>1</MinorGridVisible>
+                    </Axis>
+                </AxisProperties>
+                <ChartProperties>
+                    <TitleText visible="1">
+                        <Text>Relative Humidity</Text>
+                    </TitleText>
+                    <TitleFont>Ubuntu,9,-1,5,50,0,0,0,0,0</TitleFont>
+                    <Proportional>0</Proportional>
+                    <FixedChartSize>0</FixedChartSize>
+                    <ChartSizeWidth>500</ChartSizeWidth>
+                    <ChartSizeHeight>500</ChartSizeHeight>
+                    <ChartSizeUnit>pixel</ChartSizeUnit>
+                    <Legend visible="1" hasFrame="1">
+                        <LegendFont>Ubuntu,9,-1,5,50,0,0,0,0,0</LegendFont>
+                        <BackgroundTransparency>1</BackgroundTransparency>
+                        <IdentifierWidth>20</IdentifierWidth>
+                        <MaxColumns>1</MaxColumns>
+                        <BackgroundColor>#ffffff</BackgroundColor>
+                        <LegendType>Bottom</LegendType>
+                        <Position>100 100 </Position>
+                    </Legend>
+                </ChartProperties>
+            </ChartModel>
+        </Mapper>
+    </Mappers>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Split window state.-->
+    <Splitting>
+        <Widget id="1" parent="0" viewTable="0" mapperIndex="0" size1="1" size2="1" orientation="2" />
+        <FocusedWidget>0</FocusedWidget>
+    </Splitting>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+</PostProc>
