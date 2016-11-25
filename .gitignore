@@ -19,3 +19,17 @@
 *.exe
 *.out
 *.app
+
+# QtCreator-generated files and directories
+OpenHAMSolver/projects/Qt/OpenHAMSolver.pro.user
+OpenHAMSolver/projects/build-*
+externals/DataIO/projects/QT/DataIO.pro.user
+externals/DataIO/projects/build-*
+externals/IBK/projects/Qt/IBK.pro.user
+externals/IBK/projects/build-*
+externals/lib
+
+# CMake build directories
+build/cmake/bb-gcc
+
+
