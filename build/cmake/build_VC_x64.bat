@@ -2,7 +2,7 @@
 
 :: setup VC environment variables
 set VCVARSALL_PATH="c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
-call %VCVARSALL_PATH%
+call %VCVARSALL_PATH% x64
 
 :: These environment variables can also be set externally
 if not defined JOM_PATH (
@@ -10,15 +10,15 @@ if not defined JOM_PATH (
 )
 
 if not defined CMAKE_PREFIX_PATH (
-	set CMAKE_PREFIX_PATH=c:\Qt\5.7.0_VC14\5.7\msvc2015
+	set CMAKE_PREFIX_PATH=c:\Qt\5.7.0_VC14\5.7\msvc2015_64
 )
 
 :: add search path for jom.exe
 set PATH=%PATH%;%JOM_PATH%
 
 :: create and change into build subdir
-mkdir bb_VC
-pushd bb_VC
+mkdir bb_VC_x64
+pushd bb_VC_x64
 
 :: configure makefiles and build
 cmake -G "NMake Makefiles JOM" .. -DCMAKE_BUILD_TYPE:String="Release"
@@ -29,8 +29,7 @@ popd
 
 
 :: copy executable to bin/release dir
-xcopy /Y .\bb_VC\OpenHAMSolver\OpenHAMSolver.exe ..\..\bin\release
-xcopy /Y .\bb_VC\OpenHAMSolver\OpenHAMSolver.exe ..\..\bin\release
+xcopy /Y .\bb_VC_x64\OpenHAMSolver\OpenHAMSolver.exe ..\..\bin\release_x64
 
 exit /b 0
 

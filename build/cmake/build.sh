@@ -1,21 +1,51 @@
 #!/bin/bash
 
+
+# Build script for building 'OpenHAMSolver' and all dependend libraries
+
+# Command line options:  
+#   [reldeb|release|debug]		build type
+#   [2 [1..n]]					cpu count
+#   [gcc|icc]					compiler
+#   [off|gprof]					gprof (includes gcc)
+#   [off|threadChecker]			threadchecker (includes icc)
+#   [off|omp]					openmp (gcc and icc)
+#   [verbose]					enable cmake to call verbose makefiles
+#   [lapack]					enable cmake to build with lapack support
+#   [skip-test]                 does not execute test script after successful build
+#   []
+
 # path export for mac
-export PATH=~/Qt/4.8.7/bin:$PATH
+export PATH=~/Qt5.7.0/5.7/clang_64/bin:~/Qt/4.8.7/bin:$PATH
 
 CMAKELISTSDIR=$(pwd)
 BUILDDIR="bb"
 
 # set defaults
-CMAKE_BUILD_TYPE=" -DCMAKE_BUILD_TYPE:STRING=Release"
-MAKE_CPUCOUNT="4"
+CMAKE_BUILD_TYPE=" -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo"
+MAKE_CPUCOUNT="2"
 BUILD_DIR_SUFFIX="gcc"
 COMPILER=""
-SKIP_TESTS="true"
+SKIP_TESTS="false"
 
 # parse parameters, except gprof and threadchecker
 for var in "$@"
 do
+
+	if [[ $var = "--help" ]];
+	then
+		echo "Command line options:"
+		echo "  [reldeb|release|debug]      build type"
+		echo "  [2 [1..n]]                  cpu count"
+		echo "  [gcc|icc]                   compiler"
+		echo "  [off|gprof]                 gprof (includes gcc)"
+		echo "  [off|threadChecker]         threadchecker (includes icc)"
+		echo "  [off|omp]                   openmp (gcc and icc)"
+		echo "  [verbose]                   enable cmake to call verbose makefiles"
+		echo "  [skip-test]                 does not execute test script after successful build"
+
+		exit 
+	fi
 
     if [[ $var = *[[:digit:]]* ]];
     then
@@ -37,7 +67,7 @@ do
 
     if [[ $var = "release"  ]]; 
     then
-		CMAKE_BUILD_TYPE=" -DCMAKE_BUILD_TYPE:STRING=Debug"
+		CMAKE_BUILD_TYPE=" -DCMAKE_BUILD_TYPE:STRING=Release"
 		echo "Release build..."
     fi
 
@@ -66,7 +96,7 @@ do
 
     if [[ $var = "verbose"  ]]; 
   	then
-		CMAKE_OPTIONS="-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
+		CMAKE_OPTIONS="$CMAKE_OPTIONS -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
 	  fi
 	  
     if [[ $var = "skip-test"  ]]; 
@@ -113,17 +143,17 @@ if [ ! -d $BUILDDIR ]; then
     mkdir -p $BUILDDIR
 fi
 
-cd $BUILDDIR && cmake $CMAKE_OPTIONS $CMAKE_BUILD_TYPE $CMAKE_COMPILER_OPTIONS $CMAKELISTSDIR && make -j$MAKE_CPUCOUNT &&
-echo "*** Copying executable to ../../bin/release ***" &&
+cd $BUILDDIR && cmake $CMAKE_OPTIONS $CMAKE_BUILD_TYPE $CMAKE_COMPILER_OPTIONS $CMAKELISTSDIR && make -j$MAKE_CPUCOUNT && 
 cd $CMAKELISTSDIR &&
 mkdir -p ../../bin/release &&
-if [ -e $BUILDDIR/OpenHAM/OpenHAM ]; then
-  cp $BUILDDIR/OpenHAM/OpenHAM ../../bin/release/OpenHAM
-fi && 
-if [ -e $BUILDDIR/OpenHAM/OpenHAM.app ]; then
-  cp -r $BUILDDIR/OpenHAM/OpenHAM.app ../../bin/release/
-fi && 
-if [ -e $BUILDDIR/OpenHAMSolver/OpenHAMSolver ]; then
+if [ -e $BUILDDIR/MasterSimulator/MasterSimulator ]; then
+  echo "*** Copying OpenHAMSolver to bin/release ***" &&
   cp $BUILDDIR/OpenHAMSolver/OpenHAMSolver ../../bin/release/OpenHAMSolver
+fi &&
+echo "*** Build OpenHAMSolver ***" &&
+if [[ $SKIP_TESTS = "false"  ]]; 
+then
+./run_tests.sh
 fi
+
 
