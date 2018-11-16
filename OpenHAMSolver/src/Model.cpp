@@ -1,17 +1,48 @@
+/*	Copyright (c) 2001-2017, Institut für Bauklimatik, TU Dresden, Germany
+
+	Written by Andreas Nicolai
+	All rights reserved.
+
+	This file is part of the OpenHAM software.
+
+	Redistribution and use in source and binary forms, with or without modification,
+	are permitted provided that the following conditions are met:
+
+	1. Redistributions of source code must retain the above copyright notice, this
+	   list of conditions and the following disclaimer.
+
+	2. Redistributions in binary form must reproduce the above copyright notice,
+	   this list of conditions and the following disclaimer in the documentation
+	   and/or other materials provided with the distribution.
+
+	3. Neither the name of the copyright holder nor the names of its contributors
+	   may be used to endorse or promote products derived from this software without
+	   specific prior written permission.
+
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+	ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+	DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+	ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+	ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
 #include "Model.h"
 
 #include <iostream>
 #include <algorithm>
 
+#include <IBK_messages.h>
 #include <IBK_physics.h>
 #include <IBK_Exception.h>
 #include <IBK_FileReader.h>
 #include <IBK_StringUtils.h>
 #include <IBK_UnitVector.h>
-
-Model::Model()
-{
-}
 
 /*! Attempts to extract a value matching the given key, convert it to double and return it. */
 template <typename T>
@@ -41,211 +72,150 @@ std::string stringValue(const std::map<std::string, std::string> & keyValuePairs
 }
 
 
-void Model::init(const std::string & projectFile) {
+void Model::init(const IBK::SolverArgsParser & args) {
 	const char * const FUNC_ID = "[Model::init]";
 
-	// read settings from project file
-	m_projectFile = projectFile;
-	IBK::Path projectFileDir = IBK::Path(projectFile).parentPath();
+	// set default settings
+	m_maxNonLinIters = 4;
 
-	std::cout << "Reading project file: " << projectFile << std::endl;
-	std::map<std::string, std::string> keyValuePairs;
-	readProjectFile(projectFile, keyValuePairs);
+	m_variableMapping = yz_TpC;
 
-	m_maxNonLinIters = value<unsigned int>(keyValuePairs, "maxNonLinIters");
+	try {
+		// read settings from project file
+		m_args = args;
 
-	std::string varMap = stringValue(keyValuePairs, "variableMapping");
-	if (varMap == "yz_Tpc")
-		m_variableMapping = yz_Tpc;
-	else if (varMap == "yz_Trh")
-		m_variableMapping = yz_Trh;
-	else if (varMap == "yz_TpC")
-		m_variableMapping = yz_TpC;
+		IBK::IBK_Message( IBK::FormatString("Initializing project\n"), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+		IBK::MessageIndentor indent; (void)indent;
+		m_project.readXML(args.m_projectFile);
 
-	m_maxDt = value<double>(keyValuePairs, "maxDt");
-	m_minDt = value<double>(keyValuePairs, "minDt");
+		m_maxDt		= m_project.m_maxTimeStep.value; // in seconds
+		m_minDt		= m_project.m_minTimeStep.value; // in seconds
 
-	m_tEnd = value<double>(keyValuePairs, "tEnd");
-	m_dt0 = value<double>(keyValuePairs, "dt0");
-	m_dtOutput = value<double>(keyValuePairs, "dtOutput");
+		m_t			= m_project.m_simStart.value; // in seconds
+		m_tEnd		= m_t + m_project.m_simDuration.value; // in seconds
+		m_dt0		= m_project.m_initialTimeStep.value; // in seconds
+		m_dtOutput	= 3600; // in seconds
 
-	// read layer definitions
-	unsigned int layerIdx = 0;
-	m_nElements = 0;
-	m_dx.clear();
-	m_matIdx.clear();
-	m_materials.clear();
-	for (;;) {
-		std::string layerName = IBK::FormatString("layer:%1").arg(layerIdx).str();
-		// check if layerName is in map
-		if (keyValuePairs.find(layerName) == keyValuePairs.end())
-			break; // done with layers
+		m_nElements = 0;
+		m_dx.clear();
+		m_matIdx.clear();
+		m_materials.clear();
 
-		// parse layer definition
-		std::string layerDef = stringValue(keyValuePairs, layerName);
-		IBK::trim(layerDef, "()");
-		std::vector<std::string> tokens;
-		IBK::explode(layerDef, tokens, ',', true);
-		if (tokens.size() < 2)
-			throw IBK::Exception(IBK::FormatString("Bad layer definition of layer '%1' in project file.").arg(layerName), FUNC_ID);
-		std::map<std::string, std::string> gridKeyMap;
-		for (unsigned int i=0; i<tokens.size(); ++i) {
-			std::string kw, val;
-			if (!IBK::extract_keyword(tokens[i], kw, val))
-				throw IBK::Exception(IBK::FormatString("Bad layer definition of layer '%1' in project file.").arg(layerName), FUNC_ID);
-			gridKeyMap[kw] = val;
-		}
-		std::string mode = stringValue(gridKeyMap, "mode");
-		unsigned int materialId = value<unsigned int>(gridKeyMap, "materialId");
-		if (mode == "equidistant") {
-			unsigned int nElements = value<unsigned int>(gridKeyMap, "nElements");
-			double dx = value<double>(gridKeyMap, "dx");
+		double gridSpacing = 0.001; // 1 mm grid spacing for now
 
-			// add material for this layer
-			unsigned int matIdx = m_materials.size();
-			m_materials.push_back( Material(materialId) );
-			for (unsigned int j=0; j<nElements; ++j) {
-				m_dx.push_back(dx);
-				m_matIdx.push_back(matIdx);
+		IBK::IBK_Message( IBK::FormatString("Settings up layers\n"), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+		IBK::MessageIndentor indent2; (void)indent2;
+		// process material layers
+		for (unsigned int i=0; i<m_project.m_materialLayers.size(); ++i) {
+			IBK::IBK_Message( IBK::FormatString("Layer #%1:\n").arg(i+1), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+			IBK::MessageIndentor indent3; (void)indent3;
+			const DELPHIN_LIGHT::Project::MaterialLayer & matLayer = m_project.m_materialLayers[i];
+			// lookup and read material data
+			std::string matref = matLayer.m_matRef.m_filename.str();
+			unsigned int matIdx = 0;
+			if (matref.find("built-in:") == 0) {
+				matIdx = IBK::string2val<unsigned int>(matref.substr(9));
+				IBK::IBK_Message(IBK::FormatString("Built-in material #%1\n").arg(matIdx), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+				Material m;
+				m.init(matIdx);
+				m_materials.push_back(m);
 			}
-			m_nElements += nElements;
+			else {
+				IBK::IBK_Message(IBK::FormatString("Material file reference: %1\n").arg(matref), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+				// resolve path placeholder and read material file
+				IBK::Path fullMatFilePath = IBK::Path(matref).withReplacedPlaceholders(m_project.m_placeholders);
+				Material m;
+				try {
+					m.readFromFile(fullMatFilePath);
+				}
+				catch (IBK::Exception & ex) {
+					throw IBK::Exception(ex, IBK::FormatString("Error initializing material from file."), FUNC_ID);
+				}
+				m_materials.push_back(m);
+			}
+			// apply discretization
+
+			// currently only equidistant grid spacing supported, should be sufficient for most cases
+			unsigned int n = matLayer.m_width.value / gridSpacing;
+			// special case, width < gridSpacing*2
+			if (n < 3)
+				n = 3;
+			unsigned int materialIndex = m_materials.size()-1;
+			double dx = matLayer.m_width.value / n;
+			for (unsigned int j=0; j<n; ++j) {
+				m_dx.push_back(dx);
+				m_matIdx.push_back(materialIndex);
+			}
+			m_nElements += n;
+			IBK::IBK_Message( IBK::FormatString("d  = %1\n").arg(matLayer.m_width.value), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+			IBK::IBK_Message( IBK::FormatString("n  = %1\n").arg(n), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+			IBK::IBK_Message( IBK::FormatString("dx = %1\n").arg(dx), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+
+			// dump out material functions for plotting
+			m_materials.back().createPlots(m_dirs.m_varDir, i+1);
 		}
 
+		// transfer constant climate conditions
+		m_TLeft = m_project.m_leftInterface.T.value;
+		m_rhLeft = m_project.m_leftInterface.RH.value;
+		m_TRight = m_project.m_rightInterface.T.value;
+		m_rhRight = m_project.m_rightInterface.RH.value;
 
-		++layerIdx;
+		if (m_nElements == 0)
+			throw IBK::Exception("Missing grid definition in project file.", FUNC_ID);
+
+
+		// Generic code
+
+		m_u.resize(m_nElements);
+		m_rhowv.resize(m_nElements);
+
+		m_zU.resize(m_nElements);
+		m_zRhowv.resize(m_nElements);
+
+		m_T.resize(m_nElements);
+		m_rh.resize(m_nElements);
+		m_pc.resize(m_nElements);
+		m_pC.resize(m_nElements);
+		m_pv.resize(m_nElements);
+		m_pvsat.resize(m_nElements);
+
+		m_Kl.resize(m_nElements);
+		m_Kv.resize(m_nElements);
+		m_lambda.resize(m_nElements);
+
+		m_q.resize(m_nElements+1);
+		m_jv.resize(m_nElements+1);
+		m_hv.resize(m_nElements+1);
+		m_jw.resize(m_nElements+1);
+		m_hw.resize(m_nElements+1);
+
+		// initial variables
+		std::vector<double> zInitial(2*m_nElements);
+		std::vector<double> yInitial(2*m_nElements);
+		for (unsigned int i=0; i<m_nElements; ++i) {
+			zInitial[i*2] = m_project.m_initialT.value;
+			switch (m_variableMapping) {
+				case yz_Trh :
+					zInitial[i*2+1] = m_project.m_initialRH.value; // yz_Trh
+					break;
+				case yz_Tpc :
+					zInitial[i*2+1] = IBK::f_pc_rh(m_project.m_initialRH.value, zInitial[i*2]); // yz_Tpc
+					break;
+				case yz_TpC :
+					zInitial[i*2+1] = IBK::f_log10(-IBK::f_pc_rh(m_project.m_initialRH.value, zInitial[i*2])); // yz_TpC
+					break;
+				default: ;
+			}
+		}
+		// evaluated mapping function y(z)
+		y_z(zInitial,yInitial);
 	}
-	if (m_nElements == 0)
-		throw IBK::Exception("Missing grid definition in project file.", FUNC_ID);
-
-	m_alphaLeft = value<double>(keyValuePairs, "alphaLeft");
-	m_betaLeft = value<double>(keyValuePairs, "betaLeft");
-
-	m_alphaRight = value<double>(keyValuePairs, "alphaRight");
-	m_betaRight = value<double>(keyValuePairs, "betaRight");
-
-	try {
-		m_TLeft = value<double>(keyValuePairs, "TLeft");
-	}
-	catch (...) {
-		std::string TLeftFile;
-		try {
-			TLeftFile = stringValue(keyValuePairs, "TLeftFile");
-		}
-		catch (...) {
-			throw IBK::Exception("Expected TLeft or TLeftFile parameter in project file.", FUNC_ID);
-		}
-		try {
-			IBK::Path ccdFile(TLeftFile);
-			if (!ccdFile.isAbsolute())
-				ccdFile = projectFileDir / ccdFile;
-			readCCD(ccdFile, m_TLeftSpline);
-		}
-		catch (IBK::Exception & ex) {
-			throw IBK::Exception(ex, "Error reading data file for parameter TLeftFile.", FUNC_ID);
-		}
-	}
-	m_rhLeft = value<double>(keyValuePairs, "rhLeft");
-
-	m_TRight = value<double>(keyValuePairs, "TRight");
-	m_rhRight = value<double>(keyValuePairs, "rhRight");
-
-	std::string RainFluxFile;
-	try {
-		RainFluxFile = stringValue(keyValuePairs, "RainFluxFile");
-	}
-	catch (...) {
-	}
-	if (!RainFluxFile.empty()) {
-		try {
-			IBK::Path ccdFile(RainFluxFile);
-			if (!ccdFile.isAbsolute())
-				ccdFile = projectFileDir / ccdFile;
-			readCCD(ccdFile, m_gRainSpline);
-		}
-		catch (IBK::Exception & ex) {
-			throw IBK::Exception(ex, "Error reading data file for parameter RainFluxFile.", FUNC_ID);
-		}
-	}
-
-
-	// Generic code
-
-	m_t = 0;
-
-	m_u.resize(m_nElements);
-	m_rhowv.resize(m_nElements);
-
-	m_zU.resize(m_nElements);
-	m_zRhowv.resize(m_nElements);
-
-	m_T.resize(m_nElements);
-	m_rh.resize(m_nElements);
-	m_pc.resize(m_nElements);
-	m_pC.resize(m_nElements);
-	m_pv.resize(m_nElements);
-	m_pvsat.resize(m_nElements);
-
-	m_Kl.resize(m_nElements);
-	m_Kv.resize(m_nElements);
-	m_lambda.resize(m_nElements);
-
-	m_q.resize(m_nElements+1);
-	m_jv.resize(m_nElements+1);
-	m_hv.resize(m_nElements+1);
-	m_jw.resize(m_nElements+1);
-	m_hw.resize(m_nElements+1);
-
-	// initial variables
-	std::vector<double> zInitial(2*m_nElements);
-	std::vector<double> yInitial(2*m_nElements);
-	for (unsigned int i=0; i<m_nElements; ++i) {
-		zInitial[i*2] = 20 + 273.15;
-		switch (m_variableMapping) {
-			case yz_Trh :
-				zInitial[i*2+1] = 0.5; // yz_Trh
-				break;
-			case yz_Tpc :
-				zInitial[i*2+1] = IBK::f_pc_rh(0.5, zInitial[i*2]); // yz_Tpc
-				break;
-			case yz_TpC :
-				zInitial[i*2+1] = IBK::f_log10(-IBK::f_pc_rh(0.5, zInitial[i*2])); // yz_TpC
-				break;
-			default: ;
-		}
-	}
-	y_z(zInitial,yInitial);
-}
-
-
-void Model::readProjectFile(const std::string & projectFile, std::map<std::string, std::string> & keyValuePairs) {
-	const char * const FUNC_ID = "[Model::readProjectFile]";
-	std::vector<std::string> lines;
-	std::vector<std::string> lastLineTokens; // none, read until end of file
-	IBK::FileReader::readAll(IBK::Path(projectFile), lines, lastLineTokens);
-	// process all lines
-	for (unsigned int i=0; i<lines.size(); ++i) {
-		std::string & line = lines[i];
-		// remove everything after # character in line
-		size_t pos = line.find('#');
-		if (pos != std::string::npos)
-			line = line.substr(0, pos);
-		// skip empty lines
-		IBK::trim(line);
-		if (line.empty())
-			continue;
-
-		// must be a key-value line
-		std::string kw, val;
-		if (!IBK::extract_keyword(line, kw, val)) {
-			throw IBK::Exception( IBK::FormatString("Error in line #%1 of project file '%2', expected <key>=<value> format.")
-								  .arg(i+1).arg(projectFile), FUNC_ID);
-		}
-		if (keyValuePairs.find(kw) != keyValuePairs.end())
-			throw IBK::Exception( IBK::FormatString("Error in line #%1 of project file '%2', dublicate keyword '%3'.")
-								  .arg(i+1).arg(projectFile).arg(kw), FUNC_ID);
-		keyValuePairs[kw] = val;
+	catch (IBK::Exception & ex) {
+		throw IBK::Exception(ex, "Error initializing project.", FUNC_ID);
 	}
 }
+
 
 
 void Model::readCCD(const IBK::Path & ccdFile, IBK::LinearSpline & spline) {
@@ -331,7 +301,7 @@ void Model::readCCD(const IBK::Path & ccdFile, IBK::LinearSpline & spline) {
 
 
 void Model::y_z(const std::vector<double> & z, std::vector<double> & y) {
-	const char * const FUNC_ID = "[Model::y]";
+	const char * const FUNC_ID = "[Model::y_z]";
 	// for each balance equation formulate physics
 
 	// z may be a vector of T and pc, or T and rh
@@ -394,6 +364,8 @@ void Model::ydot_z(double t, const std::vector<double> & z, std::vector<double> 
 
 
 void Model::updateStatesTx(unsigned int e) {
+	const char * const FUNC_ID = "[Model::updateStatesTx]";
+
 	const Material & mat = m_materials[ m_matIdx[e] ];
 
 	double T = m_zU[e];
@@ -418,7 +390,9 @@ void Model::updateStatesTx(unsigned int e) {
 			pc = -IBK::f_pow10(pC);
 			rh = IBK::f_relhum(T, pc);
 			break;
-		default:;
+
+		default:
+			throw IBK::Exception("Uninitialized m_variableMapping", FUNC_ID);
 	}
 
 
@@ -431,7 +405,7 @@ void Model::updateStatesTx(unsigned int e) {
 
 		// moisture mass density = vapor mass density in [kg/m3]
 		moistureMassDensity = pv / ( IBK::R_VAPOR * T);
-
+		Ol = moistureMassDensity / IBK::RHO_W;
 		/// \todo
 	}
 	// for regular materials we need to use either the sorption isotherm, or the
@@ -471,17 +445,17 @@ void Model::updateBoundaryConditions() {
 	// surface value extrapolation is not used
 
 	// update time-dependent climate data
-	if (!m_TLeftSpline.empty())
-		m_TLeft = m_TLeftSpline.value(m_t);
-	double gRain = 0;
-	if (!m_gRainSpline.empty())
-		gRain = m_gRainSpline.value(m_t);
+	if (!m_project.m_leftInterface.T_spline.empty())
+		m_TLeft = m_project.m_leftInterface.T_spline.value(m_t);
+//	double gRain = 0;
+//	if (!m_gRainSpline.empty())
+//		gRain = m_gRainSpline.value(m_t);
 
 
 	// Left is ambient climate
-	m_qLeft = m_alphaLeft*(m_TLeft - m_T[0]);
+	m_qLeft = m_project.m_leftInterface.alpha.value*(m_TLeft - m_T[0]);
 	double pvLeft = IBK::f_pv(m_TLeft, m_rhLeft);
-	m_jvLeft = m_betaLeft*(pvLeft - m_pv[0]);
+	m_jvLeft = m_project.m_leftInterface.beta.value*(pvLeft - m_pv[0]);
 	// for enthalpy use upwinding
 	if (m_jvLeft > 0)
 		m_hvLeft = m_jvLeft*(IBK::C_VAPOR*m_TLeft + IBK::H_EVAP); // outside in
@@ -489,25 +463,25 @@ void Model::updateBoundaryConditions() {
 		m_hvLeft = m_jvLeft*(IBK::C_VAPOR*m_T[0] + IBK::H_EVAP); // inside out
 
 	// for rain
-	if (gRain != 0) {
-		m_jwLeft = gRain;
-		// for enthalpy use upwinding
-		if (m_jwLeft > 0)
-			m_hwLeft = m_jwLeft*IBK::C_WATER*m_TLeft; // outside in
-		else
-			m_hwLeft = m_jwLeft*IBK::C_WATER*m_T[0]; // inside out
-	}
-	else {
+//	if (gRain != 0) {
+//		m_jwLeft = gRain;
+//		// for enthalpy use upwinding
+//		if (m_jwLeft > 0)
+//			m_hwLeft = m_jwLeft*IBK::C_WATER*m_TLeft; // outside in
+//		else
+//			m_hwLeft = m_jwLeft*IBK::C_WATER*m_T[0]; // inside out
+//	}
+//	else {
 		m_jwLeft = 0;
 		m_hwLeft = 0;
-	}
+//	}
 
 
 	unsigned int n1 = m_nElements-1;
 	// Right is indoor climate
-	m_qRight = m_alphaRight*(m_T[n1] - m_TRight);
+	m_qRight = m_project.m_rightInterface.alpha.value*(m_T[n1] - m_TRight);
 	double pvRight = IBK::f_pv(m_TRight, m_rhRight);
-	m_jvRight = m_betaRight*(m_pv[n1] - pvRight);
+	m_jvRight = m_project.m_rightInterface.beta.value*(m_pv[n1] - pvRight);
 	// for enthalpy use upwinding
 	if (m_jvRight > 0)
 		m_hvRight = m_jvRight*(IBK::C_VAPOR*m_T[n1] + IBK::H_EVAP); // inside out

@@ -1,38 +1,107 @@
+/*	Copyright (c) 2001-2017, Institut für Bauklimatik, TU Dresden, Germany
+
+	Written by Andreas Nicolai
+	All rights reserved.
+
+	This file is part of the OpenHAM software.
+
+	Redistribution and use in source and binary forms, with or without modification,
+	are permitted provided that the following conditions are met:
+
+	1. Redistributions of source code must retain the above copyright notice, this
+	   list of conditions and the following disclaimer.
+
+	2. Redistributions in binary form must reproduce the above copyright notice,
+	   this list of conditions and the following disclaimer in the documentation
+	   and/or other materials provided with the distribution.
+
+	3. Neither the name of the copyright holder nor the names of its contributors
+	   may be used to endorse or promote products derived from this software without
+	   specific prior written permission.
+
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+	ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+	DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+	ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+	ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
 #include "Outputs.h"
 
-#include <DataIO.h>
+#include <DataIO>
 #include <IBK_FileUtils.h>
 #include <IBK_crypt.h>
 
 Outputs::Outputs(const Model * model) :
-	m_model(model)
+	m_model(model),
+	m_surfaceValues(NULL)
 {
+}
+
+
+Outputs::~Outputs() {
+	delete m_surfaceValues;
+	for (unsigned int i=0; i<m_dataIOs.size(); ++i)
+		delete m_dataIOs[i];
 }
 
 
 void Outputs::setupOutputFiles(const IBK::Path & outputRootPath) {
 	const char * const FUNC_ID = "[Outputs::setupOutputFiles]";
 
-	// create output directory if it does not exist yet
-	if (!outputRootPath.exists())
-		IBK::Path::makePath(outputRootPath);
+	try {
 
-	m_outputRootPath = outputRootPath;
+		// create output directory if it does not exist yet
+		if (!outputRootPath.exists())
+			IBK::Path::makePath(outputRootPath);
 
-	// populate geoFile with data and write geometry file
-	writeGeofile();
+		m_outputRootPath = outputRootPath;
 
-	// create output files
-	// we need files for:
-	// surface conditions on either side: T, rh, pv
-	// surface fluxes on either side: q, j_v, j_w, h_v, h_w
-	// profiles: T, rh, pv, pvsat, w, w_hyg, w_ovhg
+		// populate geoFile with data and write geometry file
+		writeGeofile();
 
-	// index 0 - temperature profile
-	addProfileOutput("Temperature", "Temperature", "C");
-	// index 1 - temperature profile
-	addProfileOutput("RelativeHumidity", "Relative Humidity", "%");
+		// create output files
+		// we need one file for scalar quantities:
+		// - surface conditions on either side: T, rh, pv
+		// - surface fluxes on either side: q, j_v, j_w, h_v, h_w
 
+		// open file
+		IBK::Path surfValFileName(m_outputRootPath / "SurfaceValues.tsv");
+	#if defined(_WIN32)
+		#if defined(_MSC_VER)
+			m_surfaceValues = new std::ofstream( surfValFileName.wstr().c_str(), std::ios_base::binary);
+		#else
+			std::string filenameAnsi = IBK::WstringToANSI(surfValFileName.wstr(), false);
+			m_surfaceValues = new std::ofstream( filenameAnsi.c_str(), std::ios_base::binary);
+		#endif
+	#else
+		m_surfaceValues = new std::ofstream( surfValFileName.c_str() );
+	#endif
+
+		// compose header
+		*m_surfaceValues << "Time [d]\t"
+			 << "T_left [C]\t" << "RH_left [%]\t" << "pv_left [Pa]\t"
+			 << "q_left [W/m2]\t" << "gv_left [kg/m2s]\t" << "gw_left [kg/m2s]\t" << "hv_left [W/m2]\t"<< "hw_left [W/m2]\t"
+			 << "T_right [C]\t" << "RH_right [%]\t" << "pv_right [Pa]\t"
+			 << "q_right [W/m2]\t" << "gv_right [kg/m2s]\t" << "hv_right [W/m2]" << std::endl;
+
+		// create profile outputs for: T, rh, pv, pvsat, w, w_hyg, w_ovhg
+
+		// index 0 - temperature profile
+		addProfileOutput("TemperatureProfile", "Temperature", "C");
+		// index 1 - temperature profile
+		addProfileOutput("RelativeHumidityProfile", "Relative Humidity", "%");
+
+	}
+	catch (IBK::Exception & ex) {
+		throw IBK::Exception(ex, "Error creating output files.", FUNC_ID);
+	}
 	m_profileVector.resize(m_model->m_nElements);
 }
 
@@ -45,15 +114,26 @@ void Outputs::appendOutputs() {
 	m_profileVector.m_unit.set("K");
 	m_profileVector.m_data = m_model->m_T;
 	m_profileVector.convert(IBK::Unit("C"));
-	std::string errmsg;
-	m_dataIOs[0]->appendData(m_model->m_t, &m_profileVector.m_data[0], errmsg);
+	m_dataIOs[0]->appendData(m_model->m_t, &m_profileVector.m_data[0]);
 
 	// index 1 - relative humidity
 	m_profileVector.m_unit.set("---");
 	m_profileVector.m_data = m_model->m_rh;
 	m_profileVector.convert(IBK::Unit("%"));
-	m_dataIOs[1]->appendData(m_model->m_t, &m_profileVector.m_data[0], errmsg);
+	m_dataIOs[1]->appendData(m_model->m_t, &m_profileVector.m_data[0]);
 
+	std::stringstream strm;
+	strm.precision(9);
+	unsigned int n = m_model->m_nElements;
+	*m_surfaceValues << m_model->m_t/(24*3600) << '\t'
+		 << m_model->m_T[0] << '\t' << m_model->m_rh[0] << '\t' << m_model->m_pv[0] << '\t'
+		 << m_model->m_q[0] << '\t' << m_model->m_jv[0] << '\t' << m_model->m_jw[0] << '\t'
+		 << m_model->m_hv[0] << '\t' << m_model->m_hw[0] << '\t'
+		 << m_model->m_T[n-1] << '\t' << m_model->m_rh[n-1] << '\t' << m_model->m_pv[n-1] << '\t'
+		 << m_model->m_q[n] << '\t' << m_model->m_jv[n] << '\t' << m_model->m_hv[n] << '\n';
+
+	/// \todo maybe only flush the output stream after at least 1 second or so
+	m_surfaceValues->flush();
 }
 
 
@@ -132,7 +212,7 @@ void Outputs::writeGeofile() {
 
 	// *** Compose file name according to naming convention ***
 
-	IBK::Path projectFilePath(m_model->m_projectFile);
+	IBK::Path projectFilePath(m_model->m_args.m_projectFile);
 	std::string projectContent  = IBK::file2String(projectFilePath);
 	// suppose the string projectContent holds the relevant data of
 	// the project file, at least material references, grid, and assignments
@@ -154,9 +234,11 @@ void Outputs::writeGeofile() {
 	geofile.m_filename = m_outputRootPath / geofileName.filename();
 
 	// *** write geometry file ***
-	std::string errmsg;
-	if (!geofile.write(errmsg, NULL)) {
-		throw IBK::Exception(errmsg + "\nError writing geometry file.", FUNC_ID);
+	try {
+		geofile.write(NULL);
+	}
+	catch (IBK::Exception & ex) {
+		throw IBK::Exception(ex, "Error writing geometry file.", FUNC_ID);
 	}
 
 	// compute hash code and remember geofileHash
@@ -181,9 +263,9 @@ void Outputs::addProfileOutput(const std::string & fname,
 	// specify start year
 	d.m_startYear = 2000;
 	// set the file data type
-	d.m_type = DATAIO::T_FIELD; // used for the keyword ELEMENTS or SIDES and in the header
+	d.m_type = DATAIO::DataIO::T_FIELD; // used for the keyword ELEMENTS or SIDES and in the header
 	// store project file name (optional)
-	d.m_projectFileName = m_model->m_projectFile;
+	d.m_projectFileName = m_model->m_args.m_projectFile.str();
 	// store geometry file and hash of the geometry file content
 	d.m_geoFileName = m_geoFileName;
 	d.m_geoFileHash = m_geoFileHash;
@@ -191,8 +273,8 @@ void Outputs::addProfileOutput(const std::string & fname,
 	d.m_quantity = quantity;
 	d.m_quantityKeyword = fname;
 	// store data format
-	d.m_spaceType = DATAIO::ST_SINGLE;
-	d.m_timeType  = DATAIO::TT_NONE;
+	d.m_spaceType = DATAIO::DataIO::ST_SINGLE;
+	d.m_timeType  = DATAIO::DataIO::TT_NONE;
 	// store IO units
 	d.m_timeUnit  = "h";
 	d.m_valueUnit = valueUnit;
@@ -203,8 +285,10 @@ void Outputs::addProfileOutput(const std::string & fname,
 	d.m_nums = nums;
 
 	// finally write the file header
-	std::string errmsg;
-	bool success = d.writeHeader(errmsg);
-	if (!success)
-		throw IBK::Exception("Cannot write output file.", FUNC_ID);
+	try {
+		d.writeHeader();
+	}
+	catch (IBK::Exception & ex) {
+		throw IBK::Exception(ex, "Cannot write output file.", FUNC_ID);
+	}
 }

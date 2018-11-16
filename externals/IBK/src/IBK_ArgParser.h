@@ -1,4 +1,4 @@
-/*	Copyright (c) 2001-2016, Institut für Bauklimatik, TU Dresden, Germany
+/*	Copyright (c) 2001-2017, Institut für Bauklimatik, TU Dresden, Germany
 
 	Written by A. Nicolai, H. Fechner, St. Vogelsang, A. Paepcke, J. Grunewald
 	All rights reserved.
@@ -12,7 +12,7 @@
 	   list of conditions and the following disclaimer.
 
 	2. Redistributions in binary form must reproduce the above copyright notice,
-	   this list of conditions and the following disclaimer in the documentation 
+	   this list of conditions and the following disclaimer in the documentation
 	   and/or other materials provided with the distribution.
 
 	3. Neither the name of the copyright holder nor the names of its contributors
@@ -31,7 +31,7 @@
 	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-	This library contains derivative work based on other open-source libraries. 
+	This library contains derivative work based on other open-source libraries.
 	See OTHER_LICENCES and source code headers for details.
 
 */
@@ -192,6 +192,11 @@ public:
 		\return			False if option isn't found, true otherwise.
 	*/
 	bool hasOption(const std::string & longVersion) const;
+
+	/*! Removes an option again, useful for customizing predefined argument lists.
+		Throws an exception if the requested option does not exist.
+	*/
+	void removeOption(const std::string & longVersion);
 
 	/*!  Gives access to a command line option by the short version string identifier.
 		\param shortVersion	The shortversion identifier of an option.

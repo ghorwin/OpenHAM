@@ -31,7 +31,7 @@ endif (UNIX)
 
 # add VC compiler-specific flags (NONMINMAX define and disable "unsafe" warnings)
 if (MSVC)
-	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D\"NOMINMAX\" /wd4996" )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D\"NOMINMAX\" /wd4996 /GS-" )
 endif (MSVC)
 
 
@@ -41,6 +41,8 @@ endif (MSVC)
 
 add_subdirectory( ../../externals/IBK/projects/cmake_local IBK )
 add_subdirectory( ../../externals/DataIO/projects/cmake_local DataIO)
+add_subdirectory( ../../externals/TiCPP/projects/cmake_local TiCPP)
+add_subdirectory( ../../externals/DelphinLight/projects/cmake_local DelphinLight)
 
 # add subdirectories for all builds
 add_subdirectory( ../../OpenHAMSolver/projects/cmake OpenHAMSolver )

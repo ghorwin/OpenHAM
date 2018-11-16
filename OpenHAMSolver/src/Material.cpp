@@ -1,9 +1,54 @@
+/*	Copyright (c) 2001-2017, Institut für Bauklimatik, TU Dresden, Germany
+
+	Written by Andreas Nicolai
+	All rights reserved.
+
+	This file is part of the OpenHAM software.
+
+	Redistribution and use in source and binary forms, with or without modification,
+	are permitted provided that the following conditions are met:
+
+	1. Redistributions of source code must retain the above copyright notice, this
+	   list of conditions and the following disclaimer.
+
+	2. Redistributions in binary form must reproduce the above copyright notice,
+	   this list of conditions and the following disclaimer in the documentation
+	   and/or other materials provided with the distribution.
+
+	3. Neither the name of the copyright holder nor the names of its contributors
+	   may be used to endorse or promote products derived from this software without
+	   specific prior written permission.
+
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+	ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+	DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+	ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+	ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
 #include "Material.h"
 
 #include <IBK_math.h>
+#include <IBK_FileReader.h>
+#include <IBK_StringUtils.h>
+#include <IBK_Parameter.h>
+#include <IBK_messages.h>
+#include <IBK_physics.h>
 
-Material::Material(int index) {
-//	const char * const FUNC_ID = "[Material::Material(int index)]";
+Material::Material() :
+	m_i(-1)
+{
+}
+
+
+void Material::init(int index) {
+//	const char * const FUNC_ID = "[Material::init(int index)]";
 	m_i = index;
 	std::string logKlSplineOl;
 	std::string logKlSplineLog10Kl;
@@ -34,11 +79,217 @@ Material::Material(int index) {
 			m_Oeff		= 0.209;
 			m_isAir		= false;
 			break;
+
+		// EN 15026 Material
+		case 2 :
+			m_name		= "EN 15026 Material";
+			m_rho		= 1824;
+			m_cT		= 1000;
+			m_lambda	= 1.5;
+			m_Oeff		= 0.146;
+			m_Opor		= 0.146;
+			m_isAir		= false;
+			break;
+
 		// invalid number
 		default: m_i = -1;
 	}
 	if (!logKlSplineOl.empty()) {
-		m_klSpline.read(logKlSplineOl, logKlSplineLog10Kl);
+		m_lgKl_Ol_Spline.read(logKlSplineOl, logKlSplineLog10Kl);
+	}
+}
+
+
+void extractKeyValuePairs(const std::vector<std::string> & lines, std::map<std::string, std::string> & keyValuePairs) {
+	const char * const FUNC_ID = "[extractKeyValuePairs]";
+	keyValuePairs.clear();
+	// process all lines
+	for (unsigned int i=0; i<lines.size(); ++i) {
+		std::string line = lines[i];
+		// remove everything after # character in line
+		size_t pos = line.find('#');
+		if (pos != std::string::npos)
+			line = line.substr(0, pos);
+		// skip empty lines
+		IBK::trim(line);
+		if (line.empty())
+			continue;
+
+		// must be a key-value line
+		std::string kw, val;
+		if (!IBK::extract_keyword(line, kw, val)) {
+			continue;
+		}
+		if (keyValuePairs.find(kw) != keyValuePairs.end())
+			throw IBK::Exception( IBK::FormatString("Duplicate keyword '%1'.")
+								  .arg(kw), FUNC_ID);
+		keyValuePairs[kw] = val;
+	}
+}
+
+
+void Material::readFromFile(const IBK::Path & m6FilePath) {
+	const char * const FUNC_ID = "[Material::readFromFile]";
+	m_i = -1;
+
+	m_mew.clear();
+	m_Oeff = 0;
+	m_Opor = 0;
+
+	try {
+		std::vector<std::string> lines;
+		std::vector<std::string> lastLineTokens; // none, read until end of file
+		IBK::FileReader::readAll(m6FilePath, lines, lastLineTokens);
+
+		// check file version
+		if (lines.empty() || lines[0].find("D6MARLZ! 006.000") != 0)
+			throw IBK::Exception("Invalid material file format.", FUNC_ID);
+
+		std::vector<std::string> lines2(lines.begin()+1, lines.end());
+
+		// split known sections
+		std::vector<std::string> section_titles;
+		std::vector<std::vector<std::string> > section_data;
+
+		section_titles.push_back("IDENTIFICATION");
+		section_titles.push_back("STORAGE_BASE_PARAMETERS");
+		section_titles.push_back("TRANSPORT_BASE_PARAMETERS");
+		section_titles.push_back("MOISTURE_STORAGE");
+		section_titles.push_back("MOISTURE_TRANSPORT");
+		IBK::explode_sections(lines2, section_titles, section_data, "#");
+
+		// process identification section
+		std::map<std::string, std::string> keyValuePairs;
+		extractKeyValuePairs(section_data[0], keyValuePairs);
+		m_name = keyValuePairs["NAME"];
+		IBK::IBK_Message(IBK::FormatString("NAME = %1\n").arg(m_name), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_INFO);
+		m_flags = keyValuePairs["FLAGS"];
+		IBK::IBK_Message(IBK::FormatString("FLAGS = %1\n").arg(m_flags), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_INFO);
+
+		// storage base parameters
+		try {
+			extractKeyValuePairs(section_data[1], keyValuePairs);
+			IBK::Parameter p;
+			p.set("RHO", keyValuePairs["RHO"]); m_rho = p.value;
+			p.set("CE", keyValuePairs["CE"]); m_cT = p.value;
+			p.set("THETA_POR", keyValuePairs["THETA_POR"]); m_Opor = p.value;
+			p.set("THETA_EFF", keyValuePairs["THETA_EFF"]); m_Oeff = p.value;
+
+			if (m_Oeff <= 0)
+				throw IBK::Exception("Invalid or missing THETA_EFF parameter.", FUNC_ID);
+		}
+		catch (IBK::Exception & ex) {
+			throw IBK::Exception(ex, "Error reading storage base parameters.", FUNC_ID);
+		}
+
+		// transport base parameters
+		try {
+			extractKeyValuePairs(section_data[2], keyValuePairs);
+			IBK::Parameter p;
+			p.set("LAMBDA", keyValuePairs["LAMBDA"]); m_lambda = p.value;
+			if (!keyValuePairs["MEW"].empty())
+				m_mew.set("MEW", keyValuePairs["MEW"]);
+		}
+		catch (IBK::Exception & ex) {
+			throw IBK::Exception(ex, "Error reading transport base parameters.", FUNC_ID);
+		}
+
+		// moisture storage function
+		try {
+			for (unsigned int i=0; i<section_data[3].size(); ++i) {
+				std::string line = section_data[3][i];
+				// remove everything after # character in line
+				size_t pos = line.find('#');
+				if (pos != std::string::npos)
+					line = line.substr(0, pos);
+				// skip empty lines
+				IBK::trim(line);
+				if (line.empty())
+					continue;
+
+				// must be a key-value line
+				std::string kw, val;
+				if (IBK::extract_keyword(line, kw, val)) {
+					if (kw == "FUNCTION") {
+						if (val == "Theta_l(pC)_de") {
+							std::string xvals = section_data[3][i+1];
+							std::string yvals = section_data[3][i+2];
+							// set linear spline
+							try {
+								m_Ol_pC_Spline.read(xvals, yvals);
+							}
+							catch (IBK::Exception & ex) {
+								throw IBK::Exception(ex, IBK::FormatString("Error parsing 'Theta_l(pC)_de' spline."), FUNC_ID);
+							}
+							std::string errmsg;
+							if (!m_Ol_pC_Spline.valid()) {
+								m_Ol_pC_Spline.makeSpline(errmsg);
+								throw IBK::Exception(IBK::FormatString("Invalid spline data: %1").arg(errmsg), FUNC_ID);
+							}
+						}
+						i += 2; // skip the next two lines
+					} // kw == "FUNCTION"
+				}
+			}
+		}
+		catch (IBK::Exception & ex) {
+			throw IBK::Exception(ex, "Error reading moisture storage.", FUNC_ID);
+		}
+
+
+		// moisture transport functions
+		try {
+			for (unsigned int i=0; i<section_data[4].size(); ++i) {
+				std::string line = section_data[4][i];
+				// remove everything after # character in line
+				size_t pos = line.find('#');
+				if (pos != std::string::npos)
+					line = line.substr(0, pos);
+				// skip empty lines
+				IBK::trim(line);
+				if (line.empty())
+					continue;
+
+				// must be a key-value line
+				std::string kw, val;
+				if (IBK::extract_keyword(line, kw, val)) {
+					if (kw == "FUNCTION") {
+						std::string xvals = section_data[4][i+1];
+						std::string yvals = section_data[4][i+2];
+						// set linear spline
+						IBK::LinearSpline spl;
+						try {
+							spl.read(xvals, yvals);
+						}
+						catch (IBK::Exception & ex) {
+							throw IBK::Exception(ex, IBK::FormatString("Error parsing '%1' spline.").arg(val), FUNC_ID);
+						}
+						std::string errmsg;
+						if (!spl.valid()) {
+							spl.makeSpline(errmsg);
+							throw IBK::Exception(IBK::FormatString("Invalid spline data: %1").arg(errmsg), FUNC_ID);
+						}
+
+						if (val == "lgKl(Theta_l)") {
+							m_lgKl_Ol_Spline.swap(spl);
+						}
+						else if (val == "lgKv(Theta_l)") {
+							m_lgKv_Ol_Spline.swap(spl);
+						}
+						else
+							throw IBK::Exception(IBK::FormatString("Unknown or unsupported moisture transport function '%1'.").arg(val), FUNC_ID);
+						i += 2; // skip the next two lines
+					} // kw == "FUNCTION"
+				}
+			}
+		}
+		catch (IBK::Exception & ex) {
+			throw IBK::Exception(ex, "Error reading moisture transport section.", FUNC_ID);
+		}
+
+	}
+	catch (IBK::Exception & ex) {
+		throw IBK::Exception(ex, IBK::FormatString("Error reading material file '%1'.").arg(m6FilePath), FUNC_ID);
 	}
 }
 
@@ -59,6 +310,7 @@ double Material::Ol_pc(double pc) const {
 				Ol += retw[i] / tmp2;
 			}
 			Ol *= m_Oeff;
+			return Ol;
 		} break;
 
 		// Hamstad Finishing Material
@@ -67,27 +319,41 @@ double Material::Ol_pc(double pc) const {
 			double tmp = IBK::f_pow(-2e-6*pc, 1.27);
 			double tmp2 = IBK::f_pow(1.0 + tmp, 0.21260);
 			Ol = m_Oeff / tmp2;
+			return Ol;
 		} break;
+
+		// EN 15026 Material
+		case 2 :
+		{
+			Ol = 146/IBK::f_pow(1+IBK::f_pow(-8e-8*pc, 1.6),0.375);
+			return Ol;
+		}
+
 	}
-	return Ol;
+	// must be a material from data file, use linear spline interpolation
+	return m_Ol_pC_Spline.value(IBK::f_log10(-pc));
 }
 
 
 double Material::lambda_Ol(double Ol) const {
 	switch (m_i) {
 		// Hamstad Brick
-		case 0 : return m_lambda + 4.5 * Ol; // 4.5
+		case 0 : return m_lambda + 4.5 * Ol;
 		// Hamstad Finishing Material
 		case 1 : return m_lambda + 4.5 * Ol;
+		// EN 15026 Material
+		case 2 : return m_lambda + 15.8 * Ol;
 	}
-	return 0.5;
+	// use standard model
+	return m_lambda + 5.6*Ol;
 }
 
 
 double Material::Kl_Ol(double Ol) const {
 	switch (m_i) {
 		// Hamstad Brick
-		case 0 : return IBK::f_pow10(m_klSpline.value(Ol));
+		case 0 :
+			return IBK::f_pow10(m_lgKl_Ol_Spline.value(Ol));
 
 		// Hamstad Finishing Material
 		case 1 :
@@ -98,12 +364,23 @@ double Material::Kl_Ol(double Ol) const {
 			tmp *= 0.4342944819032518;
 			return IBK::f_pow10(tmp);
 		} break;
+
+		// EN 15026 Material
+		case 2 :
+		{
+			double w2 = Ol*1000-73;
+			double lnK = -39.2619 + w2*(0.0704 + w2*(-1.7420e-4 + w2*(-2.7953e-6 + w2*(-1.1566e-7 + w2*2.5969e-9))));
+			return IBK::f_exp(lnK);
+		} break;
+
 	}
-	return 0;
+	return IBK::f_pow10(m_lgKl_Ol_Spline.value(Ol));
 }
 
 
 double Material::Kv_Ol(double T, double Ol) const {
+	const char * const FUNC_ID = "[Material::Kv_Ol]";
+
 	switch (m_i) {
 		// Hamstad Brick
 		case 0 :
@@ -123,6 +400,73 @@ double Material::Kv_Ol(double T, double Ol) const {
 			return Kv;
 		} break;
 	}
-	return 0;
+	if (m_lgKv_Ol_Spline.valid())
+		return IBK::f_pow10(m_lgKv_Ol_Spline.value(Ol));
+	if (m_mew.name.empty())
+		throw IBK::Exception("Missing parametrization for Kv(Ol), neither lgKv(Ol) spline nor mu-value provided.", FUNC_ID);
+	else
+		return IBK::DV_AIR/(IBK::R_VAPOR*293.15*m_mew.value)*(1-Ol/m_Oeff);
 }
 
+// open file
+
+void openFileUtf8(const IBK::Path & fpath, std::ofstream & fout) {
+	#if defined(_WIN32)
+	#if defined(_MSC_VER)
+		fout.open( fpath.wstr().c_str(), std::ios_base::binary);
+	#else
+		std::string filenameAnsi = IBK::WstringToANSI(fpath.wstr(), false);
+		fout.open( filenameAnsi.c_str(), std::ios_base::binary);
+	#endif
+	#else
+		fout.open( fpath.c_str() );
+	#endif
+}
+
+const char * const MRC_GNUPLOT =
+	"set terminal postscript monochrome\n"
+	"set output  \"layer_${IDX}_mrc.ps\"\n"
+	"set title \"Moisture retention function - Layer ${IDX}\"\n"
+	"set xlabel \"log10(-pc)\"\n"
+	"set ylabel \"Moisture content [kg/m3]\"\n"
+	"set key off\n"
+	"plot \"layer_${IDX}_mrc.dat\" using 1:2 with lines\n"
+	"\n"
+	"set output  \"layer_${IDX}_sorp.ps\"\n"
+	"set title \"Sorption isotherm - Layer ${IDX}\"\n"
+	"set xlabel \"Relative humidity [%]\"\n"
+	"set key off\n"
+	"plot \"layer_${IDX}_mrc.dat\" using 3:2 with lines\n"
+	"\n";
+
+void Material::createPlots(const IBK::Path & plotDir, unsigned int layerIdx) const {
+	// generate material file name
+	IBK::Path fileNameRoot = plotDir / IBK::FormatString("layer_%1").arg(layerIdx).str();
+
+	IBK::Path mrcDataFile(fileNameRoot + "_mrc.dat");
+	std::ofstream fout;
+	openFileUtf8(mrcDataFile, fout);
+
+	unsigned int NUM_VALUES = 100;
+	for (unsigned int i=0; i<NUM_VALUES; ++i) {
+		double pC = i/(double)NUM_VALUES*10;
+		double pc = -IBK::f_pow10(pC);
+		double rh = IBK::f_relhum(293.15, pc);
+		fout << pC << " " << Ol_pc(-IBK::f_pow10(pC)) << " " << rh*100 << std::endl;
+	}
+	fout.close();
+
+	// create corresponding gnuplot file
+	mrcDataFile = IBK::Path(fileNameRoot + "_mrc.gpi");
+	openFileUtf8(mrcDataFile, fout);
+
+	std::string mrc_plot_text = MRC_GNUPLOT;
+	mrc_plot_text = IBK::replace_string(mrc_plot_text, "${IDX}", IBK::val2string(layerIdx));
+	fout << mrc_plot_text;
+	fout.close();
+
+
+	IBK::Path dataFile(fileNameRoot + "_transport.dat");
+	openFileUtf8(dataFile, fout);
+
+}

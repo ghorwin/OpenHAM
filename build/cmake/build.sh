@@ -145,15 +145,17 @@ fi
 
 cd $BUILDDIR && cmake $CMAKE_OPTIONS $CMAKE_BUILD_TYPE $CMAKE_COMPILER_OPTIONS $CMAKELISTSDIR && make -j$MAKE_CPUCOUNT && 
 cd $CMAKELISTSDIR &&
+
+echo "*** Copying OpenHAMSolver to bin/release ***" &&
 mkdir -p ../../bin/release &&
-if [ -e $BUILDDIR/MasterSimulator/MasterSimulator ]; then
-  echo "*** Copying OpenHAMSolver to bin/release ***" &&
-  cp $BUILDDIR/OpenHAMSolver/OpenHAMSolver ../../bin/release/OpenHAMSolver
-fi &&
+cp $BUILDDIR/OpenHAMSolver/OpenHAMSolver ../../bin/release &&
+
 echo "*** Build OpenHAMSolver ***" &&
+
 if [[ $SKIP_TESTS = "false"  ]]; 
 then
-./run_tests.sh
+    echo "*** Running test suite ***" &&
+    ./run_tests.sh
 fi
 
 

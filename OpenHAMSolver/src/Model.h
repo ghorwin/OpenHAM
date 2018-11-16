@@ -1,11 +1,50 @@
-#ifndef MODEL_H
-#define MODEL_H
+/*	Copyright (c) 2001-2017, Institut für Bauklimatik, TU Dresden, Germany
+
+	Written by Andreas Nicolai
+	All rights reserved.
+
+	This file is part of the OpenHAM software.
+
+	Redistribution and use in source and binary forms, with or without modification,
+	are permitted provided that the following conditions are met:
+
+	1. Redistributions of source code must retain the above copyright notice, this
+	   list of conditions and the following disclaimer.
+
+	2. Redistributions in binary form must reproduce the above copyright notice,
+	   this list of conditions and the following disclaimer in the documentation
+	   and/or other materials provided with the distribution.
+
+	3. Neither the name of the copyright holder nor the names of its contributors
+	   may be used to endorse or promote products derived from this software without
+	   specific prior written permission.
+
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+	ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+	DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+	ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+	ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
+#ifndef ModelH
+#define ModelH
 
 #include <string>
 #include <vector>
 #include <map>
 
+#include <IBK_SolverArgsParser.h>
+
+#include <DELPHIN_Project.h>
+
 #include "Material.h"
+#include "Directories.h"
 
 /*! The physical model implementation. */
 class Model {
@@ -18,17 +57,8 @@ public:
 		yz_urhowv
 	};
 
-
-	Model();
-
 	/*! Init model from project file. */
-	void init(const std::string & projectFile);
-
-	/*! Reads project file.
-		\param projectFile The path to the project file.
-		\param keyValuePairs Holds all key-value pairs defined in project file
-	*/
-	void readProjectFile(const std::string & projectFile, std::map<std::string, std::string> & keyValuePairs);
+	void init(const IBK::SolverArgsParser & args);
 
 	/*! Reads CCD file into linear spline.
 		Values are converted into base IO unit upon read.
@@ -60,29 +90,38 @@ public:
 
 	// Member variables controling the integrator
 
-	std::string			m_projectFile;
+	/*! Command line arguments. */
+	IBK::SolverArgsParser	m_args;
 
-	VariableMapping		m_variableMapping;
+	/*! File paths to log, result and project directory. */
+	Directories				m_dirs;
+
+	/*! Project file. */
+	DELPHIN_LIGHT::Project	m_project;
+
+
+	/*! Which potential shall be mapped to solution variables z. */
+	VariableMapping			m_variableMapping;
 
 	/*! Maximum number of allowed non-linear iterations. */
-	unsigned int		m_maxNonLinIters;
+	unsigned int			m_maxNonLinIters;
 
 	/*! Maximum time step size in [s]. */
-	double				m_maxDt;
+	double					m_maxDt;
 	/*! Minimum time step size in [s]. */
-	double				m_minDt;
+	double					m_minDt;
 
 	/*! Current simulation time point (state of model) in [s]. */
-	double				m_t;
+	double					m_t;
 
 	/*! Simulation duration in [s]. */
-	double				m_tEnd;
+	double					m_tEnd;
 
 	/*! Initial time step size in [s]. */
-	double				m_dt0;
+	double					m_dt0;
 
 	/*! Output step size in [s]. */
-	double				m_dtOutput;
+	double					m_dtOutput;
 
 
 
@@ -97,28 +136,20 @@ public:
 	/*! Materials used in model. */
 	std::vector<Material>		m_materials;
 
-	/*! Element sizes in [m] from left to right. */
+	/*! Element/grid sizes in [m] from left to right. */
 	std::vector<double>			m_dx;
 
 
-	// Member variables defining boundary conditions
-	double						m_alphaLeft;
-	double						m_betaLeft;
+	// Member variables defining current boundary conditions
 
-	double						m_alphaRight;
-	double						m_betaRight;
-
-	IBK::LinearSpline			m_TLeftSpline;
+	/*! Left ambient air temperature in [K] */
 	double						m_TLeft;
-	IBK::LinearSpline			m_rhLeftSpline;
+	/*! Left ambient air relative humidity in [0..1] */
 	double						m_rhLeft;
-
-	IBK::LinearSpline			m_TRightSpline;
+	/*! Right ambient air temperature in [K] */
 	double						m_TRight;
-	IBK::LinearSpline			m_rhRightSpline;
+	/*! Right ambient air relative humidity in [0..1] */
 	double						m_rhRight;
-
-	IBK::LinearSpline			m_gRainSpline;
 
 	// Member variables holdings profile data
 	// All vectors have size m_nElements
@@ -151,12 +182,19 @@ public:
 
 	/*! Heat conduction flux [W/m2] */
 	std::vector<double>		m_q;
+	/*! Vapor diffusion mass flux density [kg/m2s] */
 	std::vector<double>		m_jv;
+	/*! Enthalpy flux associated with vapor diffusion in [W/m2] */
 	std::vector<double>		m_hv;
+	/*! Liquid convection mass flux density [kg/m2s] */
 	std::vector<double>		m_jw;
+	/*! Enthalpy flux associated with liquid conduction in [W/m2] */
 	std::vector<double>		m_hw;
 
+
 	// Boundary fluxes
+
+	// left side - outside, heat conduction, vapor diffusion, rain
 
 	double						m_qLeft;
 	double						m_jvLeft;
@@ -164,10 +202,12 @@ public:
 	double						m_jwLeft;
 	double						m_hwLeft;
 
+	// right side - internal side, no rain
+
 	double						m_qRight;
 	double						m_jvRight;
 	double						m_hvRight;
 
 };
 
-#endif // MODEL_H
+#endif // ModelH

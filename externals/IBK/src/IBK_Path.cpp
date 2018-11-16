@@ -1,4 +1,4 @@
-/*	Copyright (c) 2001-2016, Institut für Bauklimatik, TU Dresden, Germany
+/*	Copyright (c) 2001-2017, Institut für Bauklimatik, TU Dresden, Germany
 
 	Written by A. Nicolai, H. Fechner, St. Vogelsang, A. Paepcke, J. Grunewald
 	All rights reserved.
@@ -12,7 +12,7 @@
 	   list of conditions and the following disclaimer.
 
 	2. Redistributions in binary form must reproduce the above copyright notice,
-	   this list of conditions and the following disclaimer in the documentation 
+	   this list of conditions and the following disclaimer in the documentation
 	   and/or other materials provided with the distribution.
 
 	3. Neither the name of the copyright holder nor the names of its contributors
@@ -31,7 +31,7 @@
 	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-	This library contains derivative work based on other open-source libraries. 
+	This library contains derivative work based on other open-source libraries.
 	See OTHER_LICENCES and source code headers for details.
 
 */
@@ -296,7 +296,7 @@ Path Path::relativePath(const Path& toPath) const {
 	}
 
 	unsigned int equalCount = 0;
-	unsigned int minCount = std::min(orgBranches.size(), toBranches.size());
+	unsigned int minCount = (unsigned int)std::min(orgBranches.size(), toBranches.size());
 	for (unsigned int i=0; i<minCount; ++i, ++equalCount) {
 		if (orgBranches[i] != toBranches[i])
 			break;
@@ -305,7 +305,7 @@ Path Path::relativePath(const Path& toPath) const {
 	try {
 
 		IBK::Path finalPath;
-		int backCount = toBranches.size() - equalCount;
+		int backCount = (int)toBranches.size() - equalCount;
 		IBK_ASSERT(backCount >= 0); // should not possible to get negative backCount
 
 		if (backCount == 0) {
@@ -448,71 +448,36 @@ Path Path::filename() const {
 
 std::string Path::extension() const {
 
-	if ( exists() && isDirectory() ){
-		return "";
+	// Make sure to handle the following case:
+	// IBK::Path("../README").extension() --> fullFilename = "README" --> extension = ""
+	// filename() also handles all special cases like . .. ./ C: etc. and returns an empty
+	// path in these cases.
+	std::string fullFilename = filename().str();
+
+	std::string::size_type pos = fullFilename.find_last_of(".");
+	if( pos != std::string::npos ) {
+		std::string ext = fullFilename.substr( pos+1, std::string::npos );
+		return ext;
 	}
 
-	if ( exists() && isFile()) {
-
-		// IBK::Path("../README").extension() --> ""
-		std::string fullFilename = filename().str();
-
-		std::string::size_type pos = fullFilename.find_last_of(".");
-		if( pos != std::string::npos ) {
-			std::string ext = fullFilename.substr( pos+1, std::string::npos );
-			return ext;
-		} else {
-			return "";
-		}
-
-	} // if (isFile()) {
-
-	// if it doesn't exist we assume it to be a file
-	if (!exists()){
-
-		// IBK::Path("../README").extension() --> ""
-		std::string fullFilename = filename().str();
-
-		std::string::size_type pos = fullFilename.find_last_of(".");
-		if( pos != std::string::npos ) {
-			std::string ext = fullFilename.substr( pos+1, std::string::npos );
-			return ext;
-		} else {
-			return "";
-		}
-
-	}
 	return "";
 }
 
 
 Path Path::withoutExtension() const {
 
-	// ./dfghjk
-	if (isDirectory()){
+	// We rely on filename() to handle all special cases
+	// if the filename is not an empty path and it contains
+	// a ., then we can just return everything until the last dot.
+	// In all other cases we return the original path.
+	IBK::Path fname = filename();
+	if (fname.str().find(".") == std::string::npos)
 		return *this;
-	}
 
-	// ./fgh/gh/../dfghj.a
-	if (isFile()){
-
-		std::string::size_type pos = m_path.find_last_of(".");
-		if( pos != std::string::npos ) {
-			std::string ext = m_path.substr( 0, pos );
-			return Path(ext);
-		}
-
-	} // if (isFile())
-
-	// if it doesn't exist we assume it to be a file
-	if (!exists()){
-
-		std::string::size_type pos = m_path.find_last_of(".");
-		if( pos != std::string::npos ) {
-			std::string ext = m_path.substr( 0, pos );
-			return Path(ext);
-		}
-
+	std::string::size_type pos = m_path.find_last_of(".");
+	if( pos != std::string::npos) {
+		std::string ext = m_path.substr( 0, pos );
+		return Path(ext);
 	}
 
 	return *this;
@@ -585,11 +550,15 @@ void Path::addExtension( const std::string &myExt ) {
 
 
 bool Path::hasPlaceholder() const {
-
+	// D6 type
 	if( m_path.find("{") != std::string::npos && m_path.find("}") != std::string::npos)
 		return true;
-	else
-		return false;
+
+	// D5 type
+	if( m_path.find("$(") != std::string::npos && m_path.find(")") != std::string::npos)
+		return true;
+
+	return false;
 
 }
 
@@ -925,6 +894,8 @@ int64_t Path::fileSize() const {
 
 #else
 	std::FILE *f = std::fopen(m_path.c_str(),"rb");  /* open the file in read only */
+	if (!f)
+		return 0;
 	long size = 0;
 	if (std::fseek(f,0,SEEK_END)==0) /* seek was successful */
 		size = std::ftell(f);
@@ -1358,12 +1329,12 @@ bool Path::remove(const IBK::Path & p) {
 		}
 		else {
 			std:: string errmsg = GetLastErrorMessage(nFileDeleteOprnRet);
-			IBK_Message(FormatString("Error while remove '%1'.\n'%2' !").arg(p.str()).arg(errmsg), MSG_ERROR, FUNC_ID);
+			IBK_Message(FormatString("Error while removing '%1'.\n'%2' !").arg(p.str()).arg(errmsg), MSG_ERROR, FUNC_ID);
 		}
 		return false;
 	}
 	catch(std::exception& e) {
-		IBK_Message(FormatString("Error while remove '%1'.\n'%2' !").arg(p.str()).arg(e.what()), MSG_ERROR, FUNC_ID);
+		IBK_Message(FormatString("Error while removing '%1'.\n'%2' !").arg(p.str()).arg(e.what()), MSG_ERROR, FUNC_ID);
 		return false;
 	}
 	catch(...) {
@@ -1372,8 +1343,8 @@ bool Path::remove(const IBK::Path & p) {
 #else
 
 	// delete path
-	std::string str("rm -rf ");
-	str.append(p.str().c_str());
+	IBK::FormatString cmd("rm -rf \"%1\"");
+	std::string str = cmd.arg(p).str();
 	if ( std::system( str.c_str() ) )
 		return false;
 
@@ -1630,15 +1601,15 @@ Path Path::fromURI(std::string uripath) {
 }
 
 
-Path & Path::operator+(const char * const str) {
-	m_path += IBK::trim_copy(str);
-	return *this;
+Path Path::operator+(const char * const str) const {
+	IBK::Path p(m_path + IBK::trim_copy(str));
+	return p;
 }
 
 
-Path & Path::operator+(const std::string & str) {
-	m_path += IBK::trim_copy(str);
-	return *this;
+Path Path::operator+(const std::string & str) const {
+	IBK::Path p(m_path + IBK::trim_copy(str));
+	return p;
 }
 
 

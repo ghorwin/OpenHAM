@@ -30,7 +30,6 @@ popd
 
 :: copy executable to bin/release dir
 xcopy /Y .\bb_VC\OpenHAMSolver\OpenHAMSolver.exe ..\..\bin\release
-xcopy /Y .\bb_VC\OpenHAMSolver\OpenHAMSolver.exe ..\..\bin\release
 
 exit /b 0
 

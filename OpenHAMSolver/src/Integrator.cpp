@@ -1,6 +1,45 @@
+/*	Copyright (c) 2001-2017, Institut für Bauklimatik, TU Dresden, Germany
+
+	Written by Andreas Nicolai
+	All rights reserved.
+
+	This file is part of the OpenHAM software.
+
+	Redistribution and use in source and binary forms, with or without modification,
+	are permitted provided that the following conditions are met:
+
+	1. Redistributions of source code must retain the above copyright notice, this
+	   list of conditions and the following disclaimer.
+
+	2. Redistributions in binary form must reproduce the above copyright notice,
+	   this list of conditions and the following disclaimer in the documentation
+	   and/or other materials provided with the distribution.
+
+	3. Neither the name of the copyright holder nor the names of its contributors
+	   may be used to endorse or promote products derived from this software without
+	   specific prior written permission.
+
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+	ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+	DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+	ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+	ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
 #include "Integrator.h"
 
 #include <cstring>
+#include <algorithm> // for VC14 std::min
+
+#include <IBK_math.h>
+#include <IBK_messages.h>
+#include <IBK_Time.h>
 
 Integrator::Integrator() :
 	m_outputs(&m_model),
@@ -35,83 +74,110 @@ void Integrator::setupMemory() {
 
 
 void Integrator::run() {
+	const char * const FUNC_ID = "[Integrator::run]";
+	try {
+		// resize vectors
+		setupMemory();
 
-	// resize vectors
-	setupMemory();
+		// store initial conserved quantities
+		for (unsigned int i=0; i<m_model.m_nElements; ++i) {
+			m_yn[i*2] = m_model.m_u[i];
+			m_yn[i*2+1] = m_model.m_rhowv[i];
+			m_zn[i*2] = m_model.m_zU[i];
+			m_zn[i*2+1] = m_model.m_zRhowv[i];
+		}
 
-	// store initial conserved quantities
-	for (unsigned int i=0; i<m_model.m_nElements; ++i) {
-		m_yn[i*2] = m_model.m_u[i];
-		m_yn[i*2+1] = m_model.m_rhowv[i];
-		m_zn[i*2] = m_model.m_zU[i];
-		m_zn[i*2+1] = m_model.m_zRhowv[i];
-	}
-
-	// we use constant prediction, z = z_n, to get first iterative values
-	copyVec(m_zn, m_z);
-	copyVec(m_yn, m_y);
+		// we use constant prediction, z = z_n, to get first iterative values
+		copyVec(m_zn, m_z);
+		copyVec(m_yn, m_y);
 
 
-	// write initial conditions to file
-	IBK::Path resRootDir = IBK::Path(m_model.m_projectFile).withoutExtension();
-	IBK::Path outputRootDir = resRootDir / "results";
-	m_outputs.setupOutputFiles(outputRootDir);
-	m_outputs.appendOutputs();
+		// write initial conditions to file
+		if (m_model.m_dtOutput <= 0)
+			throw IBK::Exception("Invalid output time step size.", FUNC_ID);
+		m_outputs.setupOutputFiles(m_model.m_dirs.m_resultsDir);
+		m_outputs.appendOutputs();
 
-	IBK::Path logPath = resRootDir / "log";
-	if (!logPath.exists())
-		IBK::Path::makePath(logPath);
-	logPath = logPath / "screenlog.txt";
-	m_logFileStream = new std::ofstream(logPath.str().c_str());
-	*m_logFileStream << std::setw(10) << "Time [h]" << '\t'
-					 << std::setw(10) << "dt [s]" << '\t'
-					 << std::setw(5) << "step" << '\t'
-					 << std::setw(5) << "iter" << '\t'
-					 << std::setw(10) << "resNorm" << '\t'
-					 << std::setw(10) << "deltaNorm" << std::endl;
+		IBK::Path logPath = m_model.m_dirs.m_logDir / "stats.tsv";
+		m_logFileStream = new std::ofstream(logPath.str().c_str());
+		*m_logFileStream << std::setw(10) << "Time [h]" << '\t'
+						 << std::setw(10) << "dt [s]" << '\t'
+						 << std::setw(5) << "steps" << '\t'
+						 << std::setw(5) << "iters" << '\t'
+						 << std::setw(10) << "resNorm" << '\t'
+						 << std::setw(10) << "deltaNorm" << std::endl;
 
-	m_dt = m_model.m_dt0;
+		m_dt = m_model.m_dt0;
 
-	m_statRhsEvals = 0;
-	m_statNonLinIters = 0;
-	m_statSteps = 0;
-	m_statJacEvals = 0;
+		m_statRhsEvals = 0;
+		m_statNonLinIters = 0;
+		m_statSteps = 0;
+		m_statJacEvals = 0;
 
-	// time loop, integrator time always starts at 0, mapping to real time is done
-	// in climate data loader and output handler
+		// time loop, integrator time always starts at 0, mapping to real time is done
+		// in climate data loader and output handler
 
-	m_t = 0;
-	double nextOutputTime = m_model.m_dtOutput;
-	while (m_t < m_model.m_tEnd) {
+		m_t = m_model.m_t;
 
-		// determine length of integration step, use suggestion in model as bases, but reduce if
-		// output time point is within next step
-		if (m_t+m_dt > nextOutputTime)
-			m_dt = nextOutputTime - m_t; // to hit directly the output time point
+		// initialize feedback object
+		std::ofstream progressStream((m_model.m_dirs.m_resultsDir / "progress.txt").c_str());
+		m_feedback.setup(&progressStream, m_t,
+						 m_model.m_tEnd, m_model.m_args.m_projectFile.str(), 0, m_t);
 
-		// integrate step, this will advance our simulation time point and also set a new proposed time step m_dt
-		step();
-		// Note: m_z == m_zn, m_y == m_yn, m_t := m_t + m_dt
+		double nextOutputTime = m_model.m_dtOutput;
+		while (nextOutputTime < m_t)
+			nextOutputTime += m_model.m_dtOutput;
+		while (m_t < m_model.m_tEnd) {
 
-		// if we have reached the output time point, write outputs (use fuzzy comparison)
-		if (m_t > nextOutputTime - 1e-8) { /// \note fuzzy comparison needed to compensate for rounding errors
-			m_outputs.appendOutputs();
-			nextOutputTime += m_model.m_dtOutput; /// \todo improve in case of significant round-off errors
-#ifndef ENABLE_STEP_STATS
-		std::cout << std::setw(10) << m_t/3600 << '\t'
-						 << std::setw(10) << m_dt << '\t'
-						 << std::setw(5) << m_statSteps << '\t'
-						 << std::setw(5) << m_statNonLinIters << std::endl;
-		*m_logFileStream << std::setw(10) << m_t << '\t'
-						 << std::setw(10) << m_dt << '\t'
-						 << std::setw(5) << m_statSteps << '\t'
-						 << std::setw(5) << m_nonlinIters << '\t'
-						 << std::setw(10) << m_resNorm << '\t'
-						 << std::setw(10) << m_deltaNorm << std::endl;
-#endif // ENABLE_STEP_STATS
+			// determine length of integration step, use suggestion in model as bases, but reduce if
+			// output time point is within next step
+			if (m_t+m_dt > nextOutputTime)
+				m_dt = nextOutputTime - m_t; // to hit directly the output time point
+
+			// integrate step, this will advance our simulation time point and also set a new proposed time step m_dt
+			step();
+			// Note: m_z == m_zn, m_y == m_yn, m_t := m_t + m_dt
+
+			// write step statistics to output only when in DETAILED verbosity mode
+			std::stringstream strm;
+			strm << std::setw(10) << m_t/3600 << '\t'
+							 << std::setw(10) << m_dt << '\t'
+							 << std::setw(5) << m_statSteps << '\t'
+							 << std::setw(5) << m_statNonLinIters << std::endl;
+			IBK::IBK_Message(strm.str(), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_DETAILED);
+
+			// write step statistics to file if requested
+			if (m_solverStepStats) {
+				*m_logFileStream << std::setw(10) << m_t/3600 << '\t'
+								 << std::setw(10) << m_dt << '\t'
+								 << std::setw(5) << m_statSteps << '\t'
+								 << std::setw(5) << m_nonlinIters << '\t'
+								 << std::setw(10) << m_resNorm << '\t'
+								 << std::setw(10) << m_deltaNorm << std::endl;
+			}
+
+			// if we have reached the output time point, write outputs (use fuzzy comparison)
+			if (m_t > nextOutputTime - 1e-8) { /// \note fuzzy comparison needed to compensate for rounding errors
+				m_feedback.writeFeedback(m_t, false);
+
+				m_outputs.appendOutputs();
+				nextOutputTime += m_model.m_dtOutput; /// \todo improve in case of significant round-off errors
+
+				if (!m_solverStepStats) {
+					*m_logFileStream << std::setw(10) << m_t/3600 << '\t'
+									 << std::setw(10) << m_dt << '\t'
+									 << std::setw(5) << m_statSteps << '\t'
+									 << std::setw(5) << m_nonlinIters << '\t'
+									 << std::setw(10) << m_resNorm << '\t'
+									 << std::setw(10) << m_deltaNorm << std::endl;
+				}
+
+			}
 		}
 	}
-
+	catch (IBK::Exception & ex) {
+		throw IBK::Exception(ex, "Error during solver execution.", FUNC_ID);
+	}
 }
 
 
@@ -155,6 +221,7 @@ void Integrator::step() {
 
 		} // converged
 
+		m_feedback.writeFeedbackFromF(m_t);
 
 		/// \todo Error test
 		errorTestPassed = true;

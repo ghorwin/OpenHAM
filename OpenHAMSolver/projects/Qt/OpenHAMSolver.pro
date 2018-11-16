@@ -3,40 +3,43 @@
 # set LD_LIBRARY_PATH on Linux
 
 TARGET = OpenHAMSolver
-
 TEMPLATE = app
+
+# this pri must be sourced from all our applications
+include( ../../../externals/IBK/projects/Qt/IBK.pri )
+
 QT -= core gui
 CONFIG += console
 CONFIG -= app_bundle
 
-CONFIG(debug, debug|release) {
-	OBJECTS_DIR = debug
-	DESTDIR = ../../../bin/debug
-}
-else {
-	OBJECTS_DIR = release
-	DESTDIR = ../../../bin/release
-}
+LIBS += \
+	-lDelphinLight \
+	-lDataIO \
+	-lIBK \
+	-lTiCPP
 
 INCLUDEPATH = \
 	../../../externals/DataIO/src \
-	../../../externals/IBK/src
-
-LIBS += \
-	-L../../../externals/lib \
-	-lDataIO \
-	-lIBK
+	../../../externals/IBK/src \
+	../../../externals/DelphinLight/src
 
 SOURCES += \
 	../../src/main.cpp \
 	../../src/Model.cpp \
 	../../src/Integrator.cpp \
 	../../src/Outputs.cpp \
-    ../../src/Material.cpp \
-    ../../src/BandMatrix.cpp
+	../../src/Material.cpp \
+	../../src/BandMatrix.cpp \
+    ../../src/Directories.cpp \
+    ../../src/SolverFeedback.cpp
 HEADERS += \
 	../../src/Model.h \
 	../../src/Integrator.h \
 	../../src/Outputs.h \
-    ../../src/Material.h \
-    ../../src/BandMatrix.h
+	../../src/Material.h \
+	../../src/BandMatrix.h \
+    ../../src/Directories.h \
+    ../../src/SolverFeedback.h
+
+DISTFILES += \
+    ../../../data/tests/test01_steady_state/steady_state.d6p

@@ -6,16 +6,27 @@ project( OpenHAMSolver )
 # add include directories
 include_directories(
 	${PROJECT_SOURCE_DIR}/../../src
+	${PROJECT_SOURCE_DIR}/../../../externals/IBK/src 
+	${PROJECT_SOURCE_DIR}/../../../externals/DataIO/src 
+	${PROJECT_SOURCE_DIR}/../../../externals/TiCPP/src 
+	${PROJECT_SOURCE_DIR}/../../../externals/DelphinLight/src 
 )
 
 # set variable for dependent libraries
 set( LINK_LIBS
+	DelphinLight
+	DataIO
+	TiCPP
+	IBK
 	${APPLE_FRAMEWORKS}
 )
 
+# collect a list of all source files
+file( GLOB SRCS ${PROJECT_SOURCE_DIR}/../../src/*.cpp )
+
 # add solver executable
-add_executable( ${PROJECT_NAME}
-	${PROJECT_SOURCE_DIR}/../../src/main.cpp
+add_executable( ${PROJECT_NAME} 
+	${SRCS} 
 )
 
 # link against the dependent libraries
