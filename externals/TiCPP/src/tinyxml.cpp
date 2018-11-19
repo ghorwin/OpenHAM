@@ -835,7 +835,7 @@ void TiXmlElement::Print( FILE* cfile, int depth ) const
 	int i;
 	assert( cfile );
 	for ( i=0; i<depth; i++ ) {
-		fprintf( cfile, "    " );
+		fprintf( cfile, "\t" );
 	}
 
 	fprintf( cfile, "<%s", value.c_str() );
@@ -876,7 +876,7 @@ void TiXmlElement::Print( FILE* cfile, int depth ) const
 		}
 		fprintf( cfile, "\n" );
 		for( i=0; i<depth; ++i ) {
-			fprintf( cfile, "    " );
+			fprintf( cfile, "\t" );
 		}
 		fprintf( cfile, "</%s>", value.c_str() );
 	}
@@ -1013,6 +1013,7 @@ void TiXmlElement::appendIBKParameterElement( TiXmlElement * parent,
 		xmlElement->SetAttribute("name", name);
 	xmlElement->SetAttribute("unit", unit);
 	std::stringstream para;
+	para.precision(10);
 	para << value;
 	TiXmlText * text = new TiXmlText( para.str() );
 	xmlElement->LinkEndChild( text );
@@ -1032,7 +1033,8 @@ void TiXmlElement::appendIBKParameterElement( TiXmlElement * parent,
 	// set attributes
 	if (!useEmbeddedForm)
 		xmlElement->SetAttribute("name", name);
-	xmlElement->SetAttribute("unit", unit);
+	if (!unit.empty())
+		xmlElement->SetAttribute("unit", unit);
 	std::stringstream para;
 	para << value;
 	TiXmlText * text = new TiXmlText( para.str() );
@@ -1054,7 +1056,8 @@ void TiXmlElement::appendIBKParameterElement( TiXmlElement * parent,
 	// set attributes
 	if (!useEmbeddedForm)
 		xmlElement->SetAttribute("name", name);
-	xmlElement->SetAttribute("unit", unit);
+	if (!unit.empty())
+		xmlElement->SetAttribute("unit", unit);
 	std::stringstream para;
 	para << value;
 	TiXmlText * text = new TiXmlText( para.str() );
