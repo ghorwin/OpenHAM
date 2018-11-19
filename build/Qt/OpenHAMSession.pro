@@ -4,8 +4,8 @@ TEMPLATE=subdirs
 
 # SUBDIRS lists all subprojects
 SUBDIRS += OpenHAMSolver \
-	DelphinLight \
 	CCM \
+	DelphinLight \
 	DataIO \
 	IBK \
 	TiCPP
@@ -25,3 +25,4 @@ OpenHAMSolver.depends = DelphinLight CCM DataIO IBK TiCPP
 CCM.depends = IBK TiCPP
 DataIO.depends = IBK
 DelphinLight.depends = IBK TiCPP
+TiCPP.depends = IBK
