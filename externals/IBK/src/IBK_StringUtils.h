@@ -97,7 +97,10 @@ enum StringReplaceKind {
 // windows specific conversion functions
 #if defined(_WIN32)
 
+/*! Converts a given UTF8 encoded string into a unicode string.*/
 std::wstring UTF8ToWstring(const std::string& utf8str);
+
+/*! Converts a given unicode string into a UTF8 encoded string.*/
 std::string WstringToUTF8(const std::wstring& wide);
 
 /*! Converts the given ANSI string to a wide string (UTF16).
@@ -107,6 +110,15 @@ std::wstring ANSIToWstring(const std::string& ansiString, bool OEMPage);
 /*! Converts the given wide string (UTF16) to a ANSI string.
 	The given ANSI string will be encoded with the standard codepage or the OEM codepage.*/
 std::string WstringToANSI(const std::wstring& wide, bool OEMPage);
+
+/*! Converts a given UTF8 string into a codepage string.*/
+inline std::string UTF8ToANSIString(const std::string& utf8str) {
+	return  WstringToANSI(UTF8ToWstring(utf8str), false);
+}
+
+inline std::string ANSIToUTF8String(const std::string& ansiString) {
+	return WstringToUTF8(ANSIToWstring(ansiString, false));
+}
 
 #endif
 
@@ -235,7 +247,29 @@ unsigned int extractFromParenthesis(const std::string & src, unsigned int defaul
 	\return Returns ERT_Success, if () was part of the string and a value could be extracted.
 	\sa ExtractResultType
 */
-ExtractResultType extractFromParenthesis(const std::string & src, std::string & str, unsigned int & val);
+template <typename T>
+ExtractResultType extractFromParenthesis(const std::string & src, std::string & str, T & val) {
+	std::string::size_type pos = src.find("(");
+	std::string::size_type pos2 = src.find(")");
+	if (pos != std::string::npos && pos2 != std::string::npos) {
+		str = src.substr(0,pos);
+		if (pos2 > pos) {
+			std::string substr = src.substr(pos+1, pos2-pos-1);
+			try {
+				val = IBK::string2val<T>(substr);
+				return ERT_Success;
+			}
+			catch (...) {
+				return ERT_BadNumber;
+			}
+		}
+		else
+			return ERT_NoNumber;
+	}
+	str = src;
+	return ERT_NoParenthesis;
+}
+
 
 /*! Extracts a value from paranthesis within a string, "blabla(0.01)". */
 std::pair<unsigned int, double> extractFromParenthesis(const std::string & src,

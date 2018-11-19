@@ -82,6 +82,9 @@ Color Color::fromHtml(const std::string& html) {
 	unsigned int uitemp;
 	if( !(tstr >> std::hex >> uitemp))
 		throw IBK::Exception("Cannot convert string into a color.", FUNC_ID);
+	// add alpha=255 value for short HTML string versions #rrggbb
+	if (IBK::trim_copy(html).length()<8)
+		uitemp += 0xff000000;
 	return Color::fromQRgb(uitemp);
 }
 

@@ -42,7 +42,7 @@ namespace IBK {
 
 const unsigned int INVALID_ELEMENT = 0xFFFFFFFF;
 
-const char * const VERSION = "4.2.3";
+const char * const VERSION = "4.2.4";
 
 
 const char * const  MONTH_NAMES[12]         = { "Jan", "Feb", "Mar", "Apr",

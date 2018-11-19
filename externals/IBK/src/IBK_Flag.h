@@ -70,6 +70,11 @@ public:
 	*/
 	void set(const std::string& n, const std::string& s);
 
+	/*! Convenience function around regular set function. If s is false, the flag
+		is cleared.
+	*/
+	void setOrClear(const std::string& n, bool s);
+
 	/*! Reads a flag from the stream 'in'.
 		The format for reading is: name state<br>
 		\param in       The input stream.
@@ -90,7 +95,7 @@ public:
 	void clear() { m_name.clear(); m_state = false; }
 
 	/*! Returns true, if the flag is set, and the state is true. */
-	bool isEnabled() const { return !m_name.empty() && m_state; }
+	bool isEnabled() const { return m_state && !m_name.empty(); }
 
 	/*! Returns the name of a flag. If name is empty flag is not defined and thus invalid. */
 	const std::string & name() const { return m_name; }

@@ -91,7 +91,7 @@ void Exception::writeMsgStackToError() const {
 	for (std::list<MsgInfo>::const_iterator it = msgs_.begin();
 		it != msgs_.end(); ++it)
 	{
-		IBK::IBK_Message(it->what, MSG_ERROR, it->location.c_str(), 1);
+		IBK::IBK_Message(it->what, MSG_ERROR, it->location.c_str(), VL_STANDARD);
 	}
 }
 

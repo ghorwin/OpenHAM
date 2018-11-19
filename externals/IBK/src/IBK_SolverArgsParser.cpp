@@ -64,7 +64,7 @@ SolverArgsParser::SolverArgsParser() :
 	m_numParallelThreads(1)
 {
 	// automatically add flags and options based on defined keywords
-	for (unsigned int i=0; i<NUM_OverrideOptions; ++i) {
+	for (int i=0; i<NUM_OverrideOptions; ++i) {
 		addOption(keywordChar(i),
 			keyword(i),
 			description(i),
@@ -162,9 +162,9 @@ void SolverArgsParser::parse(int argc, const char * const argv[]) {
 	if (hasOption(OO_LES_SOLVER)) {
 		std::string lesOption = option(OO_LES_SOLVER);
 		// we may have a parenthesis option
-		unsigned int val;
+		int val;
 		std::string solverName;
-		IBK::ExtractResultType ertRes = IBK::extractFromParenthesis(lesOption, solverName, val);
+		IBK::ExtractResultType ertRes = IBK::extractFromParenthesis<int>(lesOption, solverName, val);
 		switch (ertRes) {
 			case IBK::ERT_BadNumber :
 			case IBK::ERT_NoNumber :
@@ -174,7 +174,7 @@ void SolverArgsParser::parse(int argc, const char * const argv[]) {
 		m_lesSolverName = solverName;
 		if (ertRes == IBK::ERT_Success) {
 			if (val <= 0)
-				throw IBK::Exception( IBK::FormatString("Invalid integer value used in --les-solver option (must not be negative), argument was '%1'.").arg(lesOption), FUNC_ID);
+				throw IBK::Exception( IBK::FormatString("Invalid integer value used in --les-solver option (value in parenthesis must be a positive integer), argument was '%1'.").arg(lesOption), FUNC_ID);
 			m_lesSolverOption = val;
 		}
 	}
@@ -182,9 +182,9 @@ void SolverArgsParser::parse(int argc, const char * const argv[]) {
 	if (hasOption(OO_PRECONDITIONER)) {
 		std::string preOption = option(OO_PRECONDITIONER);
 		// we may have a parenthesis option
-		unsigned int val;
+		int val;
 		std::string solverName;
-		IBK::ExtractResultType ertRes = IBK::extractFromParenthesis(preOption, solverName, val);
+		IBK::ExtractResultType ertRes = IBK::extractFromParenthesis<int>(preOption, solverName, val);
 		switch (ertRes) {
 			case IBK::ERT_BadNumber :
 			case IBK::ERT_NoNumber :
@@ -193,8 +193,8 @@ void SolverArgsParser::parse(int argc, const char * const argv[]) {
 		}
 		m_preconditionerName = solverName;
 		if (ertRes == IBK::ERT_Success) {
-			if (val <= 0)
-				throw IBK::Exception( IBK::FormatString("Invalid integer value used in --precond option (must not be negative), argument was '%1'.").arg(preOption), FUNC_ID);
+			if (val < 0)
+				throw IBK::Exception( IBK::FormatString("Invalid integer value used in --precond option (value in parenthesis must not be negative), argument was '%1'.").arg(preOption), FUNC_ID);
 			m_preconditionerOption = val;
 		}
 	}
@@ -218,14 +218,13 @@ void SolverArgsParser::parse(int argc, const char * const argv[]) {
 }
 
 
-
 void SolverArgsParser::printHelp(std::ostream & out) const {
 	// re-use implementation of original help function
 	out << "Syntax: " << m_appname << " [options] <project file>\n\n";
 	const unsigned int TEXT_WIDTH = 79;
 	const unsigned int TAB_WIDTH = 26;
 	printFlags(out,TEXT_WIDTH,TAB_WIDTH);
-	printOptions(out,TEXT_WIDTH,TAB_WIDTH+15);
+	printOptions(out,TEXT_WIDTH,TAB_WIDTH);
 	// write examples
 	out << "\nExamples:\n\n"
 		"Starting solver\n"
@@ -238,8 +237,13 @@ void SolverArgsParser::printHelp(std::ostream & out) const {
 		"> "<< m_appname << " --les-solver=GMRES(30) --precond=Band(1) <project file>\n";
 }
 
-void SolverArgsParser::printManPage(std::ostream & /* out */) const {
+
+void SolverArgsParser::printManPage(std::ostream & out) const {
+	// first the default
+	IBK::ArgParser::printManPage(out);
+	// now append DELPHIN-specific examples
 }
+
 
 bool SolverArgsParser::flagEnabled(int index) const {
 	if (keywordChar(index) != 0) {
@@ -251,6 +255,7 @@ bool SolverArgsParser::flagEnabled(int index) const {
 	return false;
 }
 
+
 bool SolverArgsParser::hasOption(int index) const {
 	if (keywordChar(index) != 0) {
 		return IBK::ArgParser::hasOption( keywordChar(index) );
@@ -260,6 +265,7 @@ bool SolverArgsParser::hasOption(int index) const {
 	}
 }
 
+
 const std::string & SolverArgsParser::option(int index) const {
 	if (keywordChar(index) != 0) {
 		return IBK::ArgParser::option( keywordChar(index) );
@@ -268,6 +274,7 @@ const std::string & SolverArgsParser::option(int index) const {
 		return IBK::ArgParser::option( keyword(index) );
 	}
 }
+
 
 bool SolverArgsParser::handleErrors(std::ostream & errstrm) {
 	const char * const FUNC_ID = "[SolverArgsParser::handleErrors]";
@@ -309,6 +316,7 @@ bool SolverArgsParser::handleErrors(std::ostream & errstrm) {
 	return false;
 }
 
+
 char SolverArgsParser::keywordChar( int index ) const {
 	switch( index ) {
 		case DO_VERSION						: return 'v';
@@ -321,6 +329,7 @@ char SolverArgsParser::keywordChar( int index ) const {
 	return 0; // no short version available for this option
 }
 
+
 std::string SolverArgsParser::keyword( int index ) const {
 	switch( index ) {
 		case DO_VERSION						: return "version";
@@ -328,6 +337,7 @@ std::string SolverArgsParser::keyword( int index ) const {
 		case DO_VERBOSITY_LEVEL				: return "verbosity-level";
 		case DO_DISABLE_PERIODIC_HEADERS	: return "disable-headers";
 		case DO_CLOSE_ON_EXIT				: return "close-on-exit";
+		case DO_RESTART_INFO				: return "restart-info";
 		case GO_RESTART						: return "restart";
 		case GO_RESTART_FROM				: return "restart-from";
 		case GO_TEST_INIT					: return "test-init";
@@ -340,6 +350,7 @@ std::string SolverArgsParser::keyword( int index ) const {
 	}
 }
 
+
 std::string SolverArgsParser::description( int index ) const {
 	switch( index ) {
 		case DO_VERSION						: return "Show solver version info.";
@@ -347,6 +358,7 @@ std::string SolverArgsParser::description( int index ) const {
 		case DO_VERBOSITY_LEVEL				: return "Level of output detail (0-3).";
 		case DO_DISABLE_PERIODIC_HEADERS	: return "Disable periodically printed headers in console output.";
 		case DO_CLOSE_ON_EXIT				: return "Close console window after finishing simulation.";
+		case DO_RESTART_INFO				: return "Prints information about the restart file (if available).";
 		case GO_RESTART						: return "Continue stopped simulation from last restart check-point.";
 		case GO_RESTART_FROM				: return "Continue stopped simulation from the given restart time. ";
 		case GO_TEST_INIT					: return "Run the solver initialization and stop.";
@@ -362,6 +374,7 @@ std::string SolverArgsParser::description( int index ) const {
 	}
 }
 
+
 std::string SolverArgsParser::descriptionValue( int index ) const {
 	switch( index ) {
 		case DO_VERSION						: return "true|false";
@@ -369,6 +382,7 @@ std::string SolverArgsParser::descriptionValue( int index ) const {
 		case DO_VERBOSITY_LEVEL				: return "0-4";
 		case DO_DISABLE_PERIODIC_HEADERS	: return "true|false";
 		case DO_CLOSE_ON_EXIT				: return "true|false";
+		case DO_RESTART_INFO				: return "true|false";
 		case GO_RESTART						: return "true|false";
 		case GO_RESTART_FROM				: return "value unit";
 		case GO_TEST_INIT					: return "true|false";
@@ -382,6 +396,7 @@ std::string SolverArgsParser::descriptionValue( int index ) const {
 	}
 }
 
+
 std::string SolverArgsParser::defaultValue( int index ) const {
 	// an empty default value means user must provide a value when command-line argument is specified
 	switch( index ) {
@@ -390,6 +405,7 @@ std::string SolverArgsParser::defaultValue( int index ) const {
 		case DO_VERBOSITY_LEVEL				: return "1";
 		case DO_DISABLE_PERIODIC_HEADERS	: return "false";
 		case DO_CLOSE_ON_EXIT				: return "false";
+		case DO_RESTART_INFO				: return "false";
 		case GO_RESTART						: return "false";
 		case GO_RESTART_FROM				: return "";
 		case GO_TEST_INIT					: return "false";
@@ -403,6 +419,7 @@ std::string SolverArgsParser::defaultValue( int index ) const {
 	}
 }
 
+
 std::vector< std::string > SolverArgsParser::options( int index ) const {
 	std::vector< std::string > vec;
 
@@ -412,6 +429,7 @@ std::vector< std::string > SolverArgsParser::options( int index ) const {
 		case GO_RESTART :
 		case GO_TEST_INIT :
 		case DO_STEP_STATS :
+		case DO_RESTART_INFO :
 		case DO_VERSION  :
 				vec.push_back( "true");
 				vec.push_back( "false");
@@ -452,6 +470,7 @@ std::vector< std::string > SolverArgsParser::options( int index ) const {
 
 	return vec;
 }
+
 
 } // namespace IBK
 

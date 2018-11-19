@@ -103,6 +103,7 @@ public:
 
 	/*! Set the application/executable name (printed in printHelp())
 		\param appname Application name
+		\deprecated
 	*/
 	void setAppName(const std::string & appname);
 
@@ -193,11 +194,6 @@ public:
 	*/
 	bool hasOption(const std::string & longVersion) const;
 
-	/*! Removes an option again, useful for customizing predefined argument lists.
-		Throws an exception if the requested option does not exist.
-	*/
-	void removeOption(const std::string & longVersion);
-
 	/*!  Gives access to a command line option by the short version string identifier.
 		\param shortVersion	The shortversion identifier of an option.
 		\return			Value of the option, either the default passed to addOption() or the
@@ -263,6 +259,21 @@ public:
 	*/
 	std::string commandLineForOptions() const;
 
+	// Public attributes, used to define output of help and man pages. */
+
+	/*! Application name, used in the syntax line of printHelp(). */
+	std::string								m_appname;
+
+	/*! Short description of the program. */
+	std::string								m_manVersionString;
+	/*! Short description of the program. */
+	std::string								m_manShortDescription;
+	/*! Long description of the program. */
+	std::string								m_manLongDescription;
+	/*! Author info to show in the man page. */
+	std::string								m_manAuthor;
+
+
 protected:
 	/*! Holds information about a known flag/option. */
 	struct OptionType {
@@ -274,7 +285,8 @@ protected:
 			m_shortVersion(shortVersion),
 			m_longVersion(longVersion),
 			m_description(description),
-			m_isFlag(true)
+			m_isFlag(true),
+			m_isSet(false)
 		{
 		}
 
@@ -288,7 +300,8 @@ protected:
 			m_description(description),
 			m_defaultValue(defaultValue),
 			m_descValue(descValue),
-			m_isFlag(false)
+			m_isFlag(false),
+			m_isSet(false)
 		{
 		}
 
@@ -329,7 +342,7 @@ protected:
 	*/
 	void printOptions(std::ostream & out, unsigned int TEXT_WIDTH, unsigned int TAB_WIDTH) const;
 
-	/*! Formats a help line with command and description and scale it to tha actual text width.
+	/*! Formats a help line with command and description and scale it to the actual text width.
 		\param firstToken	Command or flag.
 		\param str			Description for the firstToken.
 		\param lines		Holds the formated lines.
@@ -341,9 +354,6 @@ protected:
 					 std::vector<std::string> & lines,
 					 unsigned int tabWidth,
 					 unsigned int textWidth) const;
-
-	/*! Application name, used in the syntax line of printHelp(). */
-	std::string								m_appname;
 
 	/*! Stores options not accepted/known to the parser.
 		These options can be queried with optionsLeft()

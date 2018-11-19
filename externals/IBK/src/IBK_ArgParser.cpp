@@ -238,17 +238,6 @@ bool ArgParser::hasOption(const std::string & longVersion) const {
 	return !m_knownOptions[idx].m_givenValue.empty();
 }
 
-void ArgParser::removeOption(const std::string & longVersion) {
-	// try to find the index of the flag in the vector with known flags
-	unsigned int idx = findOption(0, longVersion);
-	if (idx == m_knownOptions.size()) {
-		throw IBK::Exception(IBK::FormatString("Option '%1' has not been defined with addOption().")
-			.arg(longVersion), "[ArgParser::removeOption]");
-	}
-	// remove entry
-	m_knownOptions.erase(m_knownOptions.begin()+idx);
-}
-
 const std::string & ArgParser::option(const char shortVersion) const {
 	// try to find the index of the flag in the vector with known flags
 	unsigned int idx = findOption(shortVersion, "");
@@ -286,8 +275,13 @@ void ArgParser::printHelp(std::ostream & out) const {
 }
 
 void ArgParser::printManPage(std::ostream & out) const {
-	// TODO : implement
-	out << "Manpage:" << std::endl;
+	// header line: .TH [name of program] [section number] [center footer] [left footer] [center header]
+	// example:     .TH foo 1 "14 May 1999" "version 1.0"
+	out << ".TH \"" << m_appname << "\" 1 \"" << __DATE__ << "\" \"version " << m_manVersionString << "\"\n";
+	// .SH NAME
+	// foo - my own text editor
+	out << ".SH NAME\n";
+	out << m_appname << " - " << m_manShortDescription << "\n";
 }
 
 

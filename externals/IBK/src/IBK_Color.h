@@ -92,6 +92,9 @@ public:
 		Otherwise, attempts to read an unsigned int value from string. If that uint is larger
 		than a signed integer, it tries to convert from QRgb, otherwise tries to convert from TColor.
 		Throws an IBK::Exception if string reading/conversion fails.
+
+		\note When reading HTML-color code strings, two formats are supported: #aarrggbb and #rrggbb.
+			  In case of the shorter variant, the color is set to be fully opaque (alpha value set to 255).
 		\param html HTML-color code string.
 	*/
 	static Color fromHtml(const std::string &html);
