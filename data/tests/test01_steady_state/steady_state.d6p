@@ -11,7 +11,7 @@
 		<SimulationParameter>
 			<BalanceEquationModule>BEHeatMoisture</BalanceEquationModule>
 			<Interval>
-				<IBK:Parameter name="Duration" unit="d">120</IBK:Parameter>
+				<IBK:Parameter name="Duration" unit="a">1</IBK:Parameter>
 			</Interval>
 			<IBK:Parameter name="Longitude" unit="Deg">51.3</IBK:Parameter>
 			<IBK:Parameter name="Latitude" unit="Deg">13.4</IBK:Parameter>
@@ -19,7 +19,7 @@
 			<DefaultInitialCondition name="DefaultRelativeHumidity" unit="%">80</DefaultInitialCondition>
 		</SimulationParameter>
 		<SolverParameter>
-			<IBK:Parameter name="MaxTimeStep" unit="min">20</IBK:Parameter>
+			<IBK:Parameter name="MaxTimeStep" unit="h">6</IBK:Parameter>
 			<IBK:Parameter name="MinTimeStep" unit="s">1e-09</IBK:Parameter>
 			<IBK:Parameter name="InitialTimeStep" unit="s">0.0001</IBK:Parameter>
 			<IBK:Parameter name="RelTol" unit="---">0.0001</IBK:Parameter>
@@ -108,66 +108,16 @@
 
 	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-	<!--Contains definitions of output files and schedules for outputs.-->
+	<!--Contains definitions of output schedule.-->
 	<Outputs>
-		<!--General parameters-->
-		<IBK:Unit name="TimeUnit">h</IBK:Unit>
-		<!--List of all Output schedules-->
 		<OutputGrids>
 			<OutputGrid name="Felder und Profile">
 				<Interval>
-					<IBK:Parameter name="Duration" unit="a">0</IBK:Parameter>
-					<IBK:Parameter name="StepSize" unit="d">1.5</IBK:Parameter>
-				</Interval>
-			</OutputGrid>
-			<OutputGrid name="Skalare">
-				<Interval>
-					<IBK:Parameter name="Duration" unit="a">0</IBK:Parameter>
-					<IBK:Parameter name="StepSize" unit="h">1</IBK:Parameter>
+					<IBK:Parameter name="StepSize" unit="d">6</IBK:Parameter>
 				</Interval>
 			</OutputGrid>
 		</OutputGrids>
-		<!--List of all Output files-->
-		<OutputFiles>
-			<OutputFile name="Temperaturprofil">
-				<Quantity unit="C">Temperature</Quantity>
-				<TimeType>None</TimeType>
-				<SpaceType>Single</SpaceType>
-				<OutputGrid>Felder und Profile</OutputGrid>
-			</OutputFile>
-			<OutputFile name="Luftfeuchteprofil">
-				<Quantity unit="%">RelativeHumidity</Quantity>
-				<TimeType>None</TimeType>
-				<SpaceType>Single</SpaceType>
-				<OutputGrid>Felder und Profile</OutputGrid>
-			</OutputFile>
-			<OutputFile name="Feuchtegehaltsprofil">
-				<Quantity unit="kg/m3">MoistureMassDensity</Quantity>
-				<TimeType>None</TimeType>
-				<SpaceType>Single</SpaceType>
-				<OutputGrid>Felder und Profile</OutputGrid>
-			</OutputFile>
-			<OutputFile name="Feuchtegehaltsintegral">
-				<Quantity unit="kg">MoistureMassDensity</Quantity>
-				<TimeType>None</TimeType>
-				<SpaceType>Integral</SpaceType>
-				<OutputGrid>Skalare</OutputGrid>
-			</OutputFile>
-			<OutputFile name="Oberflächenwärmestrom - linke Seite">
-				<Quantity unit="W/m2">TotalFluxHeat</Quantity>
-				<TimeType>None</TimeType>
-				<SpaceType>Single</SpaceType>
-				<OutputGrid>Skalare</OutputGrid>
-			</OutputFile>
-			<OutputFile name="Oberflächenwärmestrom - rechte Seite">
-				<Quantity unit="W/m2">TotalFluxHeat</Quantity>
-				<TimeType>None</TimeType>
-				<SpaceType>Single</SpaceType>
-				<OutputGrid>Skalare</OutputGrid>
-			</OutputFile>
-		</OutputFiles>
 	</Outputs>
-
 	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 	<!--List of all assignments of materials and conditions-->
