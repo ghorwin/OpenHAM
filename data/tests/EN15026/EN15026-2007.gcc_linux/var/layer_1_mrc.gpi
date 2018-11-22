@@ -1,0 +1,14 @@
+set terminal postscript monochrome
+set output  "layer_1_mrc.ps"
+set title "Moisture retention function - Layer 1"
+set xlabel "log10(-pc)"
+set ylabel "Moisture content [kg/m3]"
+set key off
+plot "layer_1_mrc.dat" using 1:2 with lines
+
+set output  "layer_1_sorp.ps"
+set title "Sorption isotherm - Layer 1"
+set xlabel "Relative humidity [%]"
+set key off
+plot "layer_1_mrc.dat" using 3:2 with lines
+

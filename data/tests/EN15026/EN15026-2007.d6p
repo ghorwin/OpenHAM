@@ -11,7 +11,7 @@
 		<SimulationParameter>
 			<BalanceEquationModule>BEHeatMoisture</BalanceEquationModule>
 			<Interval>
-				<IBK:Parameter name="Duration" unit="a">1</IBK:Parameter>
+				<IBK:Parameter name="Duration" unit="d">35</IBK:Parameter>
 			</Interval>
 			<IBK:Flag name="UseKirchhoffPotential">false</IBK:Flag>
 			<DefaultInitialCondition name="DefaultRelativeHumidity" unit="%">50</DefaultInitialCondition>
