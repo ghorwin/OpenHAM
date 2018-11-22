@@ -126,10 +126,10 @@ void Outputs::appendOutputs() {
 	strm.precision(9);
 	unsigned int n = m_model->m_nElements;
 	*m_surfaceValues << m_model->m_t/(24*3600) << '\t'
-		 << m_model->m_T[0] << '\t' << m_model->m_rh[0] << '\t' << m_model->m_pv[0] << '\t'
+		 << m_model->m_T[0]-273.15 << '\t' << m_model->m_rh[0]*100 << '\t' << m_model->m_pv[0] << '\t'
 		 << m_model->m_q[0] << '\t' << m_model->m_jv[0] << '\t' << m_model->m_jw[0] << '\t'
 		 << m_model->m_hv[0] << '\t' << m_model->m_hw[0] << '\t'
-		 << m_model->m_T[n-1] << '\t' << m_model->m_rh[n-1] << '\t' << m_model->m_pv[n-1] << '\t'
+		 << m_model->m_T[n-1]-273.15 << '\t' << m_model->m_rh[n-1]*100 << '\t' << m_model->m_pv[n-1] << '\t'
 		 << m_model->m_q[n] << '\t' << m_model->m_jv[n] << '\t' << m_model->m_hv[n] << '\n';
 
 	/// \todo maybe only flush the output stream after at least 1 second or so
