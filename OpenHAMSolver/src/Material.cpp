@@ -311,7 +311,7 @@ double Material::Ol_pc(double pc) const {
 			}
 			Ol *= m_Oeff;
 			return Ol;
-		} break;
+		}
 
 		// Hamstad Finishing Material
 		case 1 :
@@ -320,13 +320,12 @@ double Material::Ol_pc(double pc) const {
 			double tmp2 = IBK::f_pow(1.0 + tmp, 0.21260);
 			Ol = m_Oeff / tmp2;
 			return Ol;
-		} break;
+		}
 
 		// EN 15026 Material
 		case 2 :
 		{
-			Ol = 146/IBK::f_pow(1+IBK::f_pow(-8e-8*pc, 1.6),0.375);
-			return Ol;
+			return 0.146/IBK::f_pow(1+IBK::f_pow(-8e-8*pc, 1.6),0.375);
 		}
 
 	}
@@ -363,7 +362,7 @@ double Material::Kl_Ol(double Ol) const {
 				  -1.1566e-7*tmp*tmp*tmp*tmp + 2.5969e-9*tmp*tmp*tmp*tmp*tmp;
 			tmp *= 0.4342944819032518;
 			return IBK::f_pow10(tmp);
-		} break;
+		}
 
 		// EN 15026 Material
 		case 2 :
@@ -371,7 +370,7 @@ double Material::Kl_Ol(double Ol) const {
 			double w2 = Ol*1000-73;
 			double lnK = -39.2619 + w2*(0.0704 + w2*(-1.7420e-4 + w2*(-2.7953e-6 + w2*(-1.1566e-7 + w2*2.5969e-9))));
 			return IBK::f_exp(lnK);
-		} break;
+		}
 
 	}
 	return IBK::f_pow10(m_lgKl_Ol_Spline.value(Ol));
@@ -389,7 +388,7 @@ double Material::Kv_Ol(double T, double Ol) const {
 			double tmp = 1.0 - Ol/m_Oeff;
 			double Kv = 2.61e-5/(461.89*T*mew) * tmp/(0.503*tmp*tmp + 0.497);
 			return Kv;
-		} break;
+		}
 
 		// Hamstad Finishing Material
 		case 1 :
@@ -398,12 +397,20 @@ double Material::Kv_Ol(double T, double Ol) const {
 			double tmp = 1.0 - Ol/m_Oeff;
 			double Kv = 2.61e-5/(461.89*T*mew) * tmp/(0.503*tmp*tmp + 0.497);
 			return Kv;
-		} break;
+		}
+
+		// EN 15026 Material
+		case 2 :
+		{
+			double normalizedW = 1 - Ol/0.146;
+			const double mew = 200;
+			return IBK::DV_AIR/(IBK::R_VAPOR*293.15*mew)*normalizedW/(0.503*normalizedW*normalizedW + 0.497);
+		}
 	}
 	if (m_lgKv_Ol_Spline.valid())
 		return IBK::f_pow10(m_lgKv_Ol_Spline.value(Ol));
 	if (m_mew.name.empty())
-		throw IBK::Exception("Missing parametrization for Kv(Ol), neither lgKv(Ol) spline nor mu-value provided.", FUNC_ID);
+		throw IBK::Exception("Missing parametrization for Kv(Ol), neither lgKv(Ol) spline nor MEW parameter provided.", FUNC_ID);
 	else
 		return IBK::DV_AIR/(IBK::R_VAPOR*293.15*m_mew.value)*(1-Ol/m_Oeff);
 }
@@ -449,7 +456,7 @@ void Material::createPlots(const IBK::Path & plotDir, unsigned int layerIdx) con
 
 	unsigned int NUM_VALUES = 100;
 	for (unsigned int i=0; i<NUM_VALUES; ++i) {
-		double pC = i/(double)NUM_VALUES*10;
+		double pC = 10.0*i/NUM_VALUES;
 		double pc = -IBK::f_pow10(pC);
 		double rh = IBK::f_relhum(293.15, pc);
 		fout << pC << " " << Ol_pc(-IBK::f_pow10(pC)) << " " << rh*100 << std::endl;

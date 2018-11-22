@@ -48,9 +48,9 @@
 
 /// Version info string
 const char * const PROGRAM_INFO =
-	"OpenHAM Solver, Version 0.2\n"
-	"All rights reserved. Distributed under GPL.\n\n"
-	"Copyright 2015-2017 Andreas Nicolai\n"
+	"OpenHAM Solver, Version 0.3\n"
+	"All rights reserved. Distributed under GPL v3.\n\n"
+	"Copyright 2015-today Andreas Nicolai\n"
 	"Contact: andreas.nicolai [at] tu-dresden.de\n\n";
 
 // Function sets up output directory structure
@@ -114,7 +114,7 @@ int main(int argc, char * argv[]) {
 		// *** setup message handler ***
 
 		std::string logfile = model.m_dirs.m_logDir.str() + "/screenlog.txt";
-		unsigned int verbosityLevel = IBK::string2val<int>(args.option(IBK::SolverArgsParser::DO_VERBOSITY_LEVEL));
+		int verbosityLevel = IBK::string2val<int>(args.option(IBK::SolverArgsParser::DO_VERBOSITY_LEVEL));
 		IBK::MessageHandler * messageHandlerPtr = dynamic_cast<IBK::MessageHandler *>(IBK::MessageHandlerRegistry::instance().messageHandler());
 		messageHandlerPtr->setConsoleVerbosityLevel(verbosityLevel);
 		messageHandlerPtr->m_contextIndentation = 48;

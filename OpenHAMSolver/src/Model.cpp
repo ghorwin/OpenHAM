@@ -94,7 +94,7 @@ void Model::init(const IBK::SolverArgsParser & args) {
 		m_t			= m_project.m_simStart.value; // in seconds
 		m_tEnd		= m_t + m_project.m_simDuration.value; // in seconds
 		m_dt0		= m_project.m_initialTimeStep.value; // in seconds
-		m_dtOutput	= 3600; // in seconds
+		m_dtOutput	= m_project.m_dtOutput.value; // in seconds
 
 		m_nElements = 0;
 		m_dx.clear();
@@ -103,56 +103,58 @@ void Model::init(const IBK::SolverArgsParser & args) {
 
 		double gridSpacing = 0.001; // 1 mm grid spacing for now
 
-		IBK::IBK_Message( IBK::FormatString("Settings up layers\n"), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
-		IBK::MessageIndentor indent2; (void)indent2;
-		// process material layers
-		for (unsigned int i=0; i<m_project.m_materialLayers.size(); ++i) {
-			IBK::IBK_Message( IBK::FormatString("Layer #%1:\n").arg(i+1), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
-			IBK::MessageIndentor indent3; (void)indent3;
-			const DELPHIN_LIGHT::Project::MaterialLayer & matLayer = m_project.m_materialLayers[i];
-			// lookup and read material data
-			std::string matref = matLayer.m_matRef.m_filename.str();
-			unsigned int matIdx = 0;
-			if (matref.find("built-in:") == 0) {
-				matIdx = IBK::string2val<unsigned int>(matref.substr(9));
-				IBK::IBK_Message(IBK::FormatString("Built-in material #%1\n").arg(matIdx), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
-				Material m;
-				m.init(matIdx);
-				m_materials.push_back(m);
-			}
-			else {
-				IBK::IBK_Message(IBK::FormatString("Material file reference: %1\n").arg(matref), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
-				// resolve path placeholder and read material file
-				IBK::Path fullMatFilePath = IBK::Path(matref).withReplacedPlaceholders(m_project.m_placeholders);
-				Material m;
-				try {
-					m.readFromFile(fullMatFilePath);
+		{
+			IBK::IBK_Message( IBK::FormatString("Setting up layers\n"), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+			IBK::MessageIndentor indent2; (void)indent2;
+			// process material layers
+			for (unsigned int i=0; i<m_project.m_materialLayers.size(); ++i) {
+				IBK::IBK_Message( IBK::FormatString("Layer #%1:\n").arg(i+1), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+				IBK::MessageIndentor indent3; (void)indent3;
+				const DELPHIN_LIGHT::Project::MaterialLayer & matLayer = m_project.m_materialLayers[i];
+				// lookup and read material data
+				std::string matref = matLayer.m_matRef.m_filename.str();
+				int matIdx = 0;
+				if (matref.find("built-in:") == 0) {
+					matIdx = IBK::string2val<int>(matref.substr(9));
+					IBK::IBK_Message(IBK::FormatString("Built-in material #%1\n").arg(matIdx), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+					Material m;
+					m.init(matIdx);
+					m_materials.push_back(m);
 				}
-				catch (IBK::Exception & ex) {
-					throw IBK::Exception(ex, IBK::FormatString("Error initializing material from file."), FUNC_ID);
+				else {
+					IBK::IBK_Message(IBK::FormatString("Material file reference: %1\n").arg(matref), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+					// resolve path placeholder and read material file
+					IBK::Path fullMatFilePath = IBK::Path(matref).withReplacedPlaceholders(m_project.m_placeholders);
+					Material m;
+					try {
+						m.readFromFile(fullMatFilePath);
+					}
+					catch (IBK::Exception & ex) {
+						throw IBK::Exception(ex, IBK::FormatString("Error initializing material from file."), FUNC_ID);
+					}
+					m_materials.push_back(m);
 				}
-				m_materials.push_back(m);
-			}
-			// apply discretization
+				// apply discretization
 
-			// currently only equidistant grid spacing supported, should be sufficient for most cases
-			unsigned int n = matLayer.m_width.value / gridSpacing;
-			// special case, width < gridSpacing*2
-			if (n < 3)
-				n = 3;
-			unsigned int materialIndex = m_materials.size()-1;
-			double dx = matLayer.m_width.value / n;
-			for (unsigned int j=0; j<n; ++j) {
-				m_dx.push_back(dx);
-				m_matIdx.push_back(materialIndex);
-			}
-			m_nElements += n;
-			IBK::IBK_Message( IBK::FormatString("d  = %1\n").arg(matLayer.m_width.value), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
-			IBK::IBK_Message( IBK::FormatString("n  = %1\n").arg(n), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
-			IBK::IBK_Message( IBK::FormatString("dx = %1\n").arg(dx), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+				// currently only equidistant grid spacing supported, should be sufficient for most cases
+				unsigned int n = matLayer.m_width.value / gridSpacing;
+				// special case, width < gridSpacing*3
+				if (n < 3)
+					n = 3;
+				std::size_t materialIndex = m_materials.size()-1;
+				double dx = matLayer.m_width.value / n;
+				for (unsigned int j=0; j<n; ++j) {
+					m_dx.push_back(dx);
+					m_matIdx.push_back(materialIndex);
+				}
+				m_nElements += n;
+				IBK::IBK_Message( IBK::FormatString("d  = %1 m\n").arg(matLayer.m_width.value), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+				IBK::IBK_Message( IBK::FormatString("n  = %1\n").arg(n), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+				IBK::IBK_Message( IBK::FormatString("dx = %1 m\n").arg(dx), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 
-			// dump out material functions for plotting
-			m_materials.back().createPlots(m_dirs.m_varDir, i+1);
+				// dump out material functions for plotting
+				m_materials.back().createPlots(m_dirs.m_varDir, i+1);
+			}
 		}
 
 		// transfer constant climate conditions
@@ -191,6 +193,11 @@ void Model::init(const IBK::SolverArgsParser & args) {
 		m_hw.resize(m_nElements+1);
 
 		// initial variables
+		IBK::IBK_Message( IBK::FormatString("Initial conditions\n"), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+		IBK::MessageIndentor indent2; (void)indent2;
+		IBK::IBK_Message( IBK::FormatString("T  = %1 C\n").arg(m_project.m_initialT.value - 273.15), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+		IBK::IBK_Message( IBK::FormatString("RH = %1 %\n").arg(m_project.m_initialRH.value*100), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+
 		std::vector<double> zInitial(2*m_nElements);
 		std::vector<double> yInitial(2*m_nElements);
 		for (unsigned int i=0; i<m_nElements; ++i) {
