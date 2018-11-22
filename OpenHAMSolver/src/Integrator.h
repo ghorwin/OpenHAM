@@ -131,6 +131,8 @@ public:
 
 	BandMatrix				m_jacobian;
 
+	IBK::StopWatch			m_stopWatch;
+
 	/*! Counter for non-linear iterations in last step, needed for dt adjustment. */
 	unsigned int			m_nonlinIters;
 

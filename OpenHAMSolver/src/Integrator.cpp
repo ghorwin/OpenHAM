@@ -76,6 +76,8 @@ void Integrator::setupMemory() {
 void Integrator::run() {
 	const char * const FUNC_ID = "[Integrator::run]";
 	try {
+		m_stopWatch.start();
+
 		// resize vectors
 		setupMemory();
 
@@ -422,6 +424,8 @@ void Integrator::writeMetrics() {
 	const char * const FUNC_ID = "[Integrator::writeMetrics]";
 	std::string metricsFilePath = (m_model.m_dirs.m_logDir / "summary.txt").str();
 	std::ofstream of(metricsFilePath.c_str());
+	double wct = m_stopWatch.difference()*1e-3; // in seconds
+	of << "WallClockTime=" << wct << std::endl;
 	of << "IntegratorSteps=" << m_statNumSteps << std::endl;
 	of << "IntegratorNonLinIters=" << m_statNonLinIters << std::endl;
 	of << "IntegratorErrorTestFails=" << m_statNumErrFails << std::endl;
@@ -430,6 +434,11 @@ void Integrator::writeMetrics() {
 	of << "IntegratorLESSetup=" << m_statJacEvals << std::endl;
 
 	IBK::IBK_Message( IBK::FormatString("\nSolver statistics\n"), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+	IBK::IBK_Message( IBK::FormatString("------------------------------------------------------------------------------\n"), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+	// determine suitable unit
+	std::string ustr = IBK::Time::suitableTimeUnit(wct);
+	IBK::IBK_Message( IBK::FormatString("Wall clock time                            = %1\n").arg(IBK::Time::format_time_difference(wct, ustr, true),13),
+		IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 	IBK::IBK_Message( IBK::FormatString("------------------------------------------------------------------------------\n"), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 	IBK::IBK_Message( IBK::FormatString("Integrator: Steps                          =                          %1\n")
 		.arg((unsigned int)m_statNumSteps,8),
