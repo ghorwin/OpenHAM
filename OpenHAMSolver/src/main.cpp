@@ -137,6 +137,8 @@ int main(int argc, char * argv[]) {
 		integrator.m_solverStepStats = args.flagEnabled(IBK::SolverArgsParser::DO_STEP_STATS);
 		IBK::IBK_Message("Initialization complete, starting solver.\n", IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 		integrator.run();
+
+		integrator.writeMetrics();
 	}
 	catch (IBK::Exception & ex) {
 		ex.writeMsgStackToError();

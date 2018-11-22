@@ -70,8 +70,15 @@ public:
 	*/
 	double norm(const std::vector<double> & values, const std::vector<double> & diff) const;
 
+	/*! Creates the summary.txt file with solver statistics. */
+	void writeMetrics();
+
+
+	// *** STATIC FUNCTIONS
+
 	/*! Copies content of vector efficiently. */
 	static void copyVec(const std::vector<double> & src, std::vector<double> & target);
+
 
 	/*! Physical model implementation. */
 	Model					m_model;
@@ -127,10 +134,13 @@ public:
 	/*! Counter for non-linear iterations in last step, needed for dt adjustment. */
 	unsigned int			m_nonlinIters;
 
-	unsigned int			m_statRhsEvals;
+	unsigned int			m_statNumRHSEvals;
 	unsigned int			m_statNonLinIters;
-	unsigned int			m_statSteps;
+	unsigned int			m_statNumSteps;
 	unsigned int			m_statJacEvals;
+
+	unsigned int			m_statNumErrFails;
+	unsigned int			m_statNumNCFails;
 
 	std::ostream			*m_logFileStream;
 

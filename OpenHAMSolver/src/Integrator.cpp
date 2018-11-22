@@ -109,10 +109,12 @@ void Integrator::run() {
 
 		m_dt = m_model.m_dt0;
 
-		m_statRhsEvals = 0;
+		m_statNumRHSEvals = 0;
 		m_statNonLinIters = 0;
-		m_statSteps = 0;
+		m_statNumSteps = 0;
 		m_statJacEvals = 0;
+		m_statNumErrFails = 0;
+		m_statNumNCFails = 0;
 
 		// time loop, integrator time always starts at 0, mapping to real time is done
 		// in climate data loader and output handler
@@ -142,7 +144,7 @@ void Integrator::run() {
 			std::stringstream strm;
 			strm << std::setw(10) << m_t/3600 << '\t'
 							 << std::setw(10) << m_dt << '\t'
-							 << std::setw(5) << m_statSteps << '\t'
+							 << std::setw(5) << m_statNumSteps << '\t'
 							 << std::setw(5) << m_statNonLinIters << std::endl;
 			IBK::IBK_Message(strm.str(), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_DETAILED);
 
@@ -150,7 +152,7 @@ void Integrator::run() {
 			if (m_solverStepStats) {
 				*m_logFileStream << std::setw(10) << m_t/3600 << '\t'
 								 << std::setw(10) << m_dt << '\t'
-								 << std::setw(5) << m_statSteps << '\t'
+								 << std::setw(5) << m_statNumSteps << '\t'
 								 << std::setw(5) << m_nonlinIters << '\t'
 								 << std::setw(10) << m_resNorm << '\t'
 								 << std::setw(10) << m_deltaNorm << std::endl;
@@ -166,7 +168,7 @@ void Integrator::run() {
 				if (!m_solverStepStats) {
 					*m_logFileStream << std::setw(10) << m_t/3600 << '\t'
 									 << std::setw(10) << m_dt << '\t'
-									 << std::setw(5) << m_statSteps << '\t'
+									 << std::setw(5) << m_statNumSteps << '\t'
 									 << std::setw(5) << m_nonlinIters << '\t'
 									 << std::setw(10) << m_resNorm << '\t'
 									 << std::setw(10) << m_deltaNorm << std::endl;
@@ -235,7 +237,7 @@ void Integrator::step() {
 	copyVec(m_z, m_zn);
 	copyVec(m_y, m_yn);
 
-	++m_statSteps;
+	++m_statNumSteps;
 	m_statNonLinIters += m_nonlinIters;
 
 	// compute new proposal for next iteration step
@@ -377,7 +379,7 @@ void Integrator::generateJacobian() {
 		}
 		// Jacobian matrix now holds df/dz
 		// update solver statistics
-		++m_statRhsEvals;
+		++m_statNumRHSEvals;
 
 		// restore original vector
 		for (unsigned int j=i; j<m_n; j += m) {
@@ -392,7 +394,7 @@ void Integrator::generateJacobian() {
 
 //#define DUMP_JACOBIAN
 #ifdef DUMP_JACOBIAN
-	std::ofstream jacdump("jacobian.txt");
+	std::ofstream jacdump((m_model.m_dirs.m_varDir / "jacobian.txt").c_str());
 	m_jacobian.write(jacdump, NULL, false, 14);
 #endif // DUMP_JACOBIAN
 
@@ -413,6 +415,41 @@ double Integrator::norm(const std::vector<double> & values, const std::vector<do
 	}
 	norm = IBK::f_sqrt(norm);
 	return norm;
+}
+
+
+void Integrator::writeMetrics() {
+	const char * const FUNC_ID = "[Integrator::writeMetrics]";
+	std::string metricsFilePath = (m_model.m_dirs.m_logDir / "summary.txt").str();
+	std::ofstream of(metricsFilePath.c_str());
+	of << "IntegratorSteps=" << m_statNumSteps << std::endl;
+	of << "IntegratorNonLinIters=" << m_statNonLinIters << std::endl;
+	of << "IntegratorErrorTestFails=" << m_statNumErrFails << std::endl;
+	of << "IntegratorNonLinearConvFails=" << m_statNumNCFails << std::endl;
+	of << "IntegratorFunctionEvals=" << m_statNumRHSEvals << std::endl;
+	of << "IntegratorLESSetup=" << m_statJacEvals << std::endl;
+
+	IBK::IBK_Message( IBK::FormatString("\nSolver statistics\n"), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+	IBK::IBK_Message( IBK::FormatString("------------------------------------------------------------------------------\n"), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+	IBK::IBK_Message( IBK::FormatString("Integrator: Steps                          =                          %1\n")
+		.arg((unsigned int)m_statNumSteps,8),
+		IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+	IBK::IBK_Message( IBK::FormatString("Integrator: Newton iterations              =                          %1\n")
+		.arg((unsigned int)m_statNonLinIters,8),
+		IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+	IBK::IBK_Message( IBK::FormatString("Integrator: Newton convergence failures    =                          %1\n")
+		.arg((unsigned int)m_statNumNCFails,8),
+		IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+	IBK::IBK_Message( IBK::FormatString("Integrator: Error test failures            =                          %1\n")
+		.arg((unsigned int)m_statNumErrFails,8),
+		IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+	IBK::IBK_Message( IBK::FormatString("Integrator: Function evaluations (Newton)  =                          %1\n")
+		.arg(m_statNumRHSEvals,8),
+		IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+	IBK::IBK_Message( IBK::FormatString("Integrator: LES/Jacobian setups            =                          %1\n")
+		.arg((unsigned int)m_statJacEvals,8),
+		IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+	IBK::IBK_Message( IBK::FormatString("------------------------------------------------------------------------------\n"), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 }
 
 
