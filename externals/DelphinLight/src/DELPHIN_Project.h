@@ -188,6 +188,8 @@ public:
 	IBK::Parameter					m_relTol;
 	IBK::Parameter					m_absTol;
 
+	IBK::Parameter					m_dtOutput;
+
 	// *** STATIC FUNCTIONS ***
 
 	/*! Searches for an XML tag with a name attribute and given name.

@@ -61,7 +61,9 @@ Project::Project() {
 	m_initialTimeStep.set("InitialTimeStep", "0.01 s");
 	m_relTol.set("RelTol", "1e-5 ---");
 	m_absTol.set("AbsTolMoisture", "1e-6 kg");
+	m_dtOutput.set("StepSize", 1, "h"); // by default, hourly outputs
 }
+
 
 void Project::readXML(const IBK::Path & fileNamePath) {
 	const char * const FUNC_ID = "[Project::readXML]";
@@ -235,7 +237,10 @@ void Project::readXML(const IBK::Path & fileNamePath) {
 		throw IBK::Exception("Missing 'Discretization' section.", FUNC_ID);
 
 	}
-	// Assignments
+
+
+	// *** Assignments ***
+
 	xmlElem = xmlRoot.FirstChild( "Assignments" ).Element();
 	if (xmlElem) {
 		IBK::IBK_Message("Reading Assignments section\n", IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
@@ -364,7 +369,9 @@ void Project::readXML(const IBK::Path & fileNamePath) {
 
 	} // Assignments
 
-	// Conditions
+
+	// *** Conditions ***
+
 	xmlElem = xmlRoot.FirstChild( "Conditions" ).Element();
 	if (xmlElem) {
 		const TiXmlElement * xmlElemInt = NULL;
@@ -414,6 +421,35 @@ void Project::readXML(const IBK::Path & fileNamePath) {
 		}
 	}
 
+
+	// *** Outputs ***
+	xmlElem = xmlRoot.FirstChild( "Outputs" ).Element();
+	if (xmlElem) {
+		// get first output grid child element
+		const TiXmlNode * xmlNodeSub = xmlElem->FirstChild("OutputGrids");
+		if (xmlNodeSub) {
+			xmlNodeSub = xmlNodeSub->FirstChildElement();
+			if (xmlNodeSub) {
+				xmlNodeSub = xmlNodeSub->FirstChild("Interval");
+				if (xmlNodeSub) {
+					for (const TiXmlElement * e = xmlNodeSub->FirstChildElement(); e; e = e->NextSiblingElement()) {
+						double value;
+						std::string unitStr, name;
+						try {
+							TiXmlElement::readIBKParameterElement(e, name, unitStr, value);
+						}
+						catch (std::runtime_error & ex) {
+							throw IBK::Exception( IBK::Exception(ex.what(), "[TiXmlElement::readIBKParameterElement]"), "Error reading parameter from OutputGrid.", FUNC_ID);
+						}
+						if (name == "StepSize") {
+							m_dtOutput.set(name, value, unitStr);
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 
