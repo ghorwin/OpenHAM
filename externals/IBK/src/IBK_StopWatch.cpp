@@ -304,7 +304,8 @@ void StopWatch::setIntervalLength(double intervalLength) {
 
 bool StopWatch::intervalCompleted() {
 	if (m_lastIntervalDiff + m_intervalLength < difference()/1000) {
-		m_lastIntervalDiff += m_intervalLength;
+		while (m_lastIntervalDiff + m_intervalLength < difference()/1000)
+			m_lastIntervalDiff += m_intervalLength;
 		return true;
 	}
 	return false;
