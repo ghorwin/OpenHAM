@@ -38,7 +38,9 @@
 #include "Model.h"
 
 #include <DATAIO_DataIO.h>
+
 #include <IBK_UnitVector.h>
+#include <IBK_StopWatch.h>
 
 
 /*! Handles outputs from model. */
@@ -84,6 +86,9 @@ public:
 
 	/*! Workspace vector for converting outputs and writing profiles. */
 	IBK::UnitVector					m_profileVector;
+
+	/*! A timer to check if the file stream shall be flushed already. */
+	IBK::StopWatch					m_flushTimer;
 };
 
 #endif // OutputsH

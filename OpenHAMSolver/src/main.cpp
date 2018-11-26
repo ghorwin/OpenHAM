@@ -46,15 +46,38 @@
 #include "Integrator.h"
 #include "Model.h"
 
-/// Version info string
+/*! Version info string */
 const char * const PROGRAM_INFO =
 	"OpenHAM Solver, Version 0.3\n"
 	"All rights reserved. Distributed under GPL v3.\n\n"
 	"Copyright 2015-today Andreas Nicolai\n"
 	"Contact: andreas.nicolai [at] tu-dresden.de\n\n";
 
-// Function sets up output directory structure
+/*! Function sets up output directory structure. */
 void setupDirectories(const IBK::SolverArgsParser & args, Model & model);
+
+class OpenHAMArgParser : public IBK::SolverArgsParser {
+public:
+	/*! Prints help page to std-output.
+		\param out	Stream buffer of the help output.
+	*/
+	void printHelp(std::ostream & out) const {
+		// re-use implementation of original help function
+		out << "Syntax: " << m_appname << " [options] <project file>\n\n";
+		const unsigned int TEXT_WIDTH = 79;
+		const unsigned int TAB_WIDTH = 26;
+		printFlags(out,TEXT_WIDTH,TAB_WIDTH);
+		printOptions(out,TEXT_WIDTH,TAB_WIDTH);
+	}
+
+	/*! Prints man page to std-output.
+		\param out	Stream buffer of the manual output.
+	*/
+	void printManPage(std::ostream & out) const {
+		IBK::ArgParser::printManPage(out);
+	}
+
+};
 
 
 /*! Solver main() function. */
@@ -69,7 +92,7 @@ int main(int argc, char * argv[]) {
 
 		// *** Command line parsing ***
 
-		IBK::SolverArgsParser args;
+		OpenHAMArgParser args;
 		args.setAppName("OpenHAMSolver");
 
 		// Note: Command line arguments are passed as char in local encoding, i.e. in german latin9 encoding
@@ -81,6 +104,7 @@ int main(int argc, char * argv[]) {
 			// remove arguments not supported by OpenHAMSolver so that they do not show up in help
 			args.removeOption("disable-headers");
 			args.removeOption("restart");
+			args.removeOption("restart-info");
 			args.removeOption("restart-from");
 			args.removeOption("test-init");
 			args.removeOption("output-dir");

@@ -97,12 +97,16 @@ void Outputs::setupOutputFiles(const IBK::Path & outputRootPath) {
 		addProfileOutput("TemperatureProfile", "Temperature", "C");
 		// index 1 - temperature profile
 		addProfileOutput("RelativeHumidityProfile", "Relative Humidity", "%");
-
+		// index 2 - moisture content profile
+		addProfileOutput("MoistureMassDensityProfile", "Moisture Mass Density", "kg/m3");
 	}
 	catch (IBK::Exception & ex) {
 		throw IBK::Exception(ex, "Error creating output files.", FUNC_ID);
 	}
 	m_profileVector.resize(m_model->m_nElements);
+
+	m_flushTimer.setIntervalLength(2); // only flush every 2 seconds
+	m_flushTimer.start();
 }
 
 
@@ -122,6 +126,12 @@ void Outputs::appendOutputs() {
 	m_profileVector.convert(IBK::Unit("%"));
 	m_dataIOs[1]->appendData(m_model->m_t, &m_profileVector.m_data[0]);
 
+	// index 2 - moisture mass density
+	m_profileVector.m_unit.set("kg/m3");
+	m_profileVector.m_data = m_model->m_rhowv;
+//	m_profileVector.convert(IBK::Unit("kg/m3"));
+	m_dataIOs[2]->appendData(m_model->m_t, &m_profileVector.m_data[0]);
+
 	std::stringstream strm;
 	strm.precision(9);
 	unsigned int n = m_model->m_nElements;
@@ -132,8 +142,9 @@ void Outputs::appendOutputs() {
 		 << m_model->m_T[n-1]-273.15 << '\t' << m_model->m_rh[n-1]*100 << '\t' << m_model->m_pv[n-1] << '\t'
 		 << m_model->m_q[n] << '\t' << m_model->m_jv[n] << '\t' << m_model->m_hv[n] << '\n';
 
-	/// \todo maybe only flush the output stream after at least 1 second or so
-	m_surfaceValues->flush();
+	// flush the output stream after at least 1 second or so
+	if (m_flushTimer.intervalCompleted())
+		m_surfaceValues->flush();
 }
 
 
