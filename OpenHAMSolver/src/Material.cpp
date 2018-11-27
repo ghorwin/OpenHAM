@@ -347,7 +347,7 @@ double Material::lambda_Ol(double Ol) const {
 		case 2 : return m_lambda + 15.8 * Ol;
 	}
 	// use standard model
-	return m_lambda + 5.6*Ol;
+	return m_lambda + 0.56*Ol;
 }
 
 

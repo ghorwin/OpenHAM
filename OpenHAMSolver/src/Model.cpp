@@ -549,13 +549,13 @@ void Model::updateFluxes() {
 		m_jv[i] = KV_mean*(m_pv[eL] - m_pv[eR])/(0.5*gx2);
 		// limit flux when target element approaches saturation
 		if (m_jv[i] > 0) {
-			double normDelta = (m_materials[eR].m_Oeff*1000 - m_rhowv[eR])/1;
+			double normDelta = (m_materials[m_matIdx[eR]].m_Oeff*1000 - m_rhowv[eR])/1;
 			if (normDelta < 1)
 				m_jv[i] *= IBK::scale(normDelta);
 			m_hv[i] = m_jv[i]*(IBK::C_VAPOR*m_T[eL] + IBK::H_EVAP);
 		}
 		else {
-			double normDelta = (m_materials[eL].m_Oeff*1000 - m_rhowv[eL])/1;
+			double normDelta = (m_materials[m_matIdx[eL]].m_Oeff*1000 - m_rhowv[eL])/1;
 			if (normDelta < 1)
 				m_jv[i] *= IBK::scale(normDelta);
 			m_hv[i] = m_jv[i]*(IBK::C_VAPOR*m_T[eR] + IBK::H_EVAP);

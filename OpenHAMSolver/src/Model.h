@@ -130,13 +130,13 @@ public:
 	/*! Number of elements. */
 	unsigned int				m_nElements;
 
-	/*! Material index for each element. */
+	/*! Material index for each element (size m_nElements). */
 	std::vector<unsigned int>	m_matIdx;
 
 	/*! Materials used in model. */
 	std::vector<Material>		m_materials;
 
-	/*! Element/grid sizes in [m] from left to right. */
+	/*! Element/grid sizes in [m] from left to right (size m_nElements). */
 	std::vector<double>			m_dx;
 
 
