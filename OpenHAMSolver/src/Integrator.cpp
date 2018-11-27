@@ -124,7 +124,7 @@ void Integrator::run() {
 		m_t = m_model.m_t;
 
 		// initialize feedback object
-		std::ofstream progressStream((m_model.m_dirs.m_resultsDir / "progress.txt").c_str());
+		std::ofstream progressStream((m_model.m_dirs.m_logDir / "progress.txt").c_str());
 		m_feedback.setup(&progressStream, m_t,
 						 m_model.m_tEnd, m_model.m_args.m_projectFile.str(), 0, m_t);
 
