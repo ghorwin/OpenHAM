@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<DelphinProject xmlns="http://www.bauklimatik-dresden.de" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:IBK="http://www.bauklimatik-dresden.de/IBK" xsi:schemaLocation="http://www.bauklimatik-dresden.de DelphinProject.xsd" fileVersion="6.5">
+	<ProjectInfo created="Do. Okt. 19 10:37:01 2017" lastEdited="Di. Nov. 27 14:17:17 2018">
+		<Comment>&#x0A;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Courier&apos;; font-size:12pt;&quot;&gt;Test project 1 for OpenHAM&lt;/span&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Courier&apos;; font-size:12pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Courier&apos;;&quot;&gt;Steady-state, two-layered, using built-in materials.&lt;/span&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Courier&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Courier&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;</Comment>
+	</ProjectInfo>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Model data, solver settings, general parameters-->
+	<Init>
+		<SimulationParameter>
+			<BalanceEquationModule>BEHeatMoisture</BalanceEquationModule>
+			<Interval>
+				<IBK:Parameter name="Duration" unit="a">1</IBK:Parameter>
+			</Interval>
+			<IBK:Parameter name="Longitude" unit="Deg">51.3</IBK:Parameter>
+			<IBK:Parameter name="Latitude" unit="Deg">13.4</IBK:Parameter>
+			<DefaultInitialCondition name="DefaultTemperature" unit="C">18</DefaultInitialCondition>
+		</SimulationParameter>
+		<SolverParameter>
+			<IBK:Parameter name="MaxTimeStep" unit="h">6</IBK:Parameter>
+			<IBK:Parameter name="MinTimeStep" unit="s">1e-09</IBK:Parameter>
+			<IBK:Parameter name="InitialTimeStep" unit="s">0.0001</IBK:Parameter>
+			<IBK:Parameter name="RelTol" unit="---">0.0001</IBK:Parameter>
+			<IBK:Parameter name="AbsTolMoisture" unit="kg">1e-08</IBK:Parameter>
+		</SolverParameter>
+	</Init>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--List of all materials used in this construction-->
+	<Materials>
+		<MaterialReference name="Test material [1]" color="#ff7e0d00">built-in:1</MaterialReference>
+		<MaterialReference name="Ceramic Brick [513]" color="#ff5020a0" hatchCode="13">${Project Directory}/materials/CeramicBrick_513.m6</MaterialReference>
+		<MaterialReference name="Trass-Mineral Insulation Plaster [251]" color="#ff404060" hatchCode="13">${Project Directory}/materials/TrassMineralInsulationPlaster_251.m6</MaterialReference>
+		<MaterialReference name="Klimaplatte (bis 2001) [571]" color="#ff10f0f0" hatchCode="13">${Project Directory}/materials/CalsithermCalciumsilikatHamstad_571.m6</MaterialReference>
+	</Materials>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Discretization data (grid and sketches)-->
+	<Discretization>
+		<XSteps unit="m">0.0005 0.00062 0.0007688 0.000953312 0.00118211 0.00146581 0.00181761 0.00225383 0.00279475 0.00346549 0.00429721 0.00532854 0.00660739 0.00819317 0.0101595 0.0125978 0.0156213 0.0158441 0.0158441 0.0158441 0.0158441 0.0193704 0.0156213 0.0125978 0.0101595 0.00819317 0.00660739 0.00532854 0.00429721 0.00346549 0.00279475 0.00225383 0.00181761 0.00146581 0.00118211 0.000953312 0.0007688 0.00062 0.0005 0.0005 0.00062 0.0007688 0.000953312 0.00118211 0.00146581 0.00181761 0.00225383 0.00279475 0.00528755 0.00279475 0.00225383 0.00181761 0.00146581 0.00118211 0.000953312 0.0007688 0.00062 0.0005 </XSteps>
+	</Discretization>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Conditions data, specifies how construction interacts with environment-->
+	<Conditions>
+
+		<Interfaces>
+			<Interface name="Inside" type="Detailed">
+				<BCReference>Heat conduction inside</BCReference>
+				<BCReference>Vapor diffusion inside</BCReference>
+			</Interface>
+			<Interface name="Outside" type="Detailed">
+				<BCReference>Heat conduction outside</BCReference>
+				<BCReference>Vapor diffusion outside</BCReference>
+			</Interface>
+		</Interfaces>
+
+		<ClimateConditions>
+
+			<ClimateCondition name="Inside temperature" type="Temperature" kind="Constant">
+				<IBK:Parameter name="ConstantValue" unit="C">24</IBK:Parameter>
+			</ClimateCondition>
+
+			<ClimateCondition name="Inside RH" type="RelativeHumidity" kind="Constant">
+				<IBK:Parameter name="ConstantValue" unit="%">50</IBK:Parameter>
+			</ClimateCondition>
+
+			<ClimateCondition name="Outside temperature" type="Temperature" kind="Constant">
+				<IBK:Parameter name="ConstantValue" unit="C">-5</IBK:Parameter>
+			</ClimateCondition>
+
+			<ClimateCondition name="Outside RH" type="RelativeHumidity" kind="Constant">
+				<IBK:Parameter name="ConstantValue" unit="%">80</IBK:Parameter>
+			</ClimateCondition>
+		</ClimateConditions>
+
+		<BoundaryConditions>
+
+			<BoundaryCondition name="Heat conduction inside" type="HeatConduction" kind="Exchange">
+				<IBK:Parameter name="ExchangeCoefficient" unit="W/m2K">8</IBK:Parameter>
+				<CCReference type="Temperature">Inside temperature</CCReference>
+			</BoundaryCondition>
+
+			<BoundaryCondition name="Heat conduction outside" type="HeatConduction" kind="Exchange">
+				<IBK:Parameter name="ExchangeCoefficient" unit="W/m2K">17</IBK:Parameter>
+				<CCReference type="Temperature">Outside temperature</CCReference>
+			</BoundaryCondition>
+
+			<BoundaryCondition name="Vapor diffusion inside" type="VaporDiffusion" kind="Exchange">
+				<IBK:Parameter name="ExchangeCoefficient" unit="s/m">2.5e-08</IBK:Parameter>
+				<IBK:Parameter name="SDValue" unit="m">0</IBK:Parameter>
+				<CCReference type="Temperature">Inside temperature</CCReference>
+				<CCReference type="RelativeHumidity">Inside RH</CCReference>
+			</BoundaryCondition>
+
+			<BoundaryCondition name="Vapor diffusion outside" type="VaporDiffusion" kind="Exchange">
+				<IBK:Parameter name="ExchangeCoefficient" unit="s/m">7.5e-08</IBK:Parameter>
+				<IBK:Parameter name="SDValue" unit="m">0</IBK:Parameter>
+				<CCReference type="Temperature">Outside temperature</CCReference>
+				<CCReference type="RelativeHumidity">Outside RH</CCReference>
+			</BoundaryCondition>
+		</BoundaryConditions>
+	</Conditions>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Contains definitions of output files and schedules for outputs.-->
+	<Outputs>
+		<!--General parameters-->
+		<IBK:Unit name="TimeUnit">h</IBK:Unit>
+		<!--List of all Output schedules-->
+		<OutputGrids>
+			<OutputGrid name="Felder und Profile">
+				<Interval>
+					<IBK:Parameter name="Duration" unit="d">0</IBK:Parameter>
+					<IBK:Parameter name="StepSize" unit="d">6</IBK:Parameter>
+				</Interval>
+			</OutputGrid>
+		</OutputGrids>
+		<!--List of all Output files-->
+		<OutputFiles>
+			<OutputFile name="Tfield">
+				<Quantity unit="C">Temperature</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Felder und Profile</OutputGrid>
+			</OutputFile>
+		</OutputFiles>
+	</Outputs>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--List of all assignments of materials and conditions-->
+	<Assignments>
+
+		<Assignment type="Material" location="Element">
+			<Reference>Ceramic Brick [513]</Reference>
+			<Range>0 0 38 0</Range>
+		</Assignment>
+
+		<Assignment type="Material" location="Element">
+			<Reference>Klimaplatte (bis 2001) [571]</Reference>
+			<Range>39 0 57 0</Range>
+		</Assignment>
+
+		<Assignment type="Interface" location="Right">
+			<Reference>Inside</Reference>
+			<Range>57 0 57 0</Range>
+		</Assignment>
+
+		<Assignment type="Interface" location="Left">
+			<Reference>Outside</Reference>
+			<Range>0 0 0 0</Range>
+		</Assignment>
+
+		<Assignment type="Output" location="Element">
+			<Reference>Tfield</Reference>
+			<Range>0 0 57 0</Range>
+		</Assignment>
+	</Assignments>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+</DelphinProject>

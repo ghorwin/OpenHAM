@@ -250,6 +250,8 @@ void Integrator::step() {
 
 
 bool Integrator::solveNewton() {
+	const char * const FUNC_ID = "[Integrator::solveNewton]";
+
 	// 1. Iteration equation is given by: 0 = y_n+1 - y_n - dt*f(t_n+1, y_n+1)
 	//
 	// 2. Solution variable is z, with model-specified mapping of y_n+1 = y(z_n+1)
@@ -329,13 +331,20 @@ bool Integrator::solveNewton() {
 #endif // ENABLE_STEP_STATS
 
 		// add delta z to m_z
-		for (unsigned int i=0; i<m_n; ++i)
+
+		// check for moisture undershoot
+		for (unsigned int i=0; i<m_n; ++i) {
 			m_z[i] += m_resJac[i];
+			if (m_z[i] < 0) {
+				IBK_FastMessage(IBK::VL_INFO)(IBK::FormatString("z < 0 in element %1").arg(i),
+								 IBK::MSG_WARNING, FUNC_ID, IBK::VL_INFO);
+				return false;
+			}
+		}
 
 		if (m_resNorm < 1)
 			converged = true;
 	}
-
 
 	return converged;
 }
