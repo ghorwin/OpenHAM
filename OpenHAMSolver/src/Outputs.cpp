@@ -101,6 +101,11 @@ void Outputs::setupOutputFiles(const IBK::Path & outputRootPath) {
 		addProfileOutput("Profile_MoistureMassDensity", "Moisture Mass Density", "kg/m3");
 		// index 3 - vapor pressure profile
 		addProfileOutput("Profile_VaporPressure", "Water Vapor Pressure", "Pa");
+//#define WRITE_TRANSPORT_FUNCTIONS
+#ifdef WRITE_TRANSPORT_FUNCTIONS
+		// index 4 - thermal conductivity profile
+		addProfileOutput("Profile_Lambda", "Thermal Conductivity", "W/mK");
+#endif
 	}
 	catch (IBK::Exception & ex) {
 		throw IBK::Exception(ex, "Error creating output files.", FUNC_ID);
@@ -115,30 +120,39 @@ void Outputs::setupOutputFiles(const IBK::Path & outputRootPath) {
 void Outputs::appendOutputs() {
 
 	// write profile outputs
+	int outputIdx = 0;
 
 	// index 0 - temperature
 	m_profileVector.m_unit.set("K");
 	m_profileVector.m_data = m_model->m_T;
 	m_profileVector.convert(IBK::Unit("C"));
-	m_dataIOs[0]->appendData(m_model->m_t, &m_profileVector.m_data[0]);
+	m_dataIOs[outputIdx++]->appendData(m_model->m_t, &m_profileVector.m_data[0]);
 
 	// index 1 - relative humidity
 	m_profileVector.m_unit.set("---");
 	m_profileVector.m_data = m_model->m_rh;
 	m_profileVector.convert(IBK::Unit("%"));
-	m_dataIOs[1]->appendData(m_model->m_t, &m_profileVector.m_data[0]);
+	m_dataIOs[outputIdx++]->appendData(m_model->m_t, &m_profileVector.m_data[0]);
 
 	// index 2 - moisture mass density
 	m_profileVector.m_unit.set("kg/m3");
 	m_profileVector.m_data = m_model->m_rhowv;
 	// no unit conversion necessary
-	m_dataIOs[2]->appendData(m_model->m_t, &m_profileVector.m_data[0]);
+	m_dataIOs[outputIdx++]->appendData(m_model->m_t, &m_profileVector.m_data[0]);
 
 	// index 3 - water vapor pressure
 	m_profileVector.m_unit.set("Pa");
 	m_profileVector.m_data = m_model->m_pv;
 	// no unit conversion necessary
-	m_dataIOs[3]->appendData(m_model->m_t, &m_profileVector.m_data[0]);
+	m_dataIOs[outputIdx++]->appendData(m_model->m_t, &m_profileVector.m_data[0]);
+
+#ifdef WRITE_TRANSPORT_FUNCTIONS
+	// index 4 - thermal conductivity
+	m_profileVector.m_unit.set("W/mK");
+	m_profileVector.m_data = m_model->m_lambda;
+	// no unit conversion necessary
+	m_dataIOs[outputIdx++]->appendData(m_model->m_t, &m_profileVector.m_data[0]);
+#endif
 
 	std::stringstream strm;
 	strm.precision(9);
