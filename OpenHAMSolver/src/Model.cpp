@@ -112,7 +112,9 @@ void Model::init(const IBK::SolverArgsParser & args) {
 				IBK::MessageIndentor indent3; (void)indent3;
 				const DELPHIN_LIGHT::Project::MaterialLayer & matLayer = m_project.m_materialLayers[i];
 				// lookup and read material data
-				std::string matref = matLayer.m_matRef.m_filename.str();
+				if (matLayer.m_matRef == NULL)
+					throw IBK::Exception(IBK::FormatString("Missing material assignment to material layer #%1.").arg(i), FUNC_ID);
+				std::string matref = matLayer.m_matRef->m_filename.str();
 				int matIdx = 0;
 				if (matref.find("built-in:") == 0) {
 					matIdx = IBK::string2val<int>(matref.substr(9));
@@ -137,7 +139,7 @@ void Model::init(const IBK::SolverArgsParser & args) {
 				// apply discretization
 
 				// currently only equidistant grid spacing supported, should be sufficient for most cases
-				unsigned int n = matLayer.m_width.value / gridSpacing;
+				unsigned int n = static_cast<unsigned int>(matLayer.m_width.value / gridSpacing);
 				// special case, width < gridSpacing*3
 				if (n < 3)
 					n = 3;

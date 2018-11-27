@@ -5,7 +5,6 @@
 		<Directory>
 			<Path>.</Path>
 			<SubDir Color="#416fce" Checked="1">EN15026-2007</SubDir>
-			<SubDir Color="#7141d1" Checked="1">Kirchhoff</SubDir>
 			<SubDir Color="#ffaa00" Checked="1">reference_results</SubDir>
 			<ExpandedSubDir>.</ExpandedSubDir>
 		</Directory>
@@ -15,7 +14,81 @@
 
 	<!--All mappers.-->
 	<Mappers>
-		<Mapper name="Temperature [$filename]">
+		<Mapper name="Temperatur 7 d">
+			<Extractors>
+				<Extractor>
+					<DataIOFileName>EN15026-2007/results/TemperatureProfile.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT>7</CutIndexT>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>reference_results/TempField_min.out</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT>1</CutIndexT>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>reference_results/TempField_max.out</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT>1</CutIndexT>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+				</Extractor>
+			</Extractors>
+			<ChartModel chartType="2D">
+				<SeriesProperties>
+					<Series>
+						<TitleText>$filename</TitleText>
+						<LineStyle>0</LineStyle>
+						<PenColor>#ef2929</PenColor>
+					</Series>
+					<Series>
+						<TitleText>$filename</TitleText>
+						<LineStyle>0</LineStyle>
+						<MarkerStyle>0</MarkerStyle>
+						<PenColor>#fcaf3e</PenColor>
+					</Series>
+					<Series>
+						<TitleText>$filename</TitleText>
+						<LineStyle>0</LineStyle>
+						<MarkerStyle>2</MarkerStyle>
+						<PenColor>#a40000</PenColor>
+					</Series>
+				</SeriesProperties>
+				<AxisProperties>
+					<Axis index="0" autoscale="0">
+						<TitleText>Koordinate [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">m</IBK:Unit>
+						<Maximum>5</Maximum>
+					</Axis>
+					<Axis index="1">
+						<TitleText>$quantity [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">C</IBK:Unit>
+					</Axis>
+					<Axis index="2" enabled="0">
+						<TitleText>$quantity [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">kg/m3</IBK:Unit>
+					</Axis>
+				</AxisProperties>
+				<ChartProperties>
+					<TitleText>Temperature [$filename]</TitleText>
+					<Legend />
+				</ChartProperties>
+			</ChartModel>
+		</Mapper>
+		<Mapper name="Temperatur 35 d">
 			<Extractors>
 				<Extractor>
 					<DataIOFileName>EN15026-2007/results/TemperatureProfile.d6o</DataIOFileName>
@@ -47,37 +120,25 @@
 					<CutLockZDir>0</CutLockZDir>
 					<CutLockTDir>0</CutLockTDir>
 				</Extractor>
-				<Extractor>
-					<DataIOFileName>Kirchhoff/results/TempField.d6o</DataIOFileName>
-					<CutType>TimeCut</CutType>
-					<DataFormat>DF_3D</DataFormat>
-					<CutIndexT>35</CutIndexT>
-					<CutLockXDir>0</CutLockXDir>
-					<CutLockYDir>0</CutLockYDir>
-					<CutLockZDir>0</CutLockZDir>
-					<CutLockTDir>0</CutLockTDir>
-				</Extractor>
 			</Extractors>
 			<ChartModel chartType="2D">
 				<SeriesProperties>
 					<Series>
 						<TitleText>$filename</TitleText>
 						<LineStyle>0</LineStyle>
+						<PenColor>#ef2929</PenColor>
 					</Series>
 					<Series>
 						<TitleText>$filename</TitleText>
 						<LineStyle>0</LineStyle>
-						<PenColor>#ff420e</PenColor>
+						<MarkerStyle>0</MarkerStyle>
+						<PenColor>#fcaf3e</PenColor>
 					</Series>
 					<Series>
 						<TitleText>$filename</TitleText>
 						<LineStyle>0</LineStyle>
-						<PenColor>#004586</PenColor>
-					</Series>
-					<Series>
-						<TitleText>$filename</TitleText>
-						<LineStyle>0</LineStyle>
-						<PenColor>#aecf00</PenColor>
+						<MarkerStyle>2</MarkerStyle>
+						<PenColor>#a40000</PenColor>
 					</Series>
 				</SeriesProperties>
 				<AxisProperties>
@@ -92,6 +153,7 @@
 					</Axis>
 					<Axis index="2" enabled="0">
 						<TitleText>$quantity [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">kg/m3</IBK:Unit>
 					</Axis>
 				</AxisProperties>
 				<ChartProperties>
@@ -100,43 +162,30 @@
 				</ChartProperties>
 			</ChartModel>
 		</Mapper>
-		<Mapper name="Moisture Mass Density [$filename]">
+		<Mapper name="Temperatur 365 d">
 			<Extractors>
 				<Extractor>
-					<DataIOFileName>EN15026-2007/results/MoistureMassDensityProfile.d6o</DataIOFileName>
+					<DataIOFileName>EN15026-2007/results/TemperatureProfile.d6o</DataIOFileName>
 					<CutType>TimeCut</CutType>
 					<DataFormat>DF_3D</DataFormat>
-					<CutIndexT>35</CutIndexT>
 					<CutLockXDir>0</CutLockXDir>
 					<CutLockYDir>0</CutLockYDir>
 					<CutLockZDir>0</CutLockZDir>
 					<CutLockTDir>0</CutLockTDir>
 				</Extractor>
 				<Extractor>
-					<DataIOFileName>Kirchhoff/results/MoistField.d6o</DataIOFileName>
+					<DataIOFileName>reference_results/TempField_min.out</DataIOFileName>
 					<CutType>TimeCut</CutType>
 					<DataFormat>DF_3D</DataFormat>
-					<CutIndexT>35</CutIndexT>
 					<CutLockXDir>0</CutLockXDir>
 					<CutLockYDir>0</CutLockYDir>
 					<CutLockZDir>0</CutLockZDir>
 					<CutLockTDir>0</CutLockTDir>
 				</Extractor>
 				<Extractor>
-					<DataIOFileName>reference_results/MoistField_max.out</DataIOFileName>
+					<DataIOFileName>reference_results/TempField_max.out</DataIOFileName>
 					<CutType>TimeCut</CutType>
 					<DataFormat>DF_3D</DataFormat>
-					<CutIndexT>1</CutIndexT>
-					<CutLockXDir>0</CutLockXDir>
-					<CutLockYDir>0</CutLockYDir>
-					<CutLockZDir>0</CutLockZDir>
-					<CutLockTDir>0</CutLockTDir>
-				</Extractor>
-				<Extractor>
-					<DataIOFileName>reference_results/MoistField_min.out</DataIOFileName>
-					<CutType>TimeCut</CutType>
-					<DataFormat>DF_3D</DataFormat>
-					<CutIndexT>1</CutIndexT>
 					<CutLockXDir>0</CutLockXDir>
 					<CutLockYDir>0</CutLockYDir>
 					<CutLockZDir>0</CutLockZDir>
@@ -148,81 +197,38 @@
 					<Series>
 						<TitleText>$filename</TitleText>
 						<LineStyle>0</LineStyle>
-					</Series>
-					<Series>
-						<TitleText>$filename</TitleText>
-						<LineStyle>0</LineStyle>
-						<PenColor>#ff420e</PenColor>
-					</Series>
-					<Series>
-						<TitleText>$filename</TitleText>
-						<LineStyle>0</LineStyle>
-						<MarkerStyle>0</MarkerStyle>
-						<PenWidth>4</PenWidth>
-						<PenColor>#004586</PenColor>
+						<PenColor>#ef2929</PenColor>
 					</Series>
 					<Series>
 						<TitleText>$filename</TitleText>
 						<LineStyle>0</LineStyle>
 						<MarkerStyle>0</MarkerStyle>
-						<PenColor>#aecf00</PenColor>
+						<PenColor>#fcaf3e</PenColor>
+					</Series>
+					<Series>
+						<TitleText>$filename</TitleText>
+						<LineStyle>0</LineStyle>
+						<MarkerStyle>2</MarkerStyle>
+						<PenColor>#a40000</PenColor>
 					</Series>
 				</SeriesProperties>
 				<AxisProperties>
 					<Axis index="0" autoscale="0">
 						<TitleText>Koordinate [$unit]</TitleText>
 						<IBK:Unit name="AxisUnit">m</IBK:Unit>
-						<Maximum>0.1</Maximum>
+						<Maximum>5</Maximum>
 					</Axis>
 					<Axis index="1">
 						<TitleText>$quantity [$unit]</TitleText>
-						<IBK:Unit name="AxisUnit">kg/m3</IBK:Unit>
+						<IBK:Unit name="AxisUnit">C</IBK:Unit>
 					</Axis>
 					<Axis index="2" enabled="0">
 						<TitleText>$quantity [$unit]</TitleText>
-					</Axis>
-				</AxisProperties>
-				<ChartProperties>
-					<TitleText>Moisture Mass Density [$filename]</TitleText>
-					<Legend />
-				</ChartProperties>
-			</ChartModel>
-		</Mapper>
-		<Mapper name="Moisture mass density (liquid + vapor) [$filename]">
-			<Extractors>
-				<Extractor>
-					<DataIOFileName>reference_results/MoistField_max.out</DataIOFileName>
-					<CutType>TimeCut</CutType>
-					<DataFormat>DF_3D</DataFormat>
-					<CutIndexT>1</CutIndexT>
-					<CutLockXDir>0</CutLockXDir>
-					<CutLockYDir>0</CutLockYDir>
-					<CutLockZDir>0</CutLockZDir>
-					<CutLockTDir>0</CutLockTDir>
-				</Extractor>
-			</Extractors>
-			<ChartModel chartType="2D">
-				<SeriesProperties>
-					<Series>
-						<TitleText>$filename</TitleText>
-						<LineStyle>0</LineStyle>
-					</Series>
-				</SeriesProperties>
-				<AxisProperties>
-					<Axis index="0">
-						<TitleText>Koordinate [$unit]</TitleText>
-						<IBK:Unit name="AxisUnit">m</IBK:Unit>
-					</Axis>
-					<Axis index="1">
-						<TitleText>$quantity [$unit]</TitleText>
 						<IBK:Unit name="AxisUnit">kg/m3</IBK:Unit>
 					</Axis>
-					<Axis index="2" enabled="0">
-						<TitleText>$quantity [$unit]</TitleText>
-					</Axis>
 				</AxisProperties>
 				<ChartProperties>
-					<TitleText>Moisture mass density (liquid + vapor) [$filename]</TitleText>
+					<TitleText>Temperature [$filename]</TitleText>
 					<Legend />
 				</ChartProperties>
 			</ChartModel>
@@ -233,8 +239,10 @@
 
 	<!--Split window state.-->
 	<Splitting>
-		<Widget id="1" parent="0" viewTable="0" mapperIndex="1" size1="1" size2="1" orientation="2" />
-		<FocusedWidget>0</FocusedWidget>
+		<Widget id="1" parent="0" viewTable="0" mapperIndex="0" size1="660" size2="437" orientation="2" />
+		<Widget id="2" parent="1" viewTable="0" mapperIndex="2" size1="660" size2="437" orientation="1" />
+		<Widget id="3" parent="1" viewTable="0" mapperIndex="1" size1="328" size2="328" orientation="1" />
+		<FocusedWidget>3</FocusedWidget>
 	</Splitting>
 
 	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

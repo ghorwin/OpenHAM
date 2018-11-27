@@ -190,7 +190,6 @@ void Project::readXML(const IBK::Path & fileNamePath) {
 
 	// *** Materials ***
 
-	std::vector<MaterialReference> matRefs;
 	xmlElem = xmlRoot.FirstChild( "Materials" ).Element();
 	try {
 		if (xmlElem) {
@@ -198,7 +197,7 @@ void Project::readXML(const IBK::Path & fileNamePath) {
 			IBK::MessageIndentor indent; (void)indent;
 			// for each entry, create an insance of MaterialReference and call readXML() member function
 			// to parse the XML tag, than append the instance to vector matRefs
-			IBK::read_range_XML(xmlElem->FirstChildElement(), matRefs);
+			IBK::read_range_XML(xmlElem->FirstChildElement(), m_matRefs);
 		}
 	}
 	catch (IBK::Exception & ex) {
@@ -301,7 +300,7 @@ void Project::readXML(const IBK::Path & fileNamePath) {
 			}
 			attrib = TiXmlAttribute::attributeByName(e, "location");
 			if (!attrib || attrib->ValueStr() != "Element")
-				throw IBK::Exception(IBK::FormatString("Missing or invalid  'location' attribute in Material assignment, expected 'Element'."), FUNC_ID);
+				throw IBK::Exception(IBK::FormatString("Missing or invalid 'location' attribute in Material assignment, expected 'Element'."), FUNC_ID);
 
 			// temporary variables
 			IBK::rectangle<int> range(-1,-1,-1,-1);
@@ -322,9 +321,9 @@ void Project::readXML(const IBK::Path & fileNamePath) {
 						if (!(strm >> range)) {
 							throw IBK::Exception(IBK::FormatString("Invalid format of Range element in Assignment."), FUNC_ID);
 						}
-						if (range.left != range.right) {
-							throw IBK::Exception(IBK::FormatString("Invalid format of Range element in Assignment: only single-layer assignments are allowed (left and right must hold the same value)."), FUNC_ID);
-						}
+//						if (range.left != range.right) {
+//							throw IBK::Exception(IBK::FormatString("Invalid format of Range element in Assignment: only single-layer assignments are allowed (left and right must hold the same value)."), FUNC_ID);
+//						}
 						if (range.top != 0 || range.bottom != 0) {
 							throw IBK::Exception(IBK::FormatString("Invalid format of Range element in Assignment: top and bottom indexes must be zero."), FUNC_ID);
 						}
@@ -348,20 +347,25 @@ void Project::readXML(const IBK::Path & fileNamePath) {
 				throw IBK::Exception(IBK::FormatString("Both 'Reference' and 'Range' tags are needed in Assignment element."), FUNC_ID);
 
 			// more range checking
-			if ((unsigned int)range.left >= m_materialLayers.size())
+			if ((unsigned int)range.left >= m_materialLayers.size() || (unsigned int)range.right >= m_materialLayers.size())
 				throw IBK::Exception(IBK::FormatString("Range element holds invalid element range (out of bounds)."), FUNC_ID);
 
 			// look-up assigned material in material list
-			for (unsigned int i=0; i<matRefs.size(); ++i) {
-				if (matRefs[i].m_name == refName) {
+			for (unsigned int i=0; i<m_matRefs.size(); ++i) {
+				if (m_matRefs[i].m_name == refName) {
 					// found the material reference, copy over to material layers
-					m_materialLayers[range.left].m_matRef = matRefs[i];
+					for (int r=range.left; r<=range.right; ++r) {
+						m_materialLayers[r].m_matRef = &m_matRefs[i];
+					}
 					break;
 				}
 			}
 
+			// WARNING: Now that pointers to material reference objects have been assigned to m_materialLayers,
+			//			their memory location MUST NOT CHANGE! Therefore, do not touch the m_matRefs vector anymore!
+
 			// check assigned material for correctness
-			if (m_materialLayers[range.left].m_matRef.m_name.empty()) {
+			if (m_materialLayers[range.left].m_matRef == NULL) {
 				throw IBK::Exception(IBK::FormatString("Material referenced by ID name '%1' is "
 					"not listed in material references section.").arg(refName), FUNC_ID);
 			}
@@ -454,6 +458,8 @@ void Project::readXML(const IBK::Path & fileNamePath) {
 
 
 void Project::writeXML(const std::string & fname) const {
+	const char * const FUNC_ID = "[Project::writeXML]";
+
 	TiXmlDocument doc;
 	TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "UTF-8", "" );
 	doc.LinkEndChild( decl );
@@ -499,7 +505,10 @@ void Project::writeXML(const std::string & fname) const {
 	// first we need to get a list of unique materials
 	std::set<std::string> matIDs;
 	for (unsigned int i=0; i<m_materialLayers.size(); ++i) {
-		matIDs.insert(m_materialLayers[i].m_matRef.m_name);
+		if (m_materialLayers[i].m_matRef != NULL)
+			matIDs.insert(m_materialLayers[i].m_matRef->m_name);
+		else
+			throw IBK::Exception(IBK::FormatString("Missing material referenace assigned to layer #%1.").arg(i), FUNC_ID);
 	}
 
 	// remove potential empty Ids
@@ -512,9 +521,9 @@ void Project::writeXML(const std::string & fname) const {
 		for (std::set<std::string>::const_iterator it = matIDs.begin(); it != matIDs.end(); ++it) {
 			// find a material layer that references this material ID
 			for (unsigned int i=0; i<m_materialLayers.size(); ++i) {
-				if (m_materialLayers[i].m_matRef.m_name == *it) {
+				if (m_materialLayers[i].m_matRef->m_name == *it) {
 					// write material reference
-					m_materialLayers[i].m_matRef.writeXML(e);
+					m_materialLayers[i].m_matRef->writeXML(e);
 					break;
 				}
 			}
@@ -549,7 +558,7 @@ void Project::writeXML(const std::string & fname) const {
 			e->SetAttribute("type", "Material");
 			e->SetAttribute("location", "Element");
 			// add sub-elements
-			std::string idstr = IBK::val2string(m_materialLayers[i].m_matRef.m_name);
+			std::string idstr = IBK::val2string(m_materialLayers[i].m_matRef->m_name);
 			// write Reference tag
 			TiXmlElement::appendSingleAttributeElement(e, "Reference", NULL, std::string(), idstr);
 			TiXmlElement::appendSingleAttributeElement(e, "Range", NULL, std::string(), range.toString());
@@ -600,7 +609,7 @@ bool Project::containsMaterialReference( const std::string & refName ) {
 			++it
 		)
 	{
-		if ( (*it).m_matRef.m_name ==  refName ){
+		if ( (*it).m_matRef != NULL && (*it).m_matRef->m_name == refName ){
 			return true;
 		}
 	}
@@ -614,7 +623,9 @@ void Project::materialFiles(std::set<IBK::Path> & filePaths) const {
 	for (unsigned int i=0; i<m_materialLayers.size(); ++i) {
 		// get relative file name and substitute path placeholders
 
-		IBK::Path myPath(m_materialLayers[i].m_matRef.m_filename);
+		if (m_materialLayers[i].m_matRef == NULL)
+			continue;
+		IBK::Path myPath(m_materialLayers[i].m_matRef->m_filename);
 		filePaths.insert( myPath.withReplacedPlaceholders( m_placeholders ) );
 	}
 }

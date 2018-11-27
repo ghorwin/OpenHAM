@@ -70,18 +70,18 @@ public:
 	struct MaterialLayer {
 		/*! The width of the material layer. */
 		IBK::Parameter		m_width;
-		/*! The references material. */
-		MaterialReference	m_matRef;
+		/*! Pointer to the referenced material (not owned). */
+		const MaterialReference	*m_matRef;
 
 		/*! Initializing constructor. */
 		MaterialLayer(double width, const MaterialReference & matref) :
 			m_width("width", width, IBK::Unit("m")),
-			m_matRef(matref)
+			m_matRef(&matref)
 		{}
 
 		/*! Default constructor. */
 		MaterialLayer() :
-			m_width("width", 0.1, IBK::Unit("m"))
+			m_width("width", 0.1, IBK::Unit("m")), m_matRef(NULL)
 		{}
 	};
 
@@ -161,6 +161,13 @@ public:
 	std::string						m_displayName;
 	/*! List of directory placeholders. */
 	std::map<std::string, IBK::Path> m_placeholders;
+
+	/*! Material references.
+		\note MaterialLayers hold pointers to MaterialReference objects. Once these pointers
+			  are assigned in readXML(), DO NOT MODIFY the m_matRefs vector anylonger (otherwise SEGFAULTS/ACCESS VIOLOATIONS)
+	*/
+	std::vector<MaterialReference>	m_matRefs;
+
 	/*! Material layers of the construction. */
 	std::vector<MaterialLayer>		m_materialLayers;
 
