@@ -21,6 +21,36 @@
 	message( "No custom build options specified" )
 }
 
+CONFIG			+= silent
+CONFIG			-= depend_includepath
+
+CONFIG(release, debug|release) {
+#	message( "Setting NDEBUG define" )
+	DEFINES += NDEBUG
+}
+
+linux-g++ | linux-g++-64 | macx {
+
+		# our code doesn't check errno after calling math functions
+	# so it is perfectly safe to disable it in favor of better performance
+	# use *= to uniquely assign option
+	QMAKE_CXXFLAGS   *= -fno-math-errno
+}
+
+contains( OPTIONS, sanitize_checks ) {
+
+	CONFIG(debug, debug|release) {
+		CONFIG += sanitizer
+		CONFIG += sanitize_address
+		CONFIG += sanitize_undefined
+	}
+
+	linux-g++ | linux-g++-64 | macx {
+		QMAKE_CXXFLAGS_DEBUG   *= -fsanitize=address -fno-omit-frame-pointer
+	}
+}
+
+
 contains( OPTIONS, mpi ) {
 
 	message(Setting up MPICH support.)
@@ -260,6 +290,7 @@ contains( OPTIONS, openmpVapireTraceICC ){
 	}
 }
 
+
 contains( OPTIONS, openmpVapireTraceGCC ){
 
 	message(Setting up OPENMP+TRACE+GCC support.)
@@ -343,15 +374,12 @@ equals(TEMPLATE,app) {
 	MOC_DIR = moc
 	UI_DIR = ui
 
-	win32 {
-		win32-msvc* {
-			# disable warning for unsafe functions if using MS compiler
-			QMAKE_CXXFLAGS += /wd4996
-		}
-		else {
-			# enable c++11 support for non MS compiler (necessary for Qt5)
-			QMAKE_CXXFLAGS += -std=c++11
-		}
+	win32-msvc* {
+		QMAKE_CXXFLAGS += /wd4996
+		QMAKE_CFLAGS += /wd4996
+	}
+	else {
+		QMAKE_CXXFLAGS += -std=c++11
 	}
 
 	QMAKE_LIBDIR += ../../../externals/lib$${DIR_PREFIX}
@@ -376,6 +404,10 @@ equals(TEMPLATE,lib) {
 	QT -=	core gui
 
 	CONFIG += warn_on
+
+	# set this even in case of no Qt library compilation to get mocs/uis organized in subdirs
+	MOC_DIR = moc
+	UI_DIR = ui
 
 # using of shared libs only for non MC compiler
 # MS compiler needs explicite export statements in case of shared libs
