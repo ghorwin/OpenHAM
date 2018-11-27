@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <DelphinProject xmlns="http://www.bauklimatik-dresden.de" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:IBK="http://www.bauklimatik-dresden.de/IBK" xsi:schemaLocation="http://www.bauklimatik-dresden.de DelphinProject.xsd" fileVersion="6.5">
-	<ProjectInfo created="Do. Okt. 19 10:37:01 2017" lastEdited="Di. Nov. 27 14:17:17 2018">
+	<ProjectInfo created="Do. Okt. 19 10:37:01 2017" lastEdited="Di. Nov. 27 18:08:03 2018">
 		<Comment>&#x0A;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Courier&apos;; font-size:12pt;&quot;&gt;Test project 1 for OpenHAM&lt;/span&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Courier&apos;; font-size:12pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Courier&apos;;&quot;&gt;Steady-state, two-layered, using built-in materials.&lt;/span&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Courier&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Courier&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;</Comment>
 	</ProjectInfo>
 
@@ -11,18 +11,16 @@
 		<SimulationParameter>
 			<BalanceEquationModule>BEHeatMoisture</BalanceEquationModule>
 			<Interval>
-				<IBK:Parameter name="Duration" unit="a">1</IBK:Parameter>
+				<IBK:Parameter name="Duration" unit="d">4</IBK:Parameter>
 			</Interval>
 			<IBK:Parameter name="Longitude" unit="Deg">51.3</IBK:Parameter>
 			<IBK:Parameter name="Latitude" unit="Deg">13.4</IBK:Parameter>
 			<DefaultInitialCondition name="DefaultTemperature" unit="C">18</DefaultInitialCondition>
 		</SimulationParameter>
 		<SolverParameter>
-			<IBK:Parameter name="MaxTimeStep" unit="h">6</IBK:Parameter>
+			<IBK:Parameter name="MaxTimeStep" unit="h">1</IBK:Parameter>
 			<IBK:Parameter name="MinTimeStep" unit="s">1e-09</IBK:Parameter>
 			<IBK:Parameter name="InitialTimeStep" unit="s">0.0001</IBK:Parameter>
-			<IBK:Parameter name="RelTol" unit="---">0.0001</IBK:Parameter>
-			<IBK:Parameter name="AbsTolMoisture" unit="kg">1e-08</IBK:Parameter>
 		</SolverParameter>
 	</Init>
 
@@ -30,9 +28,7 @@
 
 	<!--List of all materials used in this construction-->
 	<Materials>
-		<MaterialReference name="Test material [1]" color="#ff7e0d00">built-in:1</MaterialReference>
 		<MaterialReference name="Ceramic Brick [513]" color="#ff5020a0" hatchCode="13">${Project Directory}/materials/CeramicBrick_513.m6</MaterialReference>
-		<MaterialReference name="Trass-Mineral Insulation Plaster [251]" color="#ff404060" hatchCode="13">${Project Directory}/materials/TrassMineralInsulationPlaster_251.m6</MaterialReference>
 		<MaterialReference name="Klimaplatte (bis 2001) [571]" color="#ff10f0f0" hatchCode="13">${Project Directory}/materials/CalsithermCalciumsilikatHamstad_571.m6</MaterialReference>
 	</Materials>
 
@@ -62,7 +58,7 @@
 		<ClimateConditions>
 
 			<ClimateCondition name="Inside temperature" type="Temperature" kind="Constant">
-				<IBK:Parameter name="ConstantValue" unit="C">24</IBK:Parameter>
+				<IBK:Parameter name="ConstantValue" unit="C">26</IBK:Parameter>
 			</ClimateCondition>
 
 			<ClimateCondition name="Inside RH" type="RelativeHumidity" kind="Constant">
@@ -117,14 +113,44 @@
 			<OutputGrid name="Felder und Profile">
 				<Interval>
 					<IBK:Parameter name="Duration" unit="d">0</IBK:Parameter>
-					<IBK:Parameter name="StepSize" unit="d">6</IBK:Parameter>
+					<IBK:Parameter name="StepSize" unit="min">10</IBK:Parameter>
 				</Interval>
 			</OutputGrid>
 		</OutputGrids>
 		<!--List of all Output files-->
 		<OutputFiles>
-			<OutputFile name="Tfield">
+			<OutputFile name="Profile_Temperature">
 				<Quantity unit="C">Temperature</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Felder und Profile</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Profile_MoistureMassDensity">
+				<Quantity unit="kg/m3">MoistureMassDensity</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Felder und Profile</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Profile_RelativeHumidity">
+				<Quantity unit="kg/m3">MoistureMassDensity</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Felder und Profile</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Sensor_Inside_Temperature">
+				<Quantity unit="C">Temperature</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Felder und Profile</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Sensor_Inside_RelativeHumidity">
+				<Quantity unit="---">RelativeHumidity</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Felder und Profile</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Sensor_Inside_MoistureMassDensity">
+				<Quantity unit="kg/kg">MoistureMassByMass</Quantity>
 				<TimeType>None</TimeType>
 				<SpaceType>Single</SpaceType>
 				<OutputGrid>Felder und Profile</OutputGrid>
@@ -158,8 +184,33 @@
 		</Assignment>
 
 		<Assignment type="Output" location="Element">
-			<Reference>Tfield</Reference>
+			<Reference>Profile_Temperature</Reference>
 			<Range>0 0 57 0</Range>
+		</Assignment>
+
+		<Assignment type="Output" location="Element">
+			<Reference>Profile_MoistureMassDensity</Reference>
+			<Range>0 0 57 0</Range>
+		</Assignment>
+
+		<Assignment type="Output" location="Element">
+			<Reference>Profile_RelativeHumidity</Reference>
+			<Range>0 0 57 0</Range>
+		</Assignment>
+
+		<Assignment type="Output" location="Coordinate">
+			<Reference>Sensor_Inside_Temperature</Reference>
+			<IBK:Point3D>0.24001 0.5 0</IBK:Point3D>
+		</Assignment>
+
+		<Assignment type="Output" location="Coordinate">
+			<Reference>Sensor_Inside_RelativeHumidity</Reference>
+			<IBK:Point3D>0.24001 0.5 0</IBK:Point3D>
+		</Assignment>
+
+		<Assignment type="Output" location="Coordinate">
+			<Reference>Sensor_Inside_MoistureMassDensity</Reference>
+			<IBK:Point3D>0.24001 0.5 0</IBK:Point3D>
 		</Assignment>
 	</Assignments>
 
