@@ -94,11 +94,13 @@ void Outputs::setupOutputFiles(const IBK::Path & outputRootPath) {
 		// create profile outputs for: T, rh, pv, pvsat, w, w_hyg, w_ovhg
 
 		// index 0 - temperature profile
-		addProfileOutput("TemperatureProfile", "Temperature", "C");
+		addProfileOutput("Profile_Temperature", "Temperature", "C");
 		// index 1 - temperature profile
-		addProfileOutput("RelativeHumidityProfile", "Relative Humidity", "%");
+		addProfileOutput("Profile_RelativeHumidity", "Relative Humidity", "%");
 		// index 2 - moisture content profile
-		addProfileOutput("MoistureMassDensityProfile", "Moisture Mass Density", "kg/m3");
+		addProfileOutput("Profile_MoistureMassDensity", "Moisture Mass Density", "kg/m3");
+		// index 3 - vapor pressure profile
+		addProfileOutput("Profile_VaporPressure", "Water Vapor Pressure", "Pa");
 	}
 	catch (IBK::Exception & ex) {
 		throw IBK::Exception(ex, "Error creating output files.", FUNC_ID);
@@ -129,8 +131,14 @@ void Outputs::appendOutputs() {
 	// index 2 - moisture mass density
 	m_profileVector.m_unit.set("kg/m3");
 	m_profileVector.m_data = m_model->m_rhowv;
-//	m_profileVector.convert(IBK::Unit("kg/m3"));
+	// no unit conversion necessary
 	m_dataIOs[2]->appendData(m_model->m_t, &m_profileVector.m_data[0]);
+
+	// index 3 - water vapor pressure
+	m_profileVector.m_unit.set("Pa");
+	m_profileVector.m_data = m_model->m_pv;
+	// no unit conversion necessary
+	m_dataIOs[3]->appendData(m_model->m_t, &m_profileVector.m_data[0]);
 
 	std::stringstream strm;
 	strm.precision(9);
