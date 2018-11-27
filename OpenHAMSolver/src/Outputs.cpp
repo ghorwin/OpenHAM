@@ -40,15 +40,19 @@
 
 Outputs::Outputs(const Model * model) :
 	m_model(model),
-	m_surfaceValues(NULL)
+	m_surfaceValues(NULL),
+	m_integralValues(NULL)
 {
 }
 
 
 Outputs::~Outputs() {
 	delete m_surfaceValues;
+	delete m_integralValues;
 	for (unsigned int i=0; i<m_dataIOs.size(); ++i)
 		delete m_dataIOs[i];
+	for (unsigned int i=0; i<m_layerOutputs.size(); ++i)
+		delete m_layerOutputs[i].outputStream;
 }
 
 
@@ -90,6 +94,25 @@ void Outputs::setupOutputFiles(const IBK::Path & outputRootPath) {
 			 << "q_left [W/m2]\t" << "gv_left [kg/m2s]\t" << "gw_left [kg/m2s]\t" << "hv_left [W/m2]\t"<< "hw_left [W/m2]\t"
 			 << "T_right [C]\t" << "RH_right [%]\t" << "pv_right [Pa]\t"
 			 << "q_right [W/m2]\t" << "gv_right [kg/m2s]\t" << "hv_right [W/m2]" << std::endl;
+
+
+
+		// open file
+		IBK::Path integralValFileName(m_outputRootPath / "Integrals.tsv");
+	#if defined(_WIN32)
+		#if defined(_MSC_VER)
+			m_integralValues = new std::ofstream( integralValFileName.wstr().c_str(), std::ios_base::binary);
+		#else
+			std::string filenameAnsi = IBK::WstringToANSI(integralValFileName.wstr(), false);
+			m_integralValues = new std::ofstream( filenameAnsi.c_str(), std::ios_base::binary);
+		#endif
+	#else
+		m_integralValues = new std::ofstream( integralValFileName.c_str() );
+	#endif
+
+		// compose header
+		*m_integralValues << "Time [d]\t"
+			 << "mwv [kg/m2]" << std::endl;
 
 		// create profile outputs for: T, rh, pv, pvsat, w, w_hyg, w_ovhg
 
@@ -154,8 +177,6 @@ void Outputs::appendOutputs() {
 	m_dataIOs[outputIdx++]->appendData(m_model->m_t, &m_profileVector.m_data[0]);
 #endif
 
-	std::stringstream strm;
-	strm.precision(9);
 	unsigned int n = m_model->m_nElements;
 	*m_surfaceValues << m_model->m_t/(24*3600) << '\t'
 		 << m_model->m_T[0]-273.15 << '\t' << m_model->m_rh[0]*100 << '\t' << m_model->m_pv[0] << '\t'
@@ -164,9 +185,18 @@ void Outputs::appendOutputs() {
 		 << m_model->m_T[n-1]-273.15 << '\t' << m_model->m_rh[n-1]*100 << '\t' << m_model->m_pv[n-1] << '\t'
 		 << m_model->m_q[n] << '\t' << m_model->m_jv[n] << '\t' << m_model->m_hv[n] << '\n';
 
+	// compute integral moisture mass
+	double mwv_int = 0;
+	for (unsigned int i=0; i<m_model->m_nElements; ++i) {
+		mwv_int += m_model->m_rhowv[i]*m_model->m_dx[i]; // kg/m3 * m = kg/m2
+	}
+	*m_integralValues << m_model->m_t/(24*3600) << '\t'
+		<< mwv_int << std::endl;
 	// flush the output stream after at least 1 second or so
-	if (m_flushTimer.intervalCompleted())
+	if (m_flushTimer.intervalCompleted()) {
 		m_surfaceValues->flush();
+		m_integralValues->flush();
+	}
 }
 
 

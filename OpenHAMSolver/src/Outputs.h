@@ -46,6 +46,14 @@
 /*! Handles outputs from model. */
 class Outputs {
 public:
+	struct LayerData {
+		LayerData() : outputStream(NULL) {}
+		double width; /*! Width of the layer in  [m]. */
+		unsigned int iLeft; /*! Left-most element index. */
+		unsigned int iRight; /*! Right-most element index. */
+		std::ostream * outputStream; /*! Output stream, owned and released in destructor ~Outputs(). */
+	};
+
 	/*! Constructor, needs model to work. */
 	Outputs(const Model * model);
 
@@ -81,8 +89,14 @@ public:
 	/*! DataIO containers. */
 	std::vector<DATAIO::DataIO*>	m_dataIOs;
 
+	/*! Output data for individual material layers. */
+	std::vector<LayerData>			m_layerOutputs;
+
 	/*! Output file stream for scalar outputs. */
 	std::ostream					*m_surfaceValues;
+
+	/*! Output file stream for scalar integral outputs. */
+	std::ostream					*m_integralValues;
 
 	/*! Workspace vector for converting outputs and writing profiles. */
 	IBK::UnitVector					m_profileVector;
