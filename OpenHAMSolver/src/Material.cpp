@@ -142,7 +142,7 @@ void Material::readFromFile(const IBK::Path & m6FilePath) {
 		IBK::FileReader::readAll(m6FilePath, lines, lastLineTokens);
 
 		// check file version
-		if (lines.empty() || lines[0].find("D6MARLZ! 006.000") != 0)
+		if (lines.empty() || lines[0].find("D6MARLZ! 006.00") != 0)
 			throw IBK::Exception("Invalid material file format.", FUNC_ID);
 
 		std::vector<std::string> lines2(lines.begin()+1, lines.end());

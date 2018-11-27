@@ -94,12 +94,12 @@ int main(int argc, char * argv[]) {
 
 		OpenHAMArgParser args;
 		args.setAppName("OpenHAMSolver");
+		args.addFlag(0, "no-disc", "Skip grid generation (use grid as written in project file)");
 
 		// Note: Command line arguments are passed as char in local encoding, i.e. in german latin9 encoding
 		//       They are converted to UTF8 (on Windows) for the rest of the solver to work.
 		args.parse(argc, argv);
 		wait_on_exit.m_wait = !args.flagEnabled(IBK::SolverArgsParser::DO_CLOSE_ON_EXIT);
-		// handle default arguments like help and man-page requests, which are printed to std::cout
 		if (static_cast<IBK::ArgParser>(args).flagEnabled("help")) {
 			// remove arguments not supported by OpenHAMSolver so that they do not show up in help
 			args.removeOption("disable-headers");
@@ -113,6 +113,7 @@ int main(int argc, char * argv[]) {
 			args.removeOption("les-solver");
 			args.removeOption("precond");
 		}
+		// handle default arguments like help and man-page requests, which are printed to std::cout
 		if (args.handleDefaultFlags(std::cout))
 			// stop if help/man-page requested
 			return EXIT_SUCCESS;
