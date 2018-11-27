@@ -213,6 +213,7 @@ void Integrator::step() {
 
 			// if not converged
 			if (!converged) {
+				++m_statNumNCFails;
 				m_dt *= 0.5;
 				if (m_dt < m_model.m_minDt)
 					throw IBK::Exception( IBK::FormatString("m_dt = %1 < %2 (minimum allowed time step)")
