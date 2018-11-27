@@ -157,8 +157,18 @@ def run_performance_evaluation(args, projects):
             path, fname = os.path.split(project)
             #print "Path    : " + path
             #print "Project : " + fname
-        
+            
             cmdline = [args.solver, project]
+            
+            # try to read commandline file
+            cmdlineFilePath = project + ".cmdline"
+            if os.path.exists(cmdlineFilePath):
+                fobj = open(cmdlineFilePath)
+                cmdlineAddOn = fobj.readline()
+                del fobj
+                cmdline.append(cmdlineAddOn)
+                print "Applying cmdline addon: " + cmdlineAddOn
+        
             try:
                 # run solver 
                 FNULL = open(os.devnull, 'w')
