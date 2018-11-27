@@ -92,7 +92,9 @@ void Material::init(int index) {
 			break;
 
 		// invalid number
-		default: m_i = -1;
+		default:
+			m_i = -1;
+			m_isAir		= false;
 	}
 	if (!logKlSplineOl.empty()) {
 		m_lgKl_Ol_Spline.read(logKlSplineOl, logKlSplineLog10Kl);
@@ -131,6 +133,7 @@ void extractKeyValuePairs(const std::vector<std::string> & lines, std::map<std::
 void Material::readFromFile(const IBK::Path & m6FilePath) {
 	const char * const FUNC_ID = "[Material::readFromFile]";
 	m_i = -1;
+	m_isAir = false;
 
 	m_mew.clear();
 	m_Oeff = 0;

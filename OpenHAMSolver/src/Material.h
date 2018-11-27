@@ -73,7 +73,7 @@ public:
 	std::string		m_name;		///< Some descriptive name.
 	std::string		m_flags;	///< Parametrization flags;
 
-	bool			m_isAir;
+	bool			m_isAir;	///< Set to true for air materials (different sorption isotherm)
 	double			m_rho; 		///< Bulk density [kg/m3]
 	double			m_cT;		///< Heat capacity [J/kgK]
 	double			m_lambda;	///< Thermal conductivity [J/msK]
