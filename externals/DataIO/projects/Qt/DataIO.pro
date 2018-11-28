@@ -24,7 +24,8 @@ SOURCES += ../../src/DATAIO_DataIO.cpp \
 	../../src/DATAIO_Utils.cpp \
 	../../src/DATAIO_GeoFile.cpp \
 	../../src/DATAIO_Constants.cpp \
-	../../src/DATAIO_TextNotificationHandler.cpp
+	../../src/DATAIO_TextNotificationHandler.cpp \
+    ../../src/DATAIO_ConstructionLines2D.cpp
 
 HEADERS += \
 	../../src/DATAIO_DataIO.h \
@@ -32,7 +33,8 @@ HEADERS += \
 	../../src/DATAIO_GeoFile.h \
 	../../src/DATAIO_Constants.h \
 	../../src/DATAIO_TextNotificationHandler.h \
-	../../src/DataIO
+	../../src/DataIO \
+    ../../src/DATAIO_ConstructionLines2D.h
 
 OTHER_FILES += \
 	../../doc/footer.html \
