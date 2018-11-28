@@ -101,13 +101,14 @@ void Model::init(const IBK::SolverArgsParser & args) {
 		m_matIdx.clear();
 		m_materials.clear();
 
-		double gridSpacing = 0.001; // 1 mm grid spacing for now
 
 		{
 			IBK::IBK_Message( IBK::FormatString("Setting up layers\n"), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 			IBK::MessageIndentor indent2; (void)indent2;
 			std::set<std::string> usedMats;
 			// process material layers
+			// Mind: if discretization grid is predefined in project file, the individual grid cells
+			//       will be in the vector materialLayers.
 			for (unsigned int i=0; i<m_project.m_materialLayers.size(); ++i) {
 				IBK::IBK_Message( IBK::FormatString("Layer #%1:\n").arg(i+1), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 				IBK::MessageIndentor indent3; (void)indent3;
@@ -115,34 +116,57 @@ void Model::init(const IBK::SolverArgsParser & args) {
 				// lookup and read material data
 				if (matLayer.m_matRef == NULL)
 					throw IBK::Exception(IBK::FormatString("Missing material assignment to material layer #%1.").arg(i), FUNC_ID);
+
+				// Here we store the index of the layer material in the m_materials vector - not to be mistaken with
+				// the "built-in" material index!
+				std::size_t materialIndex;
+
 				std::string matref = matLayer.m_matRef->m_filename.str();
 				usedMats.insert(matref);
 				int matIdx = 0;
 				if (matref.find("built-in:") == 0) {
 					matIdx = IBK::string2val<int>(matref.substr(9));
 					IBK::IBK_Message(IBK::FormatString("Built-in material #%1\n").arg(matIdx), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
-					Material m;
-					m.init(matIdx);
-					m_materials.push_back(m);
+
+					// check if we already have this material in the list of materials
+					for (materialIndex=0; materialIndex<m_materials.size(); ++materialIndex) {
+						if (m_materials[materialIndex].m_i == matIdx)
+							break; // found, stop loop
+					}
+					// if we haven't found a suitable material, create it and push it to the vector
+					if (materialIndex == m_materials.size()) {
+						Material m;
+						m.init(matIdx);
+						m_materials.push_back(m);
+						// materialIndex now has the correct index and points to m_materials.size()-1
+					}
 				}
 				else {
 					IBK::IBK_Message(IBK::FormatString("Material file reference: %1\n").arg(matref), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 					// resolve path placeholder and read material file
 					IBK::Path fullMatFilePath = IBK::Path(matref).withReplacedPlaceholders(m_project.m_placeholders);
-					Material m;
-					try {
-						m.readFromFile(fullMatFilePath);
+					// check if we already have this material in the list of materials
+					for (materialIndex=0; materialIndex<m_materials.size(); ++materialIndex) {
+						if (m_materials[materialIndex].m_filepath == fullMatFilePath)
+							break; // found, stop loop
 					}
-					catch (IBK::Exception & ex) {
-						throw IBK::Exception(ex, IBK::FormatString("Error initializing material from file."), FUNC_ID);
+					// if we haven't found a suitable material, create it and push it to the vector
+					if (materialIndex == m_materials.size()) {
+						Material m;
+						try {
+							m.readFromFile(fullMatFilePath);
+						}
+						catch (IBK::Exception & ex) {
+							throw IBK::Exception(ex, IBK::FormatString("Error initializing material from file."), FUNC_ID);
+						}
+						m_materials.push_back(m);
+						// materialIndex now has the correct index and points to m_materials.size()-1
 					}
-					m_materials.push_back(m);
 				}
-				// apply discretization
 
+				// apply discretization
 				unsigned int n = 1;
 				double dx;
-				std::size_t materialIndex = m_materials.size()-1;
 				// Note: static cast below is needed because of overloaded flagEnabled() function
 				if (static_cast<const IBK::ArgParser&>(args).flagEnabled("no-disc")) {
 					dx = matLayer.m_width.value;
@@ -153,6 +177,8 @@ void Model::init(const IBK::SolverArgsParser & args) {
 				else {
 
 					// currently only equidistant grid spacing supported, should be sufficient for most cases
+					double gridSpacing = 0.001; // 1 mm grid spacing for now
+
 					n = static_cast<unsigned int>(matLayer.m_width.value / gridSpacing);
 					// special case, width < gridSpacing*3
 					if (n < 3)

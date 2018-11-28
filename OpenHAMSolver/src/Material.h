@@ -69,6 +69,7 @@ public:
 	void createPlots(const IBK::Path & plotDir, unsigned int layerIdx) const;
 
 	int				m_i;		///< Material index number
+	IBK::Path		m_filepath;	///< The file path that the material was read from (set in readFromFile()).
 
 	std::string		m_name;		///< Some descriptive name.
 	std::string		m_flags;	///< Parametrization flags;

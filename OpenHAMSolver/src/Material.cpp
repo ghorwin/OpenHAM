@@ -132,6 +132,9 @@ void extractKeyValuePairs(const std::vector<std::string> & lines, std::map<std::
 
 void Material::readFromFile(const IBK::Path & m6FilePath) {
 	const char * const FUNC_ID = "[Material::readFromFile]";
+
+	m_filepath = m6FilePath;
+
 	m_i = -1;
 	m_isAir = false;
 

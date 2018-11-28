@@ -129,6 +129,9 @@ void Outputs::setupOutputFiles(const IBK::Path & outputRootPath) {
 		// index 4 - thermal conductivity profile
 		addProfileOutput("Profile_Lambda", "Thermal Conductivity", "W/mK");
 #endif
+
+		// now determine layer infos
+
 	}
 	catch (IBK::Exception & ex) {
 		throw IBK::Exception(ex, "Error creating output files.", FUNC_ID);
