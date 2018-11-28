@@ -44,6 +44,8 @@
 #include <IBK_StringUtils.h>
 #include <IBK_UnitVector.h>
 
+#include "Outputs.h"
+
 /*! Attempts to extract a value matching the given key, convert it to double and return it. */
 template <typename T>
 double value(const std::map<std::string, std::string> & keyValuePairs, const std::string & key) {
@@ -72,7 +74,7 @@ std::string stringValue(const std::map<std::string, std::string> & keyValuePairs
 }
 
 
-void Model::init(const IBK::SolverArgsParser & args) {
+void Model::init(const IBK::SolverArgsParser & args, Outputs & outputs) {
 	const char * const FUNC_ID = "[Model::init]";
 
 	// set default settings
@@ -235,30 +237,35 @@ void Model::init(const IBK::SolverArgsParser & args) {
 		m_hw.resize(m_nElements+1);
 
 		// initial variables
-		IBK::IBK_Message( IBK::FormatString("Initial conditions\n"), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
-		IBK::MessageIndentor indent2; (void)indent2;
-		IBK::IBK_Message( IBK::FormatString("T  = %1 C\n").arg(m_project.m_initialT.value - 273.15), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
-		IBK::IBK_Message( IBK::FormatString("RH = %1 %\n").arg(m_project.m_initialRH.value*100), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+		{
+			IBK::IBK_Message( IBK::FormatString("Initial conditions\n"), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+			IBK::MessageIndentor indent2; (void)indent2;
+			IBK::IBK_Message( IBK::FormatString("T  = %1 C\n").arg(m_project.m_initialT.value - 273.15), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+			IBK::IBK_Message( IBK::FormatString("RH = %1 %\n").arg(m_project.m_initialRH.value*100), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 
-		std::vector<double> zInitial(2*m_nElements);
-		std::vector<double> yInitial(2*m_nElements);
-		for (unsigned int i=0; i<m_nElements; ++i) {
-			zInitial[i*2] = m_project.m_initialT.value;
-			switch (m_variableMapping) {
-				case yz_Trh :
-					zInitial[i*2+1] = m_project.m_initialRH.value; // yz_Trh
-					break;
-				case yz_Tpc :
-					zInitial[i*2+1] = IBK::f_pc_rh(m_project.m_initialRH.value, zInitial[i*2]); // yz_Tpc
-					break;
-				case yz_TpC :
-					zInitial[i*2+1] = IBK::f_log10(-IBK::f_pc_rh(m_project.m_initialRH.value, zInitial[i*2])); // yz_TpC
-					break;
-				default: ;
+			std::vector<double> zInitial(2*m_nElements);
+			std::vector<double> yInitial(2*m_nElements);
+			for (unsigned int i=0; i<m_nElements; ++i) {
+				zInitial[i*2] = m_project.m_initialT.value;
+				switch (m_variableMapping) {
+					case yz_Trh :
+						zInitial[i*2+1] = m_project.m_initialRH.value; // yz_Trh
+						break;
+					case yz_Tpc :
+						zInitial[i*2+1] = IBK::f_pc_rh(m_project.m_initialRH.value, zInitial[i*2]); // yz_Tpc
+						break;
+					case yz_TpC :
+						zInitial[i*2+1] = IBK::f_log10(-IBK::f_pc_rh(m_project.m_initialRH.value, zInitial[i*2])); // yz_TpC
+						break;
+					default: ;
+				}
 			}
+			// evaluated mapping function y(z)
+			y_z(zInitial,yInitial);
 		}
-		// evaluated mapping function y(z)
-		y_z(zInitial,yInitial);
+
+		// Output setup
+		outputs.setupOutputFiles(m_dirs.m_resultsDir);
 	}
 	catch (IBK::Exception & ex) {
 		throw IBK::Exception(ex, "Error initializing project.", FUNC_ID);

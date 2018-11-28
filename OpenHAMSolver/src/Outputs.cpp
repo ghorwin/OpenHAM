@@ -37,6 +37,8 @@
 #include <DataIO>
 #include <IBK_FileUtils.h>
 #include <IBK_crypt.h>
+#include <IBK_messages.h>
+#include <IBK_FormatString.h>
 
 Outputs::Outputs(const Model * model) :
 	m_model(model),
@@ -56,10 +58,33 @@ Outputs::~Outputs() {
 }
 
 
+/*! Platform independent creation of file streams while supporting utf8-encoded file names.
+	\param fname Full file path in utf8 encoding.
+	\return Pointer to created output file stream (caller takes ownership).
+*/
+std::ofstream * createOutputStream(const std::string & fname) {
+	std::ofstream * fst;
+#if defined(_WIN32)
+	#if defined(_MSC_VER)
+		fst = new std::ofstream( fname.wstr().c_str());
+	#else
+		std::string filenameAnsi = IBK::WstringToANSI(fname.wstr(), false);
+		fst = new std::ofstream( filenameAnsi.c_str());
+	#endif
+#else
+	fst = new std::ofstream( fname.c_str() );
+#endif
+	return fst;
+}
+
+
 void Outputs::setupOutputFiles(const IBK::Path & outputRootPath) {
 	const char * const FUNC_ID = "[Outputs::setupOutputFiles]";
 
 	try {
+
+		IBK::IBK_Message("Preparing outputs\n", IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+		IBK::MessageIndentor ident;
 
 		// create output directory if it does not exist yet
 		if (!outputRootPath.exists())
@@ -77,16 +102,7 @@ void Outputs::setupOutputFiles(const IBK::Path & outputRootPath) {
 
 		// open file
 		IBK::Path surfValFileName(m_outputRootPath / "SurfaceValues.tsv");
-	#if defined(_WIN32)
-		#if defined(_MSC_VER)
-			m_surfaceValues = new std::ofstream( surfValFileName.wstr().c_str(), std::ios_base::binary);
-		#else
-			std::string filenameAnsi = IBK::WstringToANSI(surfValFileName.wstr(), false);
-			m_surfaceValues = new std::ofstream( filenameAnsi.c_str(), std::ios_base::binary);
-		#endif
-	#else
-		m_surfaceValues = new std::ofstream( surfValFileName.c_str() );
-	#endif
+		m_surfaceValues = createOutputStream(surfValFileName.str());
 
 		// compose header
 		*m_surfaceValues << "Time [d]\t"
@@ -99,16 +115,7 @@ void Outputs::setupOutputFiles(const IBK::Path & outputRootPath) {
 
 		// open file
 		IBK::Path integralValFileName(m_outputRootPath / "Integrals.tsv");
-	#if defined(_WIN32)
-		#if defined(_MSC_VER)
-			m_integralValues = new std::ofstream( integralValFileName.wstr().c_str(), std::ios_base::binary);
-		#else
-			std::string filenameAnsi = IBK::WstringToANSI(integralValFileName.wstr(), false);
-			m_integralValues = new std::ofstream( filenameAnsi.c_str(), std::ios_base::binary);
-		#endif
-	#else
-		m_integralValues = new std::ofstream( integralValFileName.c_str() );
-	#endif
+		m_integralValues = createOutputStream(integralValFileName.str());
 
 		// compose header
 		*m_integralValues << "Time [d]\t"
@@ -116,21 +123,54 @@ void Outputs::setupOutputFiles(const IBK::Path & outputRootPath) {
 
 		// create profile outputs for: T, rh, pv, pvsat, w, w_hyg, w_ovhg
 
-		// index 0 - temperature profile
-		addProfileOutput("Profile_Temperature", "Temperature", "C");
-		// index 1 - temperature profile
-		addProfileOutput("Profile_RelativeHumidity", "Relative Humidity", "%");
-		// index 2 - moisture content profile
-		addProfileOutput("Profile_MoistureMassDensity", "Moisture Mass Density", "kg/m3");
-		// index 3 - vapor pressure profile
-		addProfileOutput("Profile_VaporPressure", "Water Vapor Pressure", "Pa");
+		{
+			IBK::IBK_Message("Setting up profile outputs\n", IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+			IBK::MessageIndentor indent2;
+			// index 0 - temperature profile
+			addProfileOutput("Profile_Temperature", "Temperature", "C");
+			// index 1 - temperature profile
+			addProfileOutput("Profile_RelativeHumidity", "Relative Humidity", "%");
+			// index 2 - moisture content profile
+			addProfileOutput("Profile_MoistureMassDensity", "Moisture Mass Density", "kg/m3");
+			// index 3 - vapor pressure profile
+			addProfileOutput("Profile_VaporPressure", "Water Vapor Pressure", "Pa");
 //#define WRITE_TRANSPORT_FUNCTIONS
 #ifdef WRITE_TRANSPORT_FUNCTIONS
-		// index 4 - thermal conductivity profile
-		addProfileOutput("Profile_Lambda", "Thermal Conductivity", "W/mK");
+			// index 4 - thermal conductivity profile
+			addProfileOutput("Profile_Lambda", "Thermal Conductivity", "W/mK");
 #endif
+		}
 
 		// now determine layer infos
+		unsigned int currentMaterialIndex = -1;
+		for (unsigned int i=0; i<m_model->m_nElements; ++i) {
+			// new material, new layer
+			if (m_model->m_matIdx[i] != currentMaterialIndex) {
+				LayerData newLayer;
+				newLayer.iLeft = i;
+				newLayer.width = 0;
+				m_layerOutputs.push_back(newLayer);
+				currentMaterialIndex = m_model->m_matIdx[i];
+			}
+			m_layerOutputs.back().width += m_model->m_dx[i];
+		}
+		// now process all layers and set right indexes and create corresponding output files
+
+		{
+			IBK::IBK_Message("Setting up layer based outputs\n", IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+			IBK::MessageIndentor indent2;
+			for (unsigned int i=0; i<m_layerOutputs.size(); ++i) {
+				std::string fname = IBK::FormatString("Layer_%1.tsv").arg(i+1).str();
+				IBK::IBK_Message(IBK::FormatString("Material layer %1, width = %2 m - \"%3\"\n").arg(i+1)
+								 .arg(m_layerOutputs[i].width).arg(fname),
+								 IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+				IBK::Path fullPath = m_model->m_dirs.m_resultsDir / fname;
+				m_layerOutputs[i].outputStream = createOutputStream(fullPath.str());
+				*m_layerOutputs[i].outputStream << "Time [d]\t" << "Moisture mass integral [kg/m2]\t"
+					 << "T_left [C]\t" << "RH_left [%]\t" << "pv_left [Pa]\t"
+					 << "T_right [C]\t" << "RH_right [%]\t" << "pv_right [Pa]" << std::endl;
+			}
+		}
 
 	}
 	catch (IBK::Exception & ex) {
@@ -318,6 +358,9 @@ void Outputs::addProfileOutput(const std::string & fname,
 							   const std::string & valueUnit)
 {
 	const char * const FUNC_ID = "[Outputs::addProfileOutput]";
+
+	IBK::IBK_Message(IBK::FormatString("%1 [%2] - \"%3.d6o\"\n").arg(quantity).arg(valueUnit).arg(IBK::Path(fname).filename()),
+					 IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 
 	m_dataIOs.push_back(new DATAIO::DataIO);
 	DATAIO::DataIO & d = *m_dataIOs.back();

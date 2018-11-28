@@ -46,6 +46,8 @@
 #include "Material.h"
 #include "Directories.h"
 
+class Outputs;
+
 /*! The physical model implementation. */
 class Model {
 public:
@@ -58,7 +60,7 @@ public:
 	};
 
 	/*! Init model from project file. */
-	void init(const IBK::SolverArgsParser & args);
+	void init(const IBK::SolverArgsParser & args, Outputs & outputs);
 
 	/*! Reads CCD file into linear spline.
 		Values are converted into base IO unit upon read.

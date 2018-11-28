@@ -97,7 +97,6 @@ void Integrator::run() {
 		// write initial conditions to file
 		if (m_model.m_dtOutput <= 0)
 			throw IBK::Exception("Invalid output time step size.", FUNC_ID);
-		m_outputs.setupOutputFiles(m_model.m_dirs.m_resultsDir);
 		m_outputs.appendOutputs();
 
 		IBK::Path logPath = m_model.m_dirs.m_logDir / "stats.tsv";

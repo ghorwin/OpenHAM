@@ -156,11 +156,11 @@ int main(int argc, char * argv[]) {
 
 
 		// *** initialize model ***
-		model.init(args);
+		model.init(args, integrator.m_outputs);
+		IBK::IBK_Message("Model initialization complete\n\n", IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 
 		// *** run solver ***
 		integrator.m_solverStepStats = args.flagEnabled(IBK::SolverArgsParser::DO_STEP_STATS);
-		IBK::IBK_Message("Initialization complete, starting solver.\n", IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 		integrator.run();
 
 		integrator.writeMetrics();
