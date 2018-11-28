@@ -228,14 +228,26 @@ void Outputs::appendOutputs() {
 		 << m_model->m_T[n-1]-273.15 << '\t' << m_model->m_rh[n-1]*100 << '\t' << m_model->m_pv[n-1] << '\t'
 		 << m_model->m_q[n] << '\t' << m_model->m_jv[n] << '\t' << m_model->m_hv[n] << '\n';
 
-	// compute integral moisture mass
+	// integral moisture mass
 	double mwv_int = 0;
-	for (unsigned int i=0; i<m_model->m_nElements; ++i) {
-		mwv_int += m_model->m_rhowv[i]*m_model->m_dx[i]; // kg/m3 * m = kg/m2
+
+	for (unsigned int i=0; i<m_layerOutputs.size(); ++i) {
+		const LayerData & ld = m_layerOutputs[i];
+		// compute integral moisture mass density
+		double mwv = 0;
+		for (unsigned int j=ld.iLeft; j<=ld.iRight; ++j) {
+			mwv += m_model->m_rhowv[j]*m_model->m_dx[j];
+		}
+		mwv_int += mwv;
 	}
+
+//	for (unsigned int i=0; i<m_model->m_nElements; ++i) {
+//		mwv_int += m_model->m_rhowv[i]*m_model->m_dx[i]; // kg/m3 * m = kg/m2
+//	}
 	*m_integralValues << m_model->m_t/(24*3600) << '\t'
 		<< mwv_int << std::endl;
-	// flush the output stream after at least 1 second or so
+
+	// flush the output streams after at least 1 second or so
 	if (m_flushTimer.intervalCompleted()) {
 		m_surfaceValues->flush();
 		m_integralValues->flush();
