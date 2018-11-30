@@ -1,0 +1,17 @@
+#!wing
+#!version=5.0
+##################################################################
+# Wing IDE project file                                          #
+##################################################################
+[project attributes]
+proj.directory-list = [{'dirloc': loc('../../scripts/TestSuite'),
+                        'excludes': (),
+                        'filter': u'*',
+                        'include_hidden': False,
+                        'recursive': True,
+                        'watch_for_changes': True}]
+proj.file-type = 'shared'
+proj.launch-config = {loc('../../scripts/TestSuite/run_tests.py'): ('project',
+        (u'-p ../../data/tests -s ../../bin/release/OpenHAMSolver -e d6p',
+         ''))}
+proj.main-file = loc('../../scripts/TestSuite/run_tests.py')
