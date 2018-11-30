@@ -62,7 +62,7 @@ Outputs::~Outputs() {
 	\param fname Full file path in utf8 encoding.
 	\return Pointer to created output file stream (caller takes ownership).
 */
-std::ofstream * createOutputStream(const std::string & fname) {
+std::ofstream * createOutputStream(const IBK::Path & fname) {
 	std::ofstream * fst;
 #if defined(_WIN32)
 	#if defined(_MSC_VER)
@@ -102,7 +102,7 @@ void Outputs::setupOutputFiles(const IBK::Path & outputRootPath) {
 
 		// open file
 		IBK::Path surfValFileName(m_outputRootPath / "SurfaceValues.tsv");
-		m_surfaceValues = createOutputStream(surfValFileName.str());
+		m_surfaceValues = createOutputStream(surfValFileName);
 
 		// compose header
 		*m_surfaceValues << "Time [d]\t"
@@ -115,7 +115,7 @@ void Outputs::setupOutputFiles(const IBK::Path & outputRootPath) {
 
 		// open file
 		IBK::Path integralValFileName(m_outputRootPath / "Integrals.tsv");
-		m_integralValues = createOutputStream(integralValFileName.str());
+		m_integralValues = createOutputStream(integralValFileName);
 
 		// compose header
 		*m_integralValues << "Time [d]\t"
@@ -165,7 +165,7 @@ void Outputs::setupOutputFiles(const IBK::Path & outputRootPath) {
 								 .arg(m_layerOutputs[i].width).arg(fname),
 								 IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 				IBK::Path fullPath = m_model->m_dirs.m_resultsDir / fname;
-				m_layerOutputs[i].outputStream = createOutputStream(fullPath.str());
+				m_layerOutputs[i].outputStream = createOutputStream(fullPath);
 				*m_layerOutputs[i].outputStream << "Time [d]\t" << "Moisture mass integral [kg/m2]\t"
 					 << "T_left [C]\t" << "RH_left [%]\t" << "pv_left [Pa]\t"
 					 << "T_right [C]\t" << "RH_right [%]\t" << "pv_right [Pa]" << std::endl;
