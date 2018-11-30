@@ -142,7 +142,7 @@ void Outputs::setupOutputFiles(const IBK::Path & outputRootPath) {
 		}
 
 		// now determine layer infos
-		unsigned int currentMaterialIndex = -1;
+		unsigned int currentMaterialIndex = (unsigned int)-1;
 		for (unsigned int i=0; i<m_model->m_nElements; ++i) {
 			// new material, new layer
 			if (m_model->m_matIdx[i] != currentMaterialIndex) {
@@ -169,6 +169,10 @@ void Outputs::setupOutputFiles(const IBK::Path & outputRootPath) {
 				*m_layerOutputs[i].outputStream << "Time [d]\t" << "Moisture mass integral [kg/m2]\t"
 					 << "T_left [C]\t" << "RH_left [%]\t" << "pv_left [Pa]\t"
 					 << "T_right [C]\t" << "RH_right [%]\t" << "pv_right [Pa]" << std::endl;
+				if (i+1<m_layerOutputs.size())
+					m_layerOutputs[i].iRight = m_layerOutputs[i+1].iLeft-1;
+				else
+					m_layerOutputs[i].iRight = m_model->m_nElements-1;
 			}
 		}
 
@@ -238,12 +242,15 @@ void Outputs::appendOutputs() {
 		for (unsigned int j=ld.iLeft; j<=ld.iRight; ++j) {
 			mwv += m_model->m_rhowv[j]*m_model->m_dx[j];
 		}
+		// finally write outputs for this layer
+		*ld.outputStream << m_model->m_t/(24*3600) << '\t'
+			<< mwv << '\t'
+			<< m_model->m_T[ld.iLeft]-273.15 << '\t' << m_model->m_rh[ld.iLeft]*100 << '\t' << m_model->m_pv[ld.iLeft] << '\t'
+			<< m_model->m_T[ld.iRight]-273.15 << '\t' << m_model->m_rh[ld.iRight]*100 << '\t' << m_model->m_pv[ld.iRight] << std::endl;
+		// sum up total moisture mass integral
 		mwv_int += mwv;
 	}
 
-//	for (unsigned int i=0; i<m_model->m_nElements; ++i) {
-//		mwv_int += m_model->m_rhowv[i]*m_model->m_dx[i]; // kg/m3 * m = kg/m2
-//	}
 	*m_integralValues << m_model->m_t/(24*3600) << '\t'
 		<< mwv_int << std::endl;
 
