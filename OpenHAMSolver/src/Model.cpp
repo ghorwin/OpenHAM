@@ -103,6 +103,11 @@ void Model::init(const IBK::SolverArgsParser & args, Outputs & outputs) {
 		m_matIdx.clear();
 		m_materials.clear();
 
+		bool variableDisc = false;
+		double dx = 0.001; // by default
+		double stretch = 1.3;
+
+		extractDiscretizationOptions(variableDisc, dx, stretch);
 
 		{
 			IBK::IBK_Message( IBK::FormatString("Setting up layers\n"), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
@@ -605,4 +610,55 @@ void Model::updateFluxes() {
 	}
 }
 
+
+
+void Model::extractDiscretizationOptions(bool & variableDisc, double & dx, double & stretch) {
+	const char * const FUNC_ID = "[Model::extractDiscretizationOptions]";
+	// extract discretization options
+	if (static_cast<IBK::ArgParser>(m_args).hasOption("disc")) {
+		if (static_cast<IBK::ArgParser>(m_args).flagEnabled("no-disc"))
+			throw IBK::Exception("You must not use 'no-disc' and 'disc' command line options at the same time.", FUNC_ID);
+
+		// explode argument
+		std::vector<std::string> tokens;
+		IBK::explode(static_cast<IBK::ArgParser>(m_args).option("disc"), tokens, ':', true);
+
+		// must have at least 2 tokens
+		if (tokens.size() < 2)
+			throw IBK::Exception("Invalid argument to 'disc' command line option.", FUNC_ID);
+
+		// second token is always dx
+		try {
+			dx = IBK::string2val<double>(tokens[1]);
+			if (dx <= 0)
+				throw IBK::Exception("Invalid dx value in 'disc' command line option.", FUNC_ID);
+		}
+		catch (...) {
+			throw IBK::Exception("Invalid dx value in 'disc' command line option.", FUNC_ID);
+		}
+
+		// operation
+		if (IBK::string_nocase_compare(tokens[0], "equi")) {
+			variableDisc = false;
+		}
+		else if (IBK::string_nocase_compare(tokens[0], "var")) {
+			variableDisc = true;
+
+			// third token is stretch
+			if (tokens.size() != 3)
+				throw IBK::Exception("Invalid argument to 'disc' command line option.", FUNC_ID);
+			try {
+				stretch = IBK::string2val<double>(tokens[2]);
+				if (stretch <= 1)
+					throw IBK::Exception("Invalid stretch factor in 'disc' command line option.", FUNC_ID);
+			}
+			catch (...) {
+				throw IBK::Exception("Invalid stretch factor in 'disc' command line option.", FUNC_ID);
+			}
+
+		}
+		else
+			throw IBK::Exception("Invalid operation in 'disc' command line option.", FUNC_ID);
+	}
+}
 

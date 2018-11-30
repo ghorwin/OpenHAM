@@ -210,6 +210,12 @@ public:
 	double						m_jvRight;
 	double						m_hvRight;
 
+
+private:
+	/*! Utility function to parse command line arguments.
+		\todo Move to command line parser at some point.
+	*/
+	void extractDiscretizationOptions(bool & variableDisc, double & dx, double & stretch);
 };
 
 #endif // ModelH
