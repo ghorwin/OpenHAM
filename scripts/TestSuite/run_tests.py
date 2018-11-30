@@ -162,6 +162,7 @@ def run_performance_evaluation(args, projects):
             
             # try to read commandline file
             cmdlineFilePath = project + ".cmdline"
+            print cmdlineFilePath
             if os.path.exists(cmdlineFilePath):
                 fobj = open(cmdlineFilePath)
                 cmdlineAddOn = fobj.readline()
@@ -294,7 +295,7 @@ for project in projects:
     #print "Path    : " + path
     #print "Project : " + fname
 
-    cmdline = [args.solver, project]
+    cmdline = [args.solver, project, "--cmdline"]
     # if in test-init mode, append --test-init to command line
     if args.test_init:
         cmdline.append("--test-init")
@@ -302,7 +303,16 @@ for project in projects:
         args.run_all = True
     else:
         skipResultCheck = False
-    
+
+    # try to read commandline file
+    cmdlineFilePath = project + ".cmdline"
+    if os.path.exists(cmdlineFilePath):
+        fobj = open(cmdlineFilePath)
+        cmdlineAddOn = fobj.readline()
+        del fobj
+        cmdline.append(cmdlineAddOn)
+        print "Applying cmdline addon: " + cmdlineAddOn
+		
     # compose path of result folder
     resultsFolder = project[:-(1+len(args.extension))]
     referenceFolder = resultsFolder + "." + compilerID
