@@ -320,7 +320,8 @@ for project in projects:
         if platform.system() == "Windows":
             cmdline.append("-x")
             cmdline.append("--verbosity-level=0")
-            retcode = subprocess.call(cmdline, creationflags=subprocess.CREATE_NEW_CONSOLE)
+            # retcode = subprocess.call(cmdline, creationflags=subprocess.CREATE_NEW_CONSOLE)
+            retcode = subprocess.call(cmdline)
         else:
             retcode = subprocess.call(cmdline, stdout=FNULL, stderr=subprocess.STDOUT)
         # check return code
