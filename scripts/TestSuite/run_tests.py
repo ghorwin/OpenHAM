@@ -308,7 +308,7 @@ for project in projects:
     cmdlineFilePath = project + ".cmdline"
     if os.path.exists(cmdlineFilePath):
         fobj = open(cmdlineFilePath)
-        cmdlineAddOn = fobj.readline()
+        cmdlineAddOn = fobj.readline().strip() # mind the strip() to remove trailing '\n'
         del fobj
         cmdline.append(cmdlineAddOn)
         print "Applying cmdline addon: " + cmdlineAddOn
