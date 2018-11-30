@@ -6,11 +6,11 @@ call %VCVARSALL_PATH% x64
 
 :: These environment variables can also be set externally
 if not defined JOM_PATH (
-	set JOM_PATH=c:\Qt\5.7.0_VC14\Tools\QtCreator\bin
+	set JOM_PATH=c:\Qt\Qt5.10.1\Tools\QtCreator\bin
 )
 
 if not defined CMAKE_PREFIX_PATH (
-	set CMAKE_PREFIX_PATH=c:\Qt\5.7.0_VC14\5.7\msvc2015_64
+	set CMAKE_PREFIX_PATH=c:\Qt\Qt5.10.1\5.10.1\msvc2015_64
 )
 
 :: add search path for jom.exe
@@ -34,6 +34,7 @@ xcopy /Y .\bb_VC_x64\OpenHAMSolver\OpenHAMSolver.exe ..\..\bin\release_x64
 exit /b 0
 
 :fail
+pause
 exit /b 1
 
 
