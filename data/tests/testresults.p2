@@ -6,17 +6,98 @@
 			<Path>.</Path>
 			<SubDir Color="#ff007f" Checked="0">EN15026/EN15026-2007</SubDir>
 			<SubDir Color="#7141d1" Checked="0">EN15026/EN15026-2007.gcc_linux</SubDir>
-			<SubDir Color="#ffee00" Checked="0">test01_steady_state/steady_state</SubDir>
+			<SubDir Color="#ff007f" Checked="0">EN15026/EN15026-2007.win_VC14</SubDir>
+			<SubDir Color="#ffee00" Checked="1">test01_steady_state/steady_state</SubDir>
 			<SubDir Color="#45ad45" Checked="0">test01_steady_state/steady_state.gcc_linux</SubDir>
-			<SubDir Color="#aa0000" Checked="0">test01_steady_state/steady_state_discretized</SubDir>
+			<SubDir Color="#45ad45" Checked="0">test01_steady_state/steady_state.win_VC14</SubDir>
+			<SubDir Color="#aa0000" Checked="1">test01_steady_state/steady_state_discretized</SubDir>
+			<SubDir Color="#55aaff" Checked="0">test01_steady_state/steady_state_discretized.gcc_linux</SubDir>
+			<SubDir Color="#005500" Checked="0">test01_steady_state/steady_state_discretized.win_VC14</SubDir>
+			<SubDir Color="#550000" Checked="1">test01_steady_state/steady_state_equiGrid</SubDir>
+			<SubDir Color="#ffaaff" Checked="0">test01_steady_state/steady_state_equiGrid.gcc_linux</SubDir>
+			<ExpandedSubDir>test01_steady_state</ExpandedSubDir>
+			<ExpandedSubDir>.</ExpandedSubDir>
 		</Directory>
 	</Directories>
 
 	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+	<!--All mappers.-->
+	<Mappers>
+		<Mapper name="Relative Humidity [$filename]">
+			<Extractors>
+				<Extractor>
+					<DataIOFileName>test01_steady_state/steady_state/results/Profile_RelativeHumidity.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>test01_steady_state/steady_state_discretized/results/Profile_RelativeHumidity.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>test01_steady_state/steady_state_equiGrid/results/Profile_RelativeHumidity.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+				</Extractor>
+			</Extractors>
+			<ChartModel chartType="2D">
+				<SeriesProperties>
+					<Series>
+						<TitleText>$filename</TitleText>
+						<LineStyle>0</LineStyle>
+					</Series>
+					<Series>
+						<TitleText>$filename</TitleText>
+						<LineStyle>0</LineStyle>
+						<PenColor>#ff420e</PenColor>
+					</Series>
+					<Series>
+						<TitleText>$filename</TitleText>
+						<LineStyle>0</LineStyle>
+						<MarkerStyle>0</MarkerStyle>
+						<PenColor>#004586</PenColor>
+					</Series>
+				</SeriesProperties>
+				<AxisProperties>
+					<Axis index="0">
+						<TitleText>Koordinate [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">m</IBK:Unit>
+					</Axis>
+					<Axis index="1">
+						<TitleText>$quantity [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">%</IBK:Unit>
+					</Axis>
+					<Axis index="2" enabled="0">
+						<TitleText>$quantity [$unit]</TitleText>
+					</Axis>
+				</AxisProperties>
+				<ChartProperties>
+					<TitleText>Relative Humidity [$filename]</TitleText>
+					<Legend />
+				</ChartProperties>
+			</ChartModel>
+		</Mapper>
+	</Mappers>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 	<!--Split window state.-->
 	<Splitting>
-		<Widget id="1" parent="0" viewTable="0" mapperIndex="-1" size1="1" size2="1" orientation="2" />
+		<Widget id="1" parent="0" viewTable="0" mapperIndex="0" size1="1" size2="1" orientation="2" />
 		<FocusedWidget>0</FocusedWidget>
 	</Splitting>
 
