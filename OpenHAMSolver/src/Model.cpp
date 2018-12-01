@@ -43,8 +43,10 @@
 #include <IBK_FileReader.h>
 #include <IBK_StringUtils.h>
 #include <IBK_UnitVector.h>
+#include <IBK_ScalarFunction.h>
 
 #include "Outputs.h"
+#include "Mesh.h"
 
 /*! Attempts to extract a value matching the given key, convert it to double and return it. */
 template <typename T>
@@ -186,8 +188,55 @@ void Model::init(const IBK::SolverArgsParser & args, Outputs & outputs) {
 				}
 				else {
 
-					if (variableDisc) {
+					// variable disc is only applied with material layer's width > 3*dx (where dx is minimum dx)
+					if (variableDisc && matLayer.m_width.value > dx*3) {
+						// get thicknesses of left and right side elements
+						// Mind: left or right layer may be small, so that dx*3 > layer_thickness
+						double dx_left = dx;
+						double dx_right = dx;
+						// if left layer has already been processes, so we can take that right-most
+						// element thickness as starting thickness for this layer
+						if (i > 0)
+							dx_left = m_dx.back(); // left side of layer uses same element thickness as left side
+						if (i+1<m_project.m_materialLayers.size()) {
+							// if right layer has small width it will be split into 3 equal elements
+							// of size dx/3, which will also be our right side thickness
+							if (m_project.m_materialLayers[i+1].m_width.value < dx*3)
+								dx_right = dx/3;
+						}
 
+
+						// Mesh generation function. Use given stretch factor a first.
+						Mesh grid(stretch*2, dx_right/dx_left);
+
+						// We iteratively obtain n until dx[0] <= dx_left
+						// Afterwards we adjust stretch until dx[0] == dx_left
+
+						unsigned int n = 3; // adjust I until suitable number of elements is found
+						std::vector<double> dx_vec;
+						do {
+							++n;
+							grid.generate(n, matLayer.m_width.value, dx_vec);
+							if (dx_vec[0] < dx_left || n > 1000) break; // 1000 elements per layer max
+						} while (dx_vec[0] > 1.1*dx_left);
+
+						// add discretization grid to global vector
+						double min_dx = std::numeric_limits<double>::max();
+						double max_dx = -std::numeric_limits<double>::max();
+						for (unsigned int j=0; j<n; ++j) {
+							double dx = dx_vec[j];
+							min_dx = std::min(dx, min_dx);
+							max_dx = std::max(dx, max_dx);
+							m_dx.push_back(dx);
+							m_matIdx.push_back(materialIndex);
+						}
+						m_nElements += n;
+						IBK::IBK_Message( IBK::FormatString("d       = %1 m\n").arg(matLayer.m_width.value), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+						IBK::IBK_Message( IBK::FormatString("n       = %1\n").arg(n), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+						IBK::IBK_Message( IBK::FormatString("min_dx  = %1 m\n").arg(min_dx), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+						IBK::IBK_Message( IBK::FormatString("max_dx  = %1 m\n").arg(max_dx), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+						IBK::IBK_Message( IBK::FormatString("s_left  = %1 m\n").arg(dx_vec[1]/dx_vec[0]), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+						IBK::IBK_Message( IBK::FormatString("s_right = %1 m\n").arg(dx_vec[n-2]/dx_vec[n-1]), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 					}
 					else {
 

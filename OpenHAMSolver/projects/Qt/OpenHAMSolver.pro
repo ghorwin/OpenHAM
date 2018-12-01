@@ -31,7 +31,8 @@ SOURCES += \
 	../../src/Material.cpp \
 	../../src/BandMatrix.cpp \
     ../../src/Directories.cpp \
-    ../../src/SolverFeedback.cpp
+    ../../src/SolverFeedback.cpp \
+    ../../src/Mesh.cpp
 HEADERS += \
 	../../src/Model.h \
 	../../src/Integrator.h \
@@ -39,7 +40,8 @@ HEADERS += \
 	../../src/Material.h \
 	../../src/BandMatrix.h \
     ../../src/Directories.h \
-    ../../src/SolverFeedback.h
+    ../../src/SolverFeedback.h \
+    ../../src/Mesh.h
 
 DISTFILES += \
     ../../../data/tests/test01_steady_state/steady_state.d6p
