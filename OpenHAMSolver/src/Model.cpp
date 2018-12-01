@@ -205,20 +205,34 @@ void Model::init(const IBK::SolverArgsParser & args, Outputs & outputs) {
 								dx_right = dx/3;
 						}
 
-
-						// Mesh generation function. Use given stretch factor a first.
-						Mesh grid(stretch*2, dx_right/dx_left);
-
-						// We iteratively obtain n until dx[0] <= dx_left
-						// Afterwards we adjust stretch until dx[0] == dx_left
-
-						unsigned int n = 3; // adjust I until suitable number of elements is found
+						// Mesh generation, iteratively refine density until stretch factor is met (approximately)
+						double densityEstimate = 8;
+						unsigned int maxTrials = 15;
+						unsigned int n = 4; // adjust I until suitable number of elements is found
 						std::vector<double> dx_vec;
-						do {
-							++n;
-							grid.generate(n, matLayer.m_width.value, dx_vec);
-							if (dx_vec[0] < dx_left || n > 1000) break; // 1000 elements per layer max
-						} while (dx_vec[0] > 1.1*dx_left);
+						while (--maxTrials) {
+							Mesh grid(densityEstimate, dx_right/dx_left);
+
+							// We iteratively obtain n until dx[0] <= dx_left
+							// Afterwards we adjust stretch until dx[0] == dx_left
+
+							n = 3;
+							dx_vec.clear();
+							do {
+								++n;
+								grid.generate(n, matLayer.m_width.value, dx_vec);
+								if (dx_vec[0] < dx_left || n > 1000) break; // 1000 elements per layer max
+							} while (dx_vec[0] > 1.05*dx_left); // 5% tolerance for mindx
+
+							// estimate stretch factor
+							double max_stretch = dx_vec[1]/dx_vec[0];
+							max_stretch = std::max(max_stretch, dx_vec[n-2]/dx_vec[n-1]);
+							double delta_stretch = stretch - max_stretch;
+							if (delta_stretch > -1e-4)
+								break;
+							delta_stretch = std::max(delta_stretch, (densityEstimate-1)*-0.7);
+							densityEstimate += delta_stretch;
+						}
 
 						// add discretization grid to global vector
 						double min_dx = std::numeric_limits<double>::max();
