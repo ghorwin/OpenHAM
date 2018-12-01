@@ -181,8 +181,8 @@ void Model::init(const IBK::SolverArgsParser & args, Outputs & outputs) {
 				// If "no-disc" command line flag is given, we skip any grid generation and simply re-use the existing grid
 				// Note: static cast below is needed because of overloaded flagEnabled() function
 				if (static_cast<const IBK::ArgParser&>(args).flagEnabled("no-disc")) {
-					dx = matLayer.m_width.value;
-					m_dx.push_back(dx);
+					double layer_dx = matLayer.m_width.value;
+					m_dx.push_back(layer_dx);
 					m_matIdx.push_back(materialIndex);
 					++m_nElements;
 				}
@@ -201,8 +201,9 @@ void Model::init(const IBK::SolverArgsParser & args, Outputs & outputs) {
 						if (i+1<m_project.m_materialLayers.size()) {
 							// if right layer has small width it will be split into 3 equal elements
 							// of size dx/3, which will also be our right side thickness
-							if (m_project.m_materialLayers[i+1].m_width.value < dx*3)
+							if (m_project.m_materialLayers[i+1].m_width.value < dx*3) {
 								dx_right = dx/3;
+							}
 						}
 
 						// Mesh generation, iteratively refine density until stretch factor is met (approximately)
@@ -238,10 +239,10 @@ void Model::init(const IBK::SolverArgsParser & args, Outputs & outputs) {
 						double min_dx = std::numeric_limits<double>::max();
 						double max_dx = -std::numeric_limits<double>::max();
 						for (unsigned int j=0; j<n; ++j) {
-							double dx = dx_vec[j];
-							min_dx = std::min(dx, min_dx);
-							max_dx = std::max(dx, max_dx);
-							m_dx.push_back(dx);
+							double cur_dx = dx_vec[j];
+							min_dx = std::min(cur_dx, min_dx);
+							max_dx = std::max(cur_dx, max_dx);
+							m_dx.push_back(cur_dx);
 							m_matIdx.push_back(materialIndex);
 						}
 						m_nElements += n;
@@ -258,15 +259,15 @@ void Model::init(const IBK::SolverArgsParser & args, Outputs & outputs) {
 						// special case, width < gridSpacing*3
 						if (n < 3)
 							n = 3;
-						dx = matLayer.m_width.value / n;
+						double equi_dx = matLayer.m_width.value / n;
 						for (unsigned int j=0; j<n; ++j) {
-							m_dx.push_back(dx);
+							m_dx.push_back(equi_dx);
 							m_matIdx.push_back(materialIndex);
 						}
 						m_nElements += n;
 						IBK::IBK_Message( IBK::FormatString("d  = %1 m\n").arg(matLayer.m_width.value), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 						IBK::IBK_Message( IBK::FormatString("n  = %1\n").arg(n), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
-						IBK::IBK_Message( IBK::FormatString("dx = %1 m\n").arg(dx), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+						IBK::IBK_Message( IBK::FormatString("dx = %1 m\n").arg(equi_dx), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 					}
 				}
 
