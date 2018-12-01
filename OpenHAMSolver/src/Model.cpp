@@ -112,7 +112,6 @@ void Model::init(const IBK::SolverArgsParser & args, Outputs & outputs) {
 		{
 			IBK::IBK_Message( IBK::FormatString("Setting up layers\n"), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 			IBK::MessageIndentor indent2; (void)indent2;
-			std::set<std::string> usedMats;
 			// process material layers
 			// Mind: if discretization grid is predefined in project file, the individual grid cells
 			//       will be in the vector materialLayers.
@@ -126,10 +125,9 @@ void Model::init(const IBK::SolverArgsParser & args, Outputs & outputs) {
 
 				// Here we store the index of the layer material in the m_materials vector - not to be mistaken with
 				// the "built-in" material index!
-				std::size_t materialIndex;
+				unsigned int materialIndex;
 
 				std::string matref = matLayer.m_matRef->m_filename.str();
-				usedMats.insert(matref);
 				int matIdx = 0;
 				if (matref.find("built-in:") == 0) {
 					matIdx = IBK::string2val<int>(matref.substr(9));
@@ -171,9 +169,14 @@ void Model::init(const IBK::SolverArgsParser & args, Outputs & outputs) {
 					}
 				}
 
-				// apply discretization
-				unsigned int n = 1;
-				double dx;
+
+				// 'materialIndex' now holds the index of the current grid cell's material in the m_materials vector
+
+
+
+				// *** Discretization ***
+
+				// If "no-disc" command line flag is given, we skip any grid generation and simply re-use the existing grid
 				// Note: static cast below is needed because of overloaded flagEnabled() function
 				if (static_cast<const IBK::ArgParser&>(args).flagEnabled("no-disc")) {
 					dx = matLayer.m_width.value;
@@ -183,22 +186,25 @@ void Model::init(const IBK::SolverArgsParser & args, Outputs & outputs) {
 				}
 				else {
 
-					// currently only equidistant grid spacing supported, should be sufficient for most cases
-					double gridSpacing = 0.001; // 1 mm grid spacing for now
+					if (variableDisc) {
 
-					n = static_cast<unsigned int>(matLayer.m_width.value / gridSpacing);
-					// special case, width < gridSpacing*3
-					if (n < 3)
-						n = 3;
-					dx = matLayer.m_width.value / n;
-					for (unsigned int j=0; j<n; ++j) {
-						m_dx.push_back(dx);
-						m_matIdx.push_back(materialIndex);
 					}
-					m_nElements += n;
-					IBK::IBK_Message( IBK::FormatString("d  = %1 m\n").arg(matLayer.m_width.value), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
-					IBK::IBK_Message( IBK::FormatString("n  = %1\n").arg(n), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
-					IBK::IBK_Message( IBK::FormatString("dx = %1 m\n").arg(dx), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+					else {
+
+						unsigned int n = static_cast<unsigned int>(matLayer.m_width.value / dx);
+						// special case, width < gridSpacing*3
+						if (n < 3)
+							n = 3;
+						dx = matLayer.m_width.value / n;
+						for (unsigned int j=0; j<n; ++j) {
+							m_dx.push_back(dx);
+							m_matIdx.push_back(materialIndex);
+						}
+						m_nElements += n;
+						IBK::IBK_Message( IBK::FormatString("d  = %1 m\n").arg(matLayer.m_width.value), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+						IBK::IBK_Message( IBK::FormatString("n  = %1\n").arg(n), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+						IBK::IBK_Message( IBK::FormatString("dx = %1 m\n").arg(dx), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
+					}
 				}
 
 				// dump out material functions for plotting
