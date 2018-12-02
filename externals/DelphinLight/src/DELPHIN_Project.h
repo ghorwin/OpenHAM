@@ -90,11 +90,12 @@ public:
 		m_leftInterface and m_rightInterface.
 	*/
 	struct Interface {
-		IBK::Parameter alpha;
-		IBK::Parameter beta;
-		IBK::Parameter T;
-		IBK::Parameter RH;
-		IBK::Parameter pv;
+		IBK::Parameter alpha;		///< Heat transfer exchange coefficient, base unit [W/m2K]
+		IBK::Parameter beta;		///< Vapor diffusion exchange coefficient, base unit [s/m]
+		IBK::Parameter T;			///< Temperature, base unit [K]
+		IBK::Parameter RH;			///< Relative humiditiy, base unit [---]
+		IBK::Parameter pv;			///< Vapor pressure, base unit [Pa]
+		IBK::Parameter rain;		///< Water flux density, base unit [kg/m2s]
 		IBK::LinearSpline T_spline;
 		IBK::LinearSpline RH_spline;
 		IBK::LinearSpline pv_spline;
@@ -221,23 +222,23 @@ public:
 
 		When the IBK:Parameter tag is incomplete, an exception is thrown.
 	*/
-	static void findAndReadParameter(const TiXmlNode* parent,
-									 const std::string & paraName,
-									 IBK::Parameter & para,
-									 bool optional = false);
+	void findAndReadParameter(const TiXmlNode* parent,
+							  const std::string & paraName,
+							  IBK::Parameter & para,
+							  bool optional = false) const;
 
 	/*! Utility function that reads an IBK:Parameter by name from a given IBK:Parameter xml node.
 		\note Paramter must exist and be valid, otherwise an exception is thrown.
 	*/
-	static void readParameter(const TiXmlNode * paraNode, IBK::Parameter & para);
+	void readParameter(const TiXmlNode * paraNode, IBK::Parameter & para) const;
 
 	/*! Utility function that reads a CCReference entry and its associated CC definition.
 		\note Paramter must exist and be valid, otherwise an exception is thrown.
 	*/
-	static void readCCData(const TiXmlNode * conditionsXmlElem,
-						   const TiXmlNode * bcXmlElem,
-						   const std::string & ccName,
-						   IBK::Parameter & para, IBK::LinearSpline & spline);
+	void readCCData(const TiXmlNode * conditionsXmlElem,
+					const TiXmlNode * bcXmlElem,
+					const std::string & ccName,
+					IBK::Parameter & para, IBK::LinearSpline & spline) const;
 
 };
 

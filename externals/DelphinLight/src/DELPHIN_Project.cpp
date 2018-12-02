@@ -45,6 +45,8 @@
 #include <IBK_Parameter.h>
 #include <IBK_rectangle.h>
 
+#include <CCM_ClimateDataLoader.h>
+
 #include "DELPHIN_MaterialReference.h"
 
 #include <tinyxml.h>
@@ -652,7 +654,7 @@ void Project::readBCPara(const TiXmlElement * conditionsXmlElem, Interface * ifa
 	if (attrib->ValueStr() == "HeatConduction") {
 		// currently we only support kind 'Exchange'
 		if (attribKind->ValueStr() != "Exchange")
-			throw IBK::Exception(IBK::FormatString("Currently only 'Exchange' model kind is supported."), FUNC_ID);
+			throw IBK::Exception(IBK::FormatString("Currently only 'Exchange' model kind is supported for 'HeatConduction' BC."), FUNC_ID);
 		// we need to parse the exchange coefficient child and the CCReference of type 'Temperature'
 		try {
 			findAndReadParameter(bc, "ExchangeCoefficient", iface->alpha);
@@ -667,7 +669,7 @@ void Project::readBCPara(const TiXmlElement * conditionsXmlElem, Interface * ifa
 	else if (attrib->ValueStr() == "VaporDiffusion") {
 		// currently we only support kind 'Exchange'
 		if (attribKind->ValueStr() != "Exchange")
-			throw IBK::Exception(IBK::FormatString("Currently only 'Exchange' model kind is supported."), FUNC_ID);
+			throw IBK::Exception(IBK::FormatString("Currently only 'Exchange' model kind is supported for 'VaporDiffusion' BC."), FUNC_ID);
 		// we need to parse the exchange coefficient child and the CCReference of type 'Temperature' and 'RelativeHumidity'
 		try {
 			findAndReadParameter(bc, "ExchangeCoefficient", iface->beta);
@@ -677,8 +679,22 @@ void Project::readBCPara(const TiXmlElement * conditionsXmlElem, Interface * ifa
 		catch (IBK::Exception & ex) {
 			throw IBK::Exception(ex, IBK::FormatString("Error parsing BC parameter block with name '%1'").arg(bcDefinition), FUNC_ID);
 		}
-
 	}
+	// rain via water contact
+	else if (attrib->ValueStr() == "WaterContact") {
+		// currently we only support kind 'ImposedFlux'
+		if (attribKind->ValueStr() != "ImposedFlux")
+			throw IBK::Exception(IBK::FormatString("Currently only 'ImposedFlux' model kind is supported for 'WaterContact' BC."), FUNC_ID);
+		// we need to parse the CCReference of type 'Temperature' and 'WaterFlux'
+		try {
+			readCCData(conditionsXmlElem, bc, "Temperature", iface->T, iface->T_spline);
+			readCCData(conditionsXmlElem, bc, "WaterFlux", iface->rain, iface->rain_spline);
+		}
+		catch (IBK::Exception & ex) {
+			throw IBK::Exception(ex, IBK::FormatString("Error parsing BC parameter block with name '%1'").arg(bcDefinition), FUNC_ID);
+		}
+	}
+
 
 
 }
@@ -754,7 +770,7 @@ const TiXmlNode * Project::findConditionTag(const TiXmlNode * conditionsXmlElem,
 void Project::findAndReadParameter(const TiXmlNode * parent,
 								   const std::string & paraName,
 								   IBK::Parameter & para,
-								   bool optional)
+								   bool optional) const
 {
 	const char * const FUNC_ID = "[Project::readParameter]";
 
@@ -773,7 +789,7 @@ void Project::findAndReadParameter(const TiXmlNode * parent,
 }
 
 
-void Project::readParameter(const TiXmlNode * paraNode, IBK::Parameter & para) {
+void Project::readParameter(const TiXmlNode * paraNode, IBK::Parameter & para) const {
 	const char * const FUNC_ID = "[Project::readParameter]";
 
 	const TiXmlElement * e = paraNode->ToElement();
@@ -788,7 +804,7 @@ void Project::readParameter(const TiXmlNode * paraNode, IBK::Parameter & para) {
 
 void Project::readCCData(const TiXmlNode * conditionsXmlElem, const TiXmlNode* bcXmlElem,
 						 const std::string & ccName,
-						 IBK::Parameter & para, IBK::LinearSpline & spline)
+						 IBK::Parameter & para, IBK::LinearSpline & spline) const
 {
 	const char * const FUNC_ID = "[Project::readCCData]";
 
@@ -836,6 +852,55 @@ void Project::readCCData(const TiXmlNode * conditionsXmlElem, const TiXmlNode* b
 		if (attrib->ValueStr() == "Constant") {
 			findAndReadParameter(ccNode, "ConstantValue", para);
 			spline.clear();
+		}
+		else if (attrib->ValueStr() == "TabulatedData") {
+			// must be a CCD or tsv file
+			for (const TiXmlElement * e = ccNode->FirstChildElement(); e; e = e->NextSiblingElement()) {
+				std::string ename = e->ValueStr();
+				// read filename
+				if (ename == "Filename") {
+					std::string fname;
+					std::string attribDummy;
+					TiXmlElement::readSingleAttributeElement(e, NULL, attribDummy, fname);
+					// subtitute placeholders
+					IBK::Path fullpath = IBK::Path(fname).withReplacedPlaceholders( m_placeholders );
+					// read CCD file
+					CCM::ClimateDataLoader loader;
+					std::vector<double> tp;
+					IBK::UnitVector uvec;
+					std::string comment, quantity, errorLine;
+					IBK::Unit dataUnit;
+					if (fullpath.extension() == "ccd") {
+						if (loader.readCCDFile(fullpath, tp, uvec.m_data, comment, quantity, dataUnit, errorLine) != CCM::ClimateDataLoader::RF_OK) {
+							throw IBK::Exception(IBK::FormatString("Error reading climate data file '%1', error in line '%2'")
+												 .arg(fullpath).arg(errorLine), FUNC_ID);
+						}
+					}
+					else if (fullpath.extension() == "csv" || fullpath.extension() == "tsv") {
+						if (loader.readCSVFile(fullpath, tp, uvec.m_data, quantity, dataUnit, errorLine) != CCM::ClimateDataLoader::RF_OK) {
+							throw IBK::Exception(IBK::FormatString("Error reading climate data file '%1', error in line '%2'")
+												 .arg(fullpath).arg(errorLine), FUNC_ID);
+						}
+					}
+					else
+						throw IBK::Exception(IBK::FormatString("Unknown/unsupported file type for climate data file '%1', "
+															   "supported are ccd, csv, tsv.").arg(fullpath), FUNC_ID);
+					// create a spline
+					para.clear();
+
+					// convert units to base unit
+					uvec.m_unit = dataUnit;
+					uvec.convert( IBK::Unit(dataUnit.base_id()) );
+					spline.setValues(tp, uvec.m_data);
+					if (!spline.makeSpline(errorLine)) {
+						throw IBK::Exception(IBK::FormatString("Error reading climate data file '%1', invalid spline data: '%2'")
+											 .arg(fname).arg(errorLine), FUNC_ID);
+					}
+					break;
+				}
+			}
+			if (spline.empty())
+				throw IBK::Exception("Missing 'Filename' xml tag in 'ClimateCondition' tag of type 'TabulatedData'.", FUNC_ID);
 		}
 		else
 			throw IBK::Exception(IBK::FormatString("Unsupported 'kind' for ClimateCondition, currently only 'Constant' supported for now."), FUNC_ID);
