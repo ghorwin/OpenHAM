@@ -15,15 +15,16 @@ unix|mac {
 	VERSION = $${VER_MAJ}.$${VER_MIN}.$${VER_PAT}
 }
 
-LIBS += -lIBK -lTiCPP
+LIBS += -lCCM -lIBK -lTiCPP
 
-INCLUDEPATH = ../../../IBK/src \
+INCLUDEPATH = ../../../CCM/src \
+	../../../IBK/src \
 	../../../TiCPP/src
 
 SOURCES += \
-        ../../src/DELPHIN_Project.cpp \
+		../../src/DELPHIN_Project.cpp \
 	../../src/DELPHIN_MaterialReference.cpp
 
 HEADERS += \
-        ../../src/DELPHIN_Project.h \
+		../../src/DELPHIN_Project.h \
 	../../src/DELPHIN_MaterialReference.h

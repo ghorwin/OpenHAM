@@ -24,5 +24,5 @@ OpenHAMSolver.depends = DelphinLight CCM DataIO IBK TiCPP
 
 CCM.depends = IBK TiCPP
 DataIO.depends = IBK
-DelphinLight.depends = IBK TiCPP
+DelphinLight.depends = CCM IBK TiCPP
 TiCPP.depends = IBK

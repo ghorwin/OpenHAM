@@ -6,6 +6,7 @@ project( OpenHAMSolver )
 # add include directories
 include_directories(
 	${PROJECT_SOURCE_DIR}/../../src
+	${PROJECT_SOURCE_DIR}/../../../externals/CCM/src 
 	${PROJECT_SOURCE_DIR}/../../../externals/IBK/src 
 	${PROJECT_SOURCE_DIR}/../../../externals/DataIO/src 
 	${PROJECT_SOURCE_DIR}/../../../externals/TiCPP/src 
@@ -15,6 +16,7 @@ include_directories(
 # set variable for dependent libraries
 set( LINK_LIBS
 	DelphinLight
+	CCM
 	DataIO
 	TiCPP
 	IBK
