@@ -673,8 +673,43 @@ void Project::readBCPara(const TiXmlElement * conditionsXmlElem, Interface * ifa
 		// we need to parse the exchange coefficient child and the CCReference of type 'Temperature' and 'RelativeHumidity'
 		try {
 			findAndReadParameter(bc, "ExchangeCoefficient", iface->beta);
-			readCCData(conditionsXmlElem, bc, "Temperature", iface->T, iface->T_spline);
-			readCCData(conditionsXmlElem, bc, "RelativeHumidity", iface->RH, iface->RH_spline);
+
+			// we can have either RelativeHumidity or VaporPressure, but not both.
+			// search for both entities
+
+			const TiXmlElement * rhReference = NULL;
+			const TiXmlElement * pvReference = NULL;
+			// find correct parameter block
+			for (const TiXmlElement * e = bcElement->FirstChildElement(); e; e = e->NextSiblingElement()) {
+				std::string ename = e->ValueStr();
+				if (ename == "CCReference") {
+					const TiXmlAttribute * attrib = TiXmlAttribute::attributeByName(e, "type");
+					if (!attrib)
+						throw IBK::Exception(IBK::FormatString("Missing 'type' attribute in definition of 'CCReference' tag."), FUNC_ID);
+					if (attrib->ValueStr() == "Temperature") {
+						readCCData(conditionsXmlElem, bc, "Temperature", iface->T, iface->T_spline);
+					}
+					else if (attrib->ValueStr() == "RelativeHumidity") {
+						rhReference = e;
+					}
+					else if (attrib->ValueStr() == "VaporPressure") {
+						pvReference = e;
+						continue;
+					}
+				}
+			}
+
+			if (rhReference != NULL) {
+				if (pvReference != NULL)
+					throw IBK::Exception("Cannot have both RelativeHumidity and VaporPressure CCReference within same 'VaporDiffusion' BC parameter tag!", FUNC_ID);
+				readCCData(conditionsXmlElem, bc, "RelativeHumidity", iface->RH, iface->RH_spline);
+			}
+			else {
+				if (pvReference == NULL)
+					throw IBK::Exception("Neither RelativeHumidity nor VaporPressure CCReference within 'VaporDiffusion' BC parameter tag!", FUNC_ID);
+				readCCData(conditionsXmlElem, bc, "VaporPressure", iface->pv, iface->pv_spline);
+			}
+
 		}
 		catch (IBK::Exception & ex) {
 			throw IBK::Exception(ex, IBK::FormatString("Error parsing BC parameter block with name '%1'").arg(bcDefinition), FUNC_ID);
@@ -694,9 +729,6 @@ void Project::readBCPara(const TiXmlElement * conditionsXmlElem, Interface * ifa
 			throw IBK::Exception(ex, IBK::FormatString("Error parsing BC parameter block with name '%1'").arg(bcDefinition), FUNC_ID);
 		}
 	}
-
-
-
 }
 
 
@@ -831,7 +863,7 @@ void Project::readCCData(const TiXmlNode * conditionsXmlElem, const TiXmlNode* b
 		const TiXmlElement * e = paraNode->ToElement();
 		std::string ccRef = e->GetText();
 		IBK::IBK_Message(IBK::FormatString("Reading CC Reference: [%1] = '%2'\n").arg(ccName).arg(ccRef), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
-
+		IBK::MessageIndentor indent;
 		// can be a constant value in parameter format or a reference to a climate condition
 		IBK::Parameter p;
 		if (p.set("Temperature", ccRef)) {
@@ -870,6 +902,7 @@ void Project::readCCData(const TiXmlNode * conditionsXmlElem, const TiXmlNode* b
 					IBK::UnitVector uvec;
 					std::string comment, quantity, errorLine;
 					IBK::Unit dataUnit;
+					IBK::IBK_Message(IBK::FormatString("Reading climate data file: %1\n").arg(fname), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 					if (fullpath.extension() == "ccd") {
 						if (loader.readCCDFile(fullpath, tp, uvec.m_data, comment, quantity, dataUnit, errorLine) != CCM::ClimateDataLoader::RF_OK) {
 							throw IBK::Exception(IBK::FormatString("Error reading climate data file '%1', error in line '%2'")
