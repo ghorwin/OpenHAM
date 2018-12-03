@@ -1,0 +1,7 @@
+WallClockTime=0.590425
+IntegratorSteps=617
+IntegratorNonLinIters=1782
+IntegratorErrorTestFails=0
+IntegratorNonLinearConvFails=1
+IntegratorFunctionEvals=12502
+IntegratorLESSetup=1786
