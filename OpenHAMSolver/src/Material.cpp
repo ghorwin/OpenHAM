@@ -398,8 +398,8 @@ double Material::lambda_Ol(double Ol) const {
 		case 2 : return m_lambda + 15.8 * Ol;
 	}
 	// use standard model
-	if (m_Ol_pC_Spline.valid())
-		return m_Ol_pC_Spline.value(Ol);
+	if (m_lambda_Ol_Spline.valid())
+		return m_lambda_Ol_Spline.value(Ol);
 	else
 		return m_lambda + 0.56*Ol;
 }
