@@ -153,10 +153,11 @@ void Project::readXML(const IBK::Path & fileNamePath) {
 
 	// insert Project Directory placeholder
 	IBK::Path projectDir = fileNamePath.parentPath();
-	if (projectDir.str().empty())
-		projectDir = IBK::Path("./");
-	m_placeholders["Project Directory"] = projectDir;
 
+	if (projectDir.str().empty() || projectDir.str() == ".") {
+		projectDir = IBK::Path::current();
+	}
+	m_placeholders["Project Directory"] = projectDir;
 
 	// *** Init ***
 
