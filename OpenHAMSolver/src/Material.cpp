@@ -162,6 +162,7 @@ void Material::readFromFile(const IBK::Path & m6FilePath) {
 		section_titles.push_back("TRANSPORT_BASE_PARAMETERS");
 		section_titles.push_back("MOISTURE_STORAGE");
 		section_titles.push_back("MOISTURE_TRANSPORT");
+		section_titles.push_back("HEAT_TRANSPORT");
 		IBK::explode_sections(lines2, section_titles, section_data, "#");
 
 		// process identification section
@@ -293,6 +294,53 @@ void Material::readFromFile(const IBK::Path & m6FilePath) {
 			throw IBK::Exception(ex, "Error reading moisture transport section.", FUNC_ID);
 		}
 
+		// thermal transport functions
+		try {
+			for (unsigned int i=0; i<section_data[5].size(); ++i) {
+				std::string line = section_data[5][i];
+				// remove everything after # character in line
+				size_t pos = line.find('#');
+				if (pos != std::string::npos)
+					line = line.substr(0, pos);
+				// skip empty lines
+				IBK::trim(line);
+				if (line.empty())
+					continue;
+
+				// must be a key-value line
+				std::string kw, val;
+				if (IBK::extract_keyword(line, kw, val)) {
+					if (kw == "FUNCTION") {
+						std::string xvals = section_data[5][i+1];
+						std::string yvals = section_data[5][i+2];
+						// set linear spline
+						IBK::LinearSpline spl;
+						try {
+							spl.read(xvals, yvals);
+						}
+						catch (IBK::Exception & ex) {
+							throw IBK::Exception(ex, IBK::FormatString("Error parsing '%1' spline.").arg(val), FUNC_ID);
+						}
+						std::string errmsg;
+						if (!spl.valid()) {
+							spl.makeSpline(errmsg);
+							throw IBK::Exception(IBK::FormatString("Invalid spline data: %1").arg(errmsg), FUNC_ID);
+						}
+
+						if (val == "lambda(Theta_l)") {
+							m_lambda_Ol_Spline.swap(spl);
+						}
+						else
+							throw IBK::Exception(IBK::FormatString("Unknown or unsupported thermal transport function '%1'.").arg(val), FUNC_ID);
+						i += 2; // skip the next two lines
+					} // kw == "FUNCTION"
+				}
+			}
+		}
+		catch (IBK::Exception & ex) {
+			throw IBK::Exception(ex, "Error reading thermal transport section.", FUNC_ID);
+		}
+
 	}
 	catch (IBK::Exception & ex) {
 		throw IBK::Exception(ex, IBK::FormatString("Error reading material file '%1'.").arg(m6FilePath), FUNC_ID);
@@ -350,7 +398,10 @@ double Material::lambda_Ol(double Ol) const {
 		case 2 : return m_lambda + 15.8 * Ol;
 	}
 	// use standard model
-	return m_lambda + 0.56*Ol;
+	if (m_Ol_pC_Spline.valid())
+		return m_Ol_pC_Spline.value(Ol);
+	else
+		return m_lambda + 0.56*Ol;
 }
 
 

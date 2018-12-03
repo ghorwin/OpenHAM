@@ -93,6 +93,11 @@ public:
 		\note Stores log10-values of vapor permeability, and interpolates in logspace.
 	*/
 	IBK::LinearSpline	m_lgKv_Ol_Spline;
+
+	/*! Thermal conductivity spline: \f$\lambda\left(\theta_\ell\right)\f$
+		If empty, default thermal conductivity spline is being used.
+	*/
+	IBK::LinearSpline	m_lambda_Ol_Spline;
 };
 
 #endif // MaterialH
