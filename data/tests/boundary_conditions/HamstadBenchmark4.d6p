@@ -21,7 +21,7 @@
 	<!--List of all materials used in this construction-->
 	<Materials>
 		<MaterialReference name="Hamstad Benchmark 4 Load bearing material" color="#fff02400">${Project Directory}/materials/HamstadBenchmark4Loadbearingmaterial_1001.m6</MaterialReference>
-		<MaterialReference name="Hamstad Benchmark 4 Finishing material at inside" color="#ff00e100">${Project Directory}/materials/HamstadBenchmark4Finishingmaterialatinside_1001.m6</MaterialReference>
+		<MaterialReference name="Hamstad Benchmark 4 Finishing material at inside" color="#ff00e100">${Project Directory}/materials/HamstadBenchmark4Finishingmaterialatinside_1000.m6</MaterialReference>
 	</Materials>
 
 	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
