@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <DelphinProject xmlns="http://www.bauklimatik-dresden.de" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:IBK="http://www.bauklimatik-dresden.de/IBK" xsi:schemaLocation="http://www.bauklimatik-dresden.de DelphinProject.xsd" fileVersion="6.5">
-	<ProjectInfo created="unknown" lastEdited="So. Dez. 2 14:10:20 2018">
-		<Comment>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Courier&apos;; font-size:16pt; font-weight:600;&quot;&gt;Response analysis&lt;/span&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Courier&apos;; font-size:10pt; font-weight:600;&quot;&gt;HAMSTAD: Benchmark 4&lt;/span&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Courier&apos;; font-size:10pt; font-weight:600;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Courier&apos;; font-size:10pt; color:#000000;&quot;&gt;A wall with a hygroscopic finishing material at the inside is analysed in one dimension. The wall is submitted to subsequent relative humidity, heat and moisture loads at the inner and outer surface. The structure is perfectly airtight &lt;/span&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Courier&apos;; font-size:10pt; color:#000000;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Courier&apos;; font-size:10pt;&quot;&gt;This HAMSTAD Benchmark 4 was first solved in September 2004 with cvode_solv 5.0.1 using Delphin library 0.9.17, which marked the beginning of the DELPHIN 5 development. It was also one of the first test cases used to check the DELPHIN 6 implementation. The test is challenging in many aspects, including problems with overfilling of elements due to driving rain and interstitial condensation, and extreme non-linearities due to the rapidly changing moisture conditions.&lt;/span&gt;&lt;/p&gt;</Comment>
+	<ProjectInfo created="unknown" lastEdited="Di. Dez. 4 14:11:55 2018">
+		<Comment>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Courier&apos;; font-size:16pt; font-weight:600;&quot;&gt;Response analysis&lt;/span&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Courier&apos;; color:#000000;&quot;&gt;A wall with a hygroscopic finishing material at the inside is analysed in one dimension. The wall is submitted to subsequent relative humidity, heat and moisture loads at the inner and outer surface. The structure is perfectly airtight.&lt;/span&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Courier&apos;; color:#000000;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;</Comment>
 	</ProjectInfo>
 
 	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -10,6 +10,7 @@
 	<Init>
 		<SimulationParameter>
 			<BalanceEquationModule>BEHeatMoisture</BalanceEquationModule>
+			<DefaultInitialCondition name="DefaultRelativeHumidity" unit="%">85</DefaultInitialCondition>
 		</SimulationParameter>
 		<SolverParameter>
 			<IBK:Parameter name="MinTimeStep" unit="s">0.0001</IBK:Parameter>
@@ -66,7 +67,7 @@
 			</ClimateCondition>
 
 			<ClimateCondition name="Outside imposed flux (data)" type="WaterFlux" kind="TabulatedData">
-				<Filename>${Project Directory}/climates/HB4_rain.ccd</Filename>
+				<Filename>${Project Directory}/climates/HB4_rain_red.ccd</Filename>
 				<IBK:Parameter name="ShiftValue" unit="kg/m2s">0</IBK:Parameter>
 				<IBK:Flag name="UseInterpolation">false</IBK:Flag>
 				<IBK:Flag name="ExtendData">true</IBK:Flag>
@@ -188,6 +189,18 @@
 				<SpaceType>Single</SpaceType>
 				<OutputGrid>Hourly</OutputGrid>
 			</OutputFile>
+			<OutputFile name="RHInside">
+				<Quantity unit="---">RelativeHumidity</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Hourly</OutputGrid>
+			</OutputFile>
+			<OutputFile name="RHOutside">
+				<Quantity unit="---">RelativeHumidity</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Hourly</OutputGrid>
+			</OutputFile>
 		</OutputFiles>
 	</Outputs>
 
@@ -243,6 +256,16 @@
 
 		<Assignment type="Output" location="Coordinate">
 			<Reference>MoistInside</Reference>
+			<IBK:Point3D>0.11975 0.5 0.5</IBK:Point3D>
+		</Assignment>
+
+		<Assignment type="Output" location="Coordinate">
+			<Reference>RHOutside</Reference>
+			<IBK:Point3D>0.00025 0.5 0.5</IBK:Point3D>
+		</Assignment>
+
+		<Assignment type="Output" location="Coordinate">
+			<Reference>RHInside</Reference>
 			<IBK:Point3D>0.11975 0.5 0.5</IBK:Point3D>
 		</Assignment>
 
