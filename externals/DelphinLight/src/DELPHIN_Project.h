@@ -96,10 +96,13 @@ public:
 		IBK::Parameter RH;			///< Relative humiditiy, base unit [---]
 		IBK::Parameter pv;			///< Vapor pressure, base unit [Pa]
 		IBK::Parameter rain;		///< Water flux density, base unit [kg/m2s]
+		IBK::Parameter Train;		///< Rain water temperature, base unit [K]
+
 		IBK::LinearSpline T_spline;
 		IBK::LinearSpline RH_spline;
 		IBK::LinearSpline pv_spline;
 		IBK::LinearSpline rain_spline;
+		IBK::LinearSpline Train_spline;
 		IBK::LinearSpline qswrad_spline;
 	};
 

@@ -632,9 +632,20 @@ void Model::updateBoundaryConditions() {
 		m_jwLeft = m_gRain;
 		// Note: "rain" can be negative, if one wants to model "outflow of water"
 
+		double Train;
+		if (!m_project.m_leftInterface.Train.name.empty())
+			Train = m_project.m_leftInterface.Train.value;
+		else if (m_project.m_leftInterface.Train_spline.valid()) {
+			Train = m_project.m_leftInterface.Train_spline.value(m_t);
+		}
+		else {
+			Train = m_TLeft;
+		}
+
+
 		// for enthalpy use upwinding
 		if (m_jwLeft > 0)
-			m_hwLeft = m_jwLeft*IBK::C_WATER*m_TLeft; // outside in
+			m_hwLeft = m_jwLeft*IBK::C_WATER*Train; // outside in
 		else
 			m_hwLeft = m_jwLeft*IBK::C_WATER*m_T[0]; // inside out
 	}

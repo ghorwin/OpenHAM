@@ -659,7 +659,12 @@ void Project::readBCPara(const TiXmlElement * conditionsXmlElem, Interface * ifa
 		// we need to parse the exchange coefficient child and the CCReference of type 'Temperature'
 		try {
 			findAndReadParameter(bc, "ExchangeCoefficient", iface->alpha);
-			readCCData(conditionsXmlElem, bc, "Temperature", iface->T, iface->T_spline);
+			if (!iface->T.name.empty() || !iface->T_spline.empty()) {
+				IBK::IBK_Message("CCReference of type 'Temperature' (for air temperature) has already been read and won't be read again.",
+								 IBK::MSG_WARNING, FUNC_ID, IBK::VL_STANDARD);
+			}
+			else
+				readCCData(conditionsXmlElem, bc, "Temperature", iface->T, iface->T_spline);
 		}
 		catch (IBK::Exception & ex) {
 			throw IBK::Exception(ex, IBK::FormatString("Error parsing BC parameter block with name '%1'").arg(bcDefinition), FUNC_ID);
@@ -688,7 +693,13 @@ void Project::readBCPara(const TiXmlElement * conditionsXmlElem, Interface * ifa
 					if (!attrib)
 						throw IBK::Exception(IBK::FormatString("Missing 'type' attribute in definition of 'CCReference' tag."), FUNC_ID);
 					if (attrib->ValueStr() == "Temperature") {
-						readCCData(conditionsXmlElem, bc, "Temperature", iface->T, iface->T_spline);
+						// Warn, if already a temperature CCD has been read as part of the HeatConduction BC
+						if (!iface->T.name.empty() || !iface->T_spline.empty()) {
+							IBK::IBK_Message("CCReference of type 'Temperature' (for air temperature) has already been read and won't be read again.",
+											 IBK::MSG_WARNING, FUNC_ID, IBK::VL_STANDARD);
+						}
+						else
+							readCCData(conditionsXmlElem, bc, "Temperature", iface->T, iface->T_spline);
 					}
 					else if (attrib->ValueStr() == "RelativeHumidity") {
 						rhReference = e;
@@ -723,7 +734,7 @@ void Project::readBCPara(const TiXmlElement * conditionsXmlElem, Interface * ifa
 			throw IBK::Exception(IBK::FormatString("Currently only 'ImposedFlux' model kind is supported for 'WaterContact' BC."), FUNC_ID);
 		// we need to parse the CCReference of type 'Temperature' and 'WaterFlux'
 		try {
-			readCCData(conditionsXmlElem, bc, "Temperature", iface->T, iface->T_spline);
+			readCCData(conditionsXmlElem, bc, "Temperature", iface->Train, iface->Train_spline);
 			readCCData(conditionsXmlElem, bc, "WaterFlux", iface->rain, iface->rain_spline);
 		}
 		catch (IBK::Exception & ex) {
