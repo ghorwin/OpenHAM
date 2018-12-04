@@ -6,3 +6,5 @@ It is meant as an **open source reference implementation** of the governing equa
 See [OpenHAM-wiki](../../wiki) for details.
 
 
+----
+[Download stats](https://www.somsubhra.com/github-release-stats/?username=ghorwin&repository=OpenHAM)
