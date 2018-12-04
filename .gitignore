@@ -32,3 +32,4 @@ externals/lib
 build/cmake/bb-gcc
 
 
+*.DS_Store
