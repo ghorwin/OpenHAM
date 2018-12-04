@@ -148,10 +148,16 @@ public:
 	double						m_TLeft;
 	/*! Left ambient air relative humidity in [0..1] */
 	double						m_rhLeft;
+	/*! Left ambient vapor pressure in [Pa] */
+	double						m_pvLeft;
+	/*! Left rain flux density in [kg/m2s] (rain only at left) */
+	double						m_gRain;
 	/*! Right ambient air temperature in [K] */
 	double						m_TRight;
 	/*! Right ambient air relative humidity in [0..1] */
 	double						m_rhRight;
+	/*! Right ambient vapor pressure in [Pa] */
+	double						m_pvRight;
 
 	// Member variables holdings profile data
 	// All vectors have size m_nElements

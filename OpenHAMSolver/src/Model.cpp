@@ -276,11 +276,28 @@ void Model::init(const IBK::SolverArgsParser & args, Outputs & outputs) {
 			}
 		}
 
+
+
 		// transfer constant climate conditions
+		/// \todo add sanity checks when T/RH is missing/invalid
 		m_TLeft = m_project.m_leftInterface.T.value;
 		m_rhLeft = m_project.m_leftInterface.RH.value;
+		if (m_project.m_leftInterface.pv.name.empty())
+			m_pvLeft = IBK::f_pv(m_TLeft, m_rhLeft);
+		else
+			m_pvLeft = m_project.m_leftInterface.pv.value;
+		if (m_project.m_leftInterface.rain.name.empty())
+			m_gRain = 0;
+		else
+			m_gRain = m_project.m_leftInterface.rain.value;
+
 		m_TRight = m_project.m_rightInterface.T.value;
 		m_rhRight = m_project.m_rightInterface.RH.value;
+		if (m_project.m_rightInterface.pv.name.empty())
+			m_pvRight = IBK::f_pv(m_TRight, m_rhRight);
+		else
+			m_pvRight = m_project.m_rightInterface.pv.value;
+
 
 		if (m_nElements == 0)
 			throw IBK::Exception("Missing grid definition in project file.", FUNC_ID);
@@ -576,17 +593,34 @@ void Model::updateBoundaryConditions() {
 	// surface value extrapolation is not used
 
 	// update time-dependent climate data
+
+	// *** Left side ***
 	if (!m_project.m_leftInterface.T_spline.empty())
 		m_TLeft = m_project.m_leftInterface.T_spline.value(m_t);
-//	double gRain = 0;
-//	if (!m_gRainSpline.empty())
-//		gRain = m_gRainSpline.value(m_t);
+	if (!m_project.m_leftInterface.RH_spline.empty()) {
+		m_rhLeft = m_project.m_leftInterface.RH_spline.value(m_t);
+		// compute pv
+		m_pvLeft = IBK::f_pv(m_TLeft, m_rhLeft);
+	}
+	else if (!m_project.m_leftInterface.pv_spline.empty())
+		m_pvLeft = m_project.m_leftInterface.pv_spline.value(m_t);
+	if (!m_project.m_leftInterface.rain_spline.empty())
+		m_gRain = m_project.m_leftInterface.rain_spline.value(m_t);
 
+	// *** Right side ***
+	if (!m_project.m_rightInterface.T_spline.empty())
+		m_TRight = m_project.m_rightInterface.T_spline.value(m_t);
+	if (!m_project.m_rightInterface.RH_spline.empty()) {
+		m_rhRight = m_project.m_rightInterface.RH_spline.value(m_t);
+		// compute pv
+		m_pvRight = IBK::f_pv(m_TRight, m_rhRight);
+	}
+	else if (!m_project.m_rightInterface.pv_spline.empty())
+		m_pvRight = m_project.m_rightInterface.pv_spline.value(m_t);
 
 	// Left is ambient climate
 	m_qLeft = m_project.m_leftInterface.alpha.value*(m_TLeft - m_T[0]);
-	double pvLeft = IBK::f_pv(m_TLeft, m_rhLeft);
-	m_jvLeft = m_project.m_leftInterface.beta.value*(pvLeft - m_pv[0]);
+	m_jvLeft = m_project.m_leftInterface.beta.value*(m_pvLeft - m_pv[0]);
 	// for enthalpy use upwinding
 	if (m_jvLeft > 0)
 		m_hvLeft = m_jvLeft*(IBK::C_VAPOR*m_TLeft + IBK::H_EVAP); // outside in
@@ -594,25 +628,26 @@ void Model::updateBoundaryConditions() {
 		m_hvLeft = m_jvLeft*(IBK::C_VAPOR*m_T[0] + IBK::H_EVAP); // inside out
 
 	// for rain
-//	if (gRain != 0) {
-//		m_jwLeft = gRain;
-//		// for enthalpy use upwinding
-//		if (m_jwLeft > 0)
-//			m_hwLeft = m_jwLeft*IBK::C_WATER*m_TLeft; // outside in
-//		else
-//			m_hwLeft = m_jwLeft*IBK::C_WATER*m_T[0]; // inside out
-//	}
-//	else {
+	if (m_gRain != 0) {
+		m_jwLeft = m_gRain;
+		// Note: "rain" can be negative, if one wants to model "outflow of water"
+
+		// for enthalpy use upwinding
+		if (m_jwLeft > 0)
+			m_hwLeft = m_jwLeft*IBK::C_WATER*m_TLeft; // outside in
+		else
+			m_hwLeft = m_jwLeft*IBK::C_WATER*m_T[0]; // inside out
+	}
+	else {
 		m_jwLeft = 0;
 		m_hwLeft = 0;
-//	}
+	}
 
 
 	unsigned int n1 = m_nElements-1;
-	// Right is indoor climate
+	// Right is indoor climate (no rain)
 	m_qRight = m_project.m_rightInterface.alpha.value*(m_T[n1] - m_TRight);
-	double pvRight = IBK::f_pv(m_TRight, m_rhRight);
-	m_jvRight = m_project.m_rightInterface.beta.value*(m_pv[n1] - pvRight);
+	m_jvRight = m_project.m_rightInterface.beta.value*(m_pv[n1] - m_pvRight);
 	// for enthalpy use upwinding
 	if (m_jvRight > 0)
 		m_hvRight = m_jvRight*(IBK::C_VAPOR*m_T[n1] + IBK::H_EVAP); // inside out
