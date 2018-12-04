@@ -4,12 +4,10 @@
 	<Directories>
 		<Directory>
 			<Path>.</Path>
-			<SubDir Color="#ffaa00" Checked="0">HamstadBenchmark4</SubDir>
-			<SubDir Color="#550000" Checked="0">HamstadBenchmark4_D6_ref</SubDir>
-			<SubDir Color="#7141d1" Checked="0">HamstadBenchmark4_with_builtin_materials</SubDir>
 			<SubDir Color="#ffee00" Checked="0">climates</SubDir>
 			<SubDir Color="#ffee00" Checked="1">response_test</SubDir>
 			<SubDir Color="#45ad45" Checked="1">response_test_d6ref</SubDir>
+			<SubDir Color="#7141d1" Checked="1">response_test_with_builtin_materials</SubDir>
 			<ExpandedSubDir>.</ExpandedSubDir>
 		</Directory>
 	</Directories>
@@ -337,6 +335,7 @@
 					<DataIOFileName>response_test/results/Profile_Temperature.d6o</DataIOFileName>
 					<CutType>TimeCut</CutType>
 					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT>24</CutIndexT>
 					<CutLockXDir>0</CutLockXDir>
 					<CutLockYDir>0</CutLockYDir>
 					<CutLockZDir>0</CutLockZDir>
@@ -346,6 +345,7 @@
 					<DataIOFileName>response_test/results/Profile_MoistureMassDensity.d6o</DataIOFileName>
 					<CutType>TimeCut</CutType>
 					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT>24</CutIndexT>
 					<CutLockXDir>0</CutLockXDir>
 					<CutLockYDir>0</CutLockYDir>
 					<CutLockZDir>0</CutLockZDir>
@@ -355,6 +355,7 @@
 					<DataIOFileName>response_test_d6ref/results/Profile_Temperature.d6o</DataIOFileName>
 					<CutType>TimeCut</CutType>
 					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT>24</CutIndexT>
 					<CutLockXDir>0</CutLockXDir>
 					<CutLockYDir>0</CutLockYDir>
 					<CutLockZDir>0</CutLockZDir>
@@ -364,6 +365,27 @@
 					<DataIOFileName>response_test_d6ref/results/Profile_MoistureMassDensity.d6o</DataIOFileName>
 					<CutType>TimeCut</CutType>
 					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT>24</CutIndexT>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>response_test_with_builtin_materials/results/Profile_Temperature.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT>24</CutIndexT>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>response_test_with_builtin_materials/results/Profile_MoistureMassDensity.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT>24</CutIndexT>
 					<CutLockXDir>0</CutLockXDir>
 					<CutLockYDir>0</CutLockYDir>
 					<CutLockZDir>0</CutLockZDir>
@@ -375,40 +397,67 @@
 					<Series>
 						<TitleText>$filename</TitleText>
 						<LineStyle>0</LineStyle>
+						<PenColor>#ff420e</PenColor>
 					</Series>
 					<Series leftAxis="0">
 						<TitleText>$filename</TitleText>
 						<LineStyle>0</LineStyle>
-						<PenColor>#ff420e</PenColor>
+						<PenColor>#729fcf</PenColor>
 					</Series>
 					<Series>
 						<TitleText>$filename</TitleText>
 						<LineStyle>0</LineStyle>
-						<PenColor>#004586</PenColor>
+						<PenColor>#a40000</PenColor>
 					</Series>
 					<Series leftAxis="0">
 						<TitleText>$filename</TitleText>
 						<LineStyle>0</LineStyle>
-						<PenColor>#aecf00</PenColor>
+						<PenColor>#204a87</PenColor>
+					</Series>
+					<Series>
+						<TitleText>$filename</TitleText>
+						<LineStyle>0</LineStyle>
+						<PenColor>#fcaf3e</PenColor>
+					</Series>
+					<Series leftAxis="0">
+						<TitleText>$filename</TitleText>
+						<LineStyle>0</LineStyle>
+						<PenColor>#b6d3f1</PenColor>
 					</Series>
 				</SeriesProperties>
 				<AxisProperties>
 					<Axis index="0">
-						<TitleText>Koordinate [$unit]</TitleText>
+						<TitleText>Coordinate [$unit]</TitleText>
+						<TitleFont>Roboto Condensed,9,-1,5,75,0,0,0,0,0</TitleFont>
+						<LabelFont>Roboto Condensed,9,-1,5,50,0,0,0,0,0</LabelFont>
 						<IBK:Unit name="AxisUnit">m</IBK:Unit>
+						<GridPenStyle>1</GridPenStyle>
+						<MinorGridVisible>0</MinorGridVisible>
 					</Axis>
 					<Axis index="1">
 						<TitleText>$quantity [$unit]</TitleText>
+						<TitleFont>Roboto Condensed,9,-1,5,75,0,0,0,0,0</TitleFont>
+						<LabelFont>Roboto Condensed,9,-1,5,50,0,0,0,0,0</LabelFont>
 						<IBK:Unit name="AxisUnit">C</IBK:Unit>
+						<MinorGridVisible>0</MinorGridVisible>
 					</Axis>
 					<Axis index="2" enabled="0">
 						<TitleText>$quantity [$unit]</TitleText>
+						<TitleFont>Roboto Condensed,9,-1,5,75,0,0,0,0,0</TitleFont>
+						<LabelFont>Roboto Condensed,9,-1,5,50,0,0,0,0,0</LabelFont>
 						<IBK:Unit name="AxisUnit">kg/m3</IBK:Unit>
 					</Axis>
 				</AxisProperties>
 				<ChartProperties>
-					<TitleText>Temperature [$filename]</TitleText>
-					<Legend />
+					<TitleText />
+					<TitleFont>Roboto Condensed,9,-1,5,50,0,0,0,0,0</TitleFont>
+					<AxisScalesInside>1</AxisScalesInside>
+					<Legend>
+						<Position>Inside</Position>
+						<Alignment>1</Alignment>
+						<MaxColumns>1</MaxColumns>
+						<Font>Roboto Condensed,9,-1,5,50,0,0,0,0,0</Font>
+					</Legend>
 				</ChartProperties>
 			</ChartModel>
 		</Mapper>
