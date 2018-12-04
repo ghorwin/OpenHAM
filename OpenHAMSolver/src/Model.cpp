@@ -592,9 +592,9 @@ void Model::updateBoundaryConditions() {
 	// boundary fluxes are always defined positively in coordinate direction
 	// surface value extrapolation is not used
 
-	// update time-dependent climate data
+	// *** Update time-dependent climate data ***
 
-	// *** Left side ***
+	// ** Left side **
 	if (!m_project.m_leftInterface.T_spline.empty())
 		m_TLeft = m_project.m_leftInterface.T_spline.value(m_t);
 	if (!m_project.m_leftInterface.RH_spline.empty()) {
@@ -607,7 +607,7 @@ void Model::updateBoundaryConditions() {
 	if (!m_project.m_leftInterface.rain_spline.empty())
 		m_gRain = m_project.m_leftInterface.rain_spline.value(m_t);
 
-	// *** Right side ***
+	// ** Right side **
 	if (!m_project.m_rightInterface.T_spline.empty())
 		m_TRight = m_project.m_rightInterface.T_spline.value(m_t);
 	if (!m_project.m_rightInterface.RH_spline.empty()) {
@@ -644,7 +644,9 @@ void Model::updateBoundaryConditions() {
 	}
 
 
-	unsigned int n1 = m_nElements-1;
+	// *** Compute boundary fluxes ***
+
+	const unsigned int n1 = m_nElements-1;
 	// Right is indoor climate (no rain)
 	m_qRight = m_project.m_rightInterface.alpha.value*(m_T[n1] - m_TRight);
 	m_jvRight = m_project.m_rightInterface.beta.value*(m_pv[n1] - m_pvRight);
