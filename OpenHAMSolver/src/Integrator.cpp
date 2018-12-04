@@ -286,6 +286,8 @@ bool Integrator::solveNewton() {
 		}
 		catch (IBK::Exception & ex) {
 			ex.writeMsgStackToError();
+			IBK::IBK_Message( IBK::FormatString("Newton convergence error at t=%1 s, re-attempting step with "
+												"reduced step size.").arg(m_t), IBK::MSG_WARNING, FUNC_ID, IBK::VL_STANDARD);
 			return false;
 		}
 
