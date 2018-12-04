@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<DelphinProject xmlns="http://www.bauklimatik-dresden.de" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:IBK="http://www.bauklimatik-dresden.de/IBK" xsi:schemaLocation="http://www.bauklimatik-dresden.de DelphinProject.xsd" fileVersion="6.5">
+	<ProjectInfo created="unknown" lastEdited="Di. Dez. 4 14:11:55 2018">
+		<Comment>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Courier&apos;; font-size:16pt; font-weight:600;&quot;&gt;Response analysis&lt;/span&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Courier&apos;; color:#000000;&quot;&gt;A wall with a hygroscopic finishing material at the inside is analysed in one dimension. The wall is submitted to subsequent relative humidity, heat and moisture loads at the inner and outer surface. The structure is perfectly airtight.&lt;/span&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Courier&apos;; color:#000000;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;</Comment>
+	</ProjectInfo>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Model data, solver settings, general parameters-->
+	<Init>
+		<SimulationParameter>
+			<BalanceEquationModule>BEHeatMoisture</BalanceEquationModule>
+			<DefaultInitialCondition name="DefaultRelativeHumidity" unit="%">85</DefaultInitialCondition>
+		</SimulationParameter>
+		<SolverParameter>
+			<IBK:Parameter name="MinTimeStep" unit="s">0.0001</IBK:Parameter>
+		</SolverParameter>
+	</Init>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--List of all materials used in this construction-->
+	<Materials>
+		<MaterialReference name="Hamstad Benchmark 4 Load bearing material" color="#fff02400">${Project Directory}/materials/HamstadBenchmark4Loadbearingmaterial_1001.m6</MaterialReference>
+		<MaterialReference name="Hamstad Benchmark 4 Finishing material at inside" color="#ff00e100">${Project Directory}/materials/HamstadBenchmark4Finishingmaterialatinside_1000.m6</MaterialReference>
+	</Materials>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Discretization data (grid and sketches)-->
+	<Discretization>
+		<XSteps unit="m">0.1 0.02 </XSteps>
+	</Discretization>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Conditions data, specifies how construction interacts with environment-->
+	<Conditions>
+
+		<Interfaces>
+			<Interface name="Interface 1" type="Detailed">
+				<BCReference>Outside Heatcond</BCReference>
+				<BCReference>Outside Vapdiff</BCReference>
+				<BCReference>Outside Watcontc</BCReference>
+			</Interface>
+			<Interface name="Interface 2" type="Detailed">
+				<BCReference>Inside Heatcond</BCReference>
+				<BCReference>Inside Vapdiff</BCReference>
+			</Interface>
+		</Interfaces>
+
+		<ClimateConditions>
+
+			<ClimateCondition name="Outside ambient temperature (constant)" type="Temperature" kind="Constant">
+				<IBK:Parameter name="ConstantValue" unit="C">10</IBK:Parameter>
+			</ClimateCondition>
+
+			<ClimateCondition name="Outside temperature (data)" type="Temperature" kind="TabulatedData">
+				<Filename>${Project Directory}/climates/HB4_Teq_e.ccd</Filename>
+				<IBK:Parameter name="ShiftValue" unit="K">0</IBK:Parameter>
+				<IBK:Flag name="UseInterpolation">false</IBK:Flag>
+				<IBK:Flag name="ExtendData">true</IBK:Flag>
+			</ClimateCondition>
+
+			<ClimateCondition name="Outside vapor pressure (constant)" type="VaporPressure" kind="Constant">
+				<IBK:Parameter name="ConstantValue" unit="Pa">1150</IBK:Parameter>
+			</ClimateCondition>
+
+			<ClimateCondition name="Outside imposed flux (data)" type="WaterFlux" kind="TabulatedData">
+				<Filename>${Project Directory}/climates/HB4_rain_red.ccd</Filename>
+				<IBK:Parameter name="ShiftValue" unit="kg/m2s">0</IBK:Parameter>
+				<IBK:Flag name="UseInterpolation">false</IBK:Flag>
+				<IBK:Flag name="ExtendData">true</IBK:Flag>
+			</ClimateCondition>
+
+			<ClimateCondition name="Inside temperature (constant)" type="Temperature" kind="Constant">
+				<IBK:Parameter name="ConstantValue" unit="C">20</IBK:Parameter>
+			</ClimateCondition>
+
+			<ClimateCondition name="Inside vapor pressure (data)" type="VaporPressure" kind="TabulatedData">
+				<Filename>${Project Directory}/climates/HB4_pa_i.ccd</Filename>
+				<IBK:Parameter name="ShiftValue" unit="Pa">0</IBK:Parameter>
+				<IBK:Flag name="UseInterpolation">false</IBK:Flag>
+				<IBK:Flag name="ExtendData">true</IBK:Flag>
+			</ClimateCondition>
+		</ClimateConditions>
+
+		<BoundaryConditions>
+
+			<BoundaryCondition name="Outside Vapdiff" type="VaporDiffusion" kind="Exchange">
+				<IBK:Parameter name="ExchangeCoefficient" unit="s/m">2e-07</IBK:Parameter>
+				<IBK:Flag name="UseVaporPressure">true</IBK:Flag>
+				<CCReference type="Temperature">Outside temperature (data)</CCReference>
+				<CCReference type="VaporPressure">Outside vapor pressure (constant)</CCReference>
+			</BoundaryCondition>
+
+			<BoundaryCondition name="Outside Watcontc" type="WaterContact" kind="ImposedFlux">
+				<CCReference type="Temperature">Outside ambient temperature (constant)</CCReference>
+				<CCReference type="WaterFlux">Outside imposed flux (data)</CCReference>
+			</BoundaryCondition>
+
+			<BoundaryCondition name="Outside Heatcond" type="HeatConduction" kind="Exchange">
+				<IBK:Parameter name="ExchangeCoefficient" unit="W/m2K">25</IBK:Parameter>
+				<CCReference type="Temperature">Outside temperature (data)</CCReference>
+			</BoundaryCondition>
+
+			<BoundaryCondition name="Inside Heatcond" type="HeatConduction" kind="Exchange">
+				<IBK:Parameter name="ExchangeCoefficient" unit="W/m2K">8</IBK:Parameter>
+				<CCReference type="Temperature">Inside temperature (constant)</CCReference>
+			</BoundaryCondition>
+
+			<BoundaryCondition name="Inside Vapdiff" type="VaporDiffusion" kind="Exchange">
+				<IBK:Parameter name="ExchangeCoefficient" unit="s/m">3e-08</IBK:Parameter>
+				<IBK:Flag name="UseVaporPressure">true</IBK:Flag>
+				<CCReference type="Temperature">Inside temperature (constant)</CCReference>
+				<CCReference type="VaporPressure">Inside vapor pressure (data)</CCReference>
+			</BoundaryCondition>
+		</BoundaryConditions>
+
+		<InitialConditions>
+
+			<InitialCondition name="Global temperatures" type="Temperature">
+				<IBK:Parameter name="Value" unit="C">20</IBK:Parameter>
+			</InitialCondition>
+
+			<InitialCondition name="Global capillary pressures" type="CapillaryPressure">
+				<IBK:Parameter name="Value" unit="Pa">-120739000</IBK:Parameter>
+			</InitialCondition>
+		</InitialConditions>
+	</Conditions>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Contains definitions of output files and schedules for outputs.-->
+	<Outputs>
+		<!--General parameters-->
+		<IBK:Unit name="TimeUnit">h</IBK:Unit>
+		<IBK:Flag name="BinaryFormat">false</IBK:Flag>
+		<!--List of all Output schedules-->
+		<OutputGrids>
+			<OutputGrid name="Hourly">
+				<Interval>
+					<IBK:Parameter name="Duration" unit="d">0</IBK:Parameter>
+					<IBK:Parameter name="StepSize" unit="h">1</IBK:Parameter>
+				</Interval>
+			</OutputGrid>
+			<OutputGrid name="Variabel">
+				<Interval>
+					<IBK:Parameter name="Duration" unit="d">0</IBK:Parameter>
+					<IBK:Parameter name="StepSize" unit="h">6</IBK:Parameter>
+				</Interval>
+			</OutputGrid>
+		</OutputGrids>
+		<!--List of all Output files-->
+		<OutputFiles>
+			<OutputFile name="TempField">
+				<Quantity>Temperature</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Variabel</OutputGrid>
+			</OutputFile>
+			<OutputFile name="TempInside">
+				<Quantity>Temperature</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Hourly</OutputGrid>
+			</OutputFile>
+			<OutputFile name="TempOutside">
+				<Quantity>Temperature</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Hourly</OutputGrid>
+			</OutputFile>
+			<OutputFile name="MoistField">
+				<Quantity>MoistureMassDensity</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Variabel</OutputGrid>
+			</OutputFile>
+			<OutputFile name="MoistInside">
+				<Quantity>MoistureMassDensity</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Hourly</OutputGrid>
+			</OutputFile>
+			<OutputFile name="MoistOutside">
+				<Quantity>MoistureMassDensity</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Hourly</OutputGrid>
+			</OutputFile>
+			<OutputFile name="RHInside">
+				<Quantity unit="---">RelativeHumidity</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Hourly</OutputGrid>
+			</OutputFile>
+			<OutputFile name="RHOutside">
+				<Quantity unit="---">RelativeHumidity</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Hourly</OutputGrid>
+			</OutputFile>
+		</OutputFiles>
+	</Outputs>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--List of all assignments of materials and conditions-->
+	<Assignments>
+
+		<Assignment type="Material" location="Element">
+			<Reference>Hamstad Benchmark 4 Load bearing material</Reference>
+			<Range>0 0 0 0</Range>
+		</Assignment>
+
+		<Assignment type="Material" location="Element">
+			<Reference>Hamstad Benchmark 4 Finishing material at inside</Reference>
+			<Range>1 0 1 0</Range>
+		</Assignment>
+
+		<Assignment type="InitialCondition" location="Element">
+			<Reference>Global temperatures</Reference>
+			<Range>0 0 1 0</Range>
+		</Assignment>
+
+		<Assignment type="InitialCondition" location="Element">
+			<Reference>Global capillary pressures</Reference>
+			<Range>0 0 1 0</Range>
+		</Assignment>
+
+		<Assignment type="Output" location="Element">
+			<Reference>TempField</Reference>
+			<Range>0 0 1 0</Range>
+		</Assignment>
+
+		<Assignment type="Output" location="Element">
+			<Reference>MoistField</Reference>
+			<Range>0 0 1 0</Range>
+		</Assignment>
+
+		<Assignment type="Output" location="Coordinate">
+			<Reference>TempInside</Reference>
+			<IBK:Point3D>0.11975 0.5 0.5</IBK:Point3D>
+		</Assignment>
+
+		<Assignment type="Output" location="Coordinate">
+			<Reference>TempOutside</Reference>
+			<IBK:Point3D>0.00025 0.5 0.5</IBK:Point3D>
+		</Assignment>
+
+		<Assignment type="Output" location="Coordinate">
+			<Reference>MoistOutside</Reference>
+			<IBK:Point3D>0.00025 0.5 0.5</IBK:Point3D>
+		</Assignment>
+
+		<Assignment type="Output" location="Coordinate">
+			<Reference>MoistInside</Reference>
+			<IBK:Point3D>0.11975 0.5 0.5</IBK:Point3D>
+		</Assignment>
+
+		<Assignment type="Output" location="Coordinate">
+			<Reference>RHOutside</Reference>
+			<IBK:Point3D>0.00025 0.5 0.5</IBK:Point3D>
+		</Assignment>
+
+		<Assignment type="Output" location="Coordinate">
+			<Reference>RHInside</Reference>
+			<IBK:Point3D>0.11975 0.5 0.5</IBK:Point3D>
+		</Assignment>
+
+		<Assignment type="Interface" location="Left">
+			<Reference>Interface 1</Reference>
+			<Range>0 0 0 0</Range>
+		</Assignment>
+
+		<Assignment type="Interface" location="Right">
+			<Reference>Interface 2</Reference>
+			<Range>1 0 1 0</Range>
+		</Assignment>
+	</Assignments>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+</DelphinProject>
