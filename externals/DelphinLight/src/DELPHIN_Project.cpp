@@ -421,6 +421,9 @@ void Project::readXML(const IBK::Path & fileNamePath) {
 				if (ename == "BCReference") {
 					readBCPara(xmlElem, iface, esub->GetText());
 				}
+				else if (ename == "IBK:Parameter") {
+					/// \todo parse orientation and inclination
+				}
 				else
 					throw IBK::Exception(IBK::FormatString("Expected 'BCReference' tag, got '%1'.").arg(ename), FUNC_ID);
 			}
