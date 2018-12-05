@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<PostProc version="2.0.15" xmlns="http://www.bauklimatik-dresden.de" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:IBK="http://www.bauklimatik-dresden.de/IBK" xsi:schemaLocation="http://www.bauklimatik-dresden.de PostProc.xsd">
+	<!--List of all directories-->
+	<Directories>
+		<Directory>
+			<Path>.</Path>
+			<SubDir Color="#416fce" Checked="1">block_climate_condensation_test</SubDir>
+			<SubDir Color="#d02000" Checked="1">block_climate_condensation_test_no_disc</SubDir>
+			<SubDir Color="#ff007f" Checked="0">climate</SubDir>
+			<ExpandedSubDir>.</ExpandedSubDir>
+		</Directory>
+	</Directories>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--All mappers.-->
+	<Mappers>
+		<Mapper name="mwv [$filename]">
+			<Extractors>
+				<Extractor>
+					<DataIOFileName>block_climate_condensation_test_no_disc/results/Integrals.tsv?1</DataIOFileName>
+					<CutType>NoCut</CutType>
+					<DataFormat>DF_2D</DataFormat>
+					<DataType>T_REFERENCE</DataType>
+					<ColumnIndex>0</ColumnIndex>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>block_climate_condensation_test/results/Feuchtegehaltsintegral.d6o</DataIOFileName>
+					<CutType>NoCut</CutType>
+					<DataFormat>DF_2D</DataFormat>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+				</Extractor>
+			</Extractors>
+			<ChartModel chartType="2D">
+				<SeriesProperties>
+					<Series>
+						<TitleText>$quantity</TitleText>
+						<LineStyle>0</LineStyle>
+					</Series>
+					<Series leftAxis="0">
+						<TitleText>$filename</TitleText>
+						<LineStyle>0</LineStyle>
+						<PenColor>#ff420e</PenColor>
+					</Series>
+				</SeriesProperties>
+				<AxisProperties>
+					<Axis index="0">
+						<TitleText>Zeit [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">d</IBK:Unit>
+						<Maximum>558.084</Maximum>
+						<Minimum>406.387</Minimum>
+					</Axis>
+					<Axis index="1">
+						<TitleText>$quantity [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">kg/m2</IBK:Unit>
+						<Maximum>9.91722</Maximum>
+						<Minimum>8.95033</Minimum>
+					</Axis>
+					<Axis index="2" enabled="0">
+						<TitleText>$quantity [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">kg</IBK:Unit>
+						<Maximum>9.92053</Maximum>
+						<Minimum>8.95033</Minimum>
+					</Axis>
+				</AxisProperties>
+				<ChartProperties>
+					<TitleText>mwv [$filename]</TitleText>
+					<Legend />
+				</ChartProperties>
+			</ChartModel>
+		</Mapper>
+		<Mapper name="Relative Humidity [$filename]">
+			<Extractors>
+				<Extractor>
+					<DataIOFileName>block_climate_condensation_test/results/Luftfeuchteprofil.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT>285</CutIndexT>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>block_climate_condensation_test_no_disc/results/Profile_RelativeHumidity.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT>285</CutIndexT>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+				</Extractor>
+			</Extractors>
+			<ChartModel chartType="2D">
+				<SeriesProperties>
+					<Series>
+						<TitleText>$filename</TitleText>
+						<LineStyle>0</LineStyle>
+					</Series>
+					<Series>
+						<TitleText>$filename</TitleText>
+						<LineStyle>0</LineStyle>
+						<PenColor>#ff420e</PenColor>
+					</Series>
+				</SeriesProperties>
+				<AxisProperties>
+					<Axis index="0">
+						<TitleText>Koordinate [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">m</IBK:Unit>
+					</Axis>
+					<Axis index="1">
+						<TitleText>$quantity [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">%</IBK:Unit>
+					</Axis>
+					<Axis index="2" enabled="0">
+						<TitleText>$quantity [$unit]</TitleText>
+					</Axis>
+				</AxisProperties>
+				<ChartProperties>
+					<TitleText>Relative Humidity [$filename]</TitleText>
+					<Legend />
+				</ChartProperties>
+			</ChartModel>
+		</Mapper>
+		<Mapper name="Relative Humidity [$filename]">
+			<Extractors>
+				<Extractor>
+					<DataIOFileName>block_climate_condensation_test_no_disc/results/Profile_RelativeHumidity.d6o</DataIOFileName>
+					<CutType>NoCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+				</Extractor>
+			</Extractors>
+			<ChartModel chartType="3D">
+				<ColorGridProperties>
+					<AutoScale>0</AutoScale>
+					<MinimumZ>49.2063</MinimumZ>
+					<MaximumZ>94.5274</MaximumZ>
+					<InterpolationMode>0</InterpolationMode>
+					<Type>LinearMap</Type>
+					<ColorStops>
+						<ColorStop index="0" position="0" color="#ff0000" />
+						<ColorStop index="1" position="0.1" color="#ff6600" />
+						<ColorStop index="2" position="0.2" color="#ffcc00" />
+						<ColorStop index="3" position="0.3" color="#ccff00" />
+						<ColorStop index="4" position="0.4" color="#66ff00" />
+						<ColorStop index="5" position="0.5" color="#00ff00" />
+						<ColorStop index="6" position="0.6" color="#00ff66" />
+						<ColorStop index="7" position="0.7" color="#00ffcc" />
+						<ColorStop index="8" position="0.8" color="#00ccff" />
+						<ColorStop index="9" position="0.9" color="#0066ff" />
+						<ColorStop index="10" position="1" color="#0000ff" />
+					</ColorStops>
+					<AlphaColor>#000000</AlphaColor>
+				</ColorGridProperties>
+				<AxisProperties>
+					<Axis index="0">
+						<TitleText>Zeit [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">a</IBK:Unit>
+						<Maximum>2.5</Maximum>
+					</Axis>
+					<Axis index="1">
+						<TitleText>Koordinate [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">m</IBK:Unit>
+					</Axis>
+					<Axis index="2" enabled="0">
+						<TitleText>$quantity [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">%</IBK:Unit>
+					</Axis>
+				</AxisProperties>
+				<ChartProperties>
+					<TitleText>Relative Humidity [$filename]</TitleText>
+					<Legend />
+					<ConstructionLinesVisible>1</ConstructionLinesVisible>
+				</ChartProperties>
+			</ChartModel>
+		</Mapper>
+		<Mapper name="Temperature [$filename]">
+			<Extractors>
+				<Extractor>
+					<DataIOFileName>block_climate_condensation_test_no_disc/results/Profile_Temperature.d6o</DataIOFileName>
+					<CutType>NoCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+				</Extractor>
+			</Extractors>
+			<ChartModel chartType="3D">
+				<ColorGridProperties>
+					<AutoScale>0</AutoScale>
+					<MinimumZ>-3.22721</MinimumZ>
+					<MaximumZ>20</MaximumZ>
+					<InterpolationMode>0</InterpolationMode>
+					<Type>LinearMap</Type>
+					<ColorStops>
+						<ColorStop index="0" position="0" color="#ff0000" />
+						<ColorStop index="1" position="0.1" color="#ff6600" />
+						<ColorStop index="2" position="0.2" color="#ffcc00" />
+						<ColorStop index="3" position="0.3" color="#ccff00" />
+						<ColorStop index="4" position="0.4" color="#66ff00" />
+						<ColorStop index="5" position="0.5" color="#00ff00" />
+						<ColorStop index="6" position="0.6" color="#00ff66" />
+						<ColorStop index="7" position="0.7" color="#00ffcc" />
+						<ColorStop index="8" position="0.8" color="#00ccff" />
+						<ColorStop index="9" position="0.9" color="#0066ff" />
+						<ColorStop index="10" position="1" color="#0000ff" />
+					</ColorStops>
+					<AlphaColor>#000000</AlphaColor>
+				</ColorGridProperties>
+				<AxisProperties>
+					<Axis index="0">
+						<TitleText>Zeit [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">h</IBK:Unit>
+						<Maximum>11135.5</Maximum>
+						<Minimum>10697.2</Minimum>
+					</Axis>
+					<Axis index="1">
+						<TitleText>Koordinate [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">m</IBK:Unit>
+						<Maximum>0.456897</Maximum>
+						<Minimum>-0.0107759</Minimum>
+					</Axis>
+					<Axis index="2" enabled="0">
+						<TitleText>$quantity [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">C</IBK:Unit>
+					</Axis>
+				</AxisProperties>
+				<ChartProperties>
+					<TitleText>Temperature [$filename]</TitleText>
+					<Legend />
+					<ConstructionLinesVisible>1</ConstructionLinesVisible>
+				</ChartProperties>
+			</ChartModel>
+		</Mapper>
+	</Mappers>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Split window state.-->
+	<Splitting>
+		<Widget id="1" parent="0" viewTable="0" mapperIndex="2" size1="1" size2="1" orientation="2" />
+		<FocusedWidget>0</FocusedWidget>
+	</Splitting>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+</PostProc>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <DelphinProject xmlns="http://www.bauklimatik-dresden.de" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:IBK="http://www.bauklimatik-dresden.de/IBK" xsi:schemaLocation="http://www.bauklimatik-dresden.de DelphinProject.xsd" fileVersion="6.5">
-	<ProjectInfo created="Mi. Dez. 5 10:42:12 2018" lastEdited="Mi. Dez. 5 16:34:39 2018">
+	<ProjectInfo created="Mi. Dez. 5 10:42:12 2018" lastEdited="Mi. Dez. 5 16:13:42 2018">
 		<Comment>&#x0A;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Reference case for EN 15026-2019.&lt;/p&gt;&#x0A;&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Wall with interior insulation subjected to block climate&lt;/p&gt;</Comment>
 	</ProjectInfo>
 
@@ -17,9 +17,6 @@
 			<IBK:Parameter name="Latitude" unit="Deg">51.3</IBK:Parameter>
 			<IBK:Flag name="UseCustomLocation">true</IBK:Flag>
 		</SimulationParameter>
-		<SolverParameter>
-			<IBK:Parameter name="RelTol" unit="---">1e-06</IBK:Parameter>
-		</SolverParameter>
 	</Init>
 
 	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -35,7 +32,7 @@
 
 	<!--Discretization data (grid and sketches)-->
 	<Discretization>
-		<XSteps unit="m">0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 </XSteps>
+		<XSteps unit="m">0.365 0.005 0.08 </XSteps>
 	</Discretization>
 
 	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -69,6 +66,14 @@
 				<IBK:Parameter name="ShiftValue" unit="%">0</IBK:Parameter>
 				<IBK:Flag name="Cyclic">false</IBK:Flag>
 			</ClimateCondition>
+
+			<ClimateCondition name="RoomTemperature" type="Temperature" kind="Constant">
+				<IBK:Parameter name="ConstantValue" unit="C">20</IBK:Parameter>
+			</ClimateCondition>
+
+			<ClimateCondition name="RoomRelativeHumidity" type="RelativeHumidity" kind="Constant">
+				<IBK:Parameter name="ConstantValue" unit="%">60</IBK:Parameter>
+			</ClimateCondition>
 		</ClimateConditions>
 
 		<BoundaryConditions>
@@ -87,14 +92,14 @@
 
 			<BoundaryCondition name="Room climate:IndoorHeatConduction" type="HeatConduction" kind="Exchange">
 				<IBK:Parameter name="ExchangeCoefficient" unit="W/m2K">8</IBK:Parameter>
-				<CCReference type="Temperature">20 C</CCReference>
+				<CCReference type="Temperature">RoomTemperature</CCReference>
 			</BoundaryCondition>
 
 			<BoundaryCondition name="Room climate:IndoorVaporDiffusion" type="VaporDiffusion" kind="Exchange">
 				<IBK:Parameter name="ExchangeCoefficient" unit="s/m">5e-06</IBK:Parameter>
 				<IBK:Parameter name="SDValue" unit="m">0</IBK:Parameter>
-				<CCReference type="Temperature">20 C</CCReference>
-				<CCReference type="RelativeHumidity">60 %</CCReference>
+				<CCReference type="Temperature">RoomTemperature</CCReference>
+				<CCReference type="RelativeHumidity">RoomRelativeHumidity</CCReference>
 			</BoundaryCondition>
 		</BoundaryConditions>
 	</Conditions>
@@ -192,22 +197,22 @@
 
 		<Assignment type="Output" location="Element">
 			<Reference>Temperaturprofil</Reference>
-			<Range>0 0 449 0</Range>
+			<Range>0 0 2 0</Range>
 		</Assignment>
 
 		<Assignment type="Output" location="Element">
 			<Reference>Luftfeuchteprofil</Reference>
-			<Range>0 0 449 0</Range>
+			<Range>0 0 2 0</Range>
 		</Assignment>
 
 		<Assignment type="Output" location="Element">
 			<Reference>Feuchtegehaltsprofil</Reference>
-			<Range>0 0 449 0</Range>
+			<Range>0 0 2 0</Range>
 		</Assignment>
 
 		<Assignment type="Output" location="Element">
 			<Reference>Feuchtegehaltsintegral</Reference>
-			<Range>0 0 449 0</Range>
+			<Range>0 0 2 0</Range>
 		</Assignment>
 
 		<Assignment type="Output" location="Left">
@@ -217,22 +222,22 @@
 
 		<Assignment type="Output" location="Right">
 			<Reference>Oberflächenwärmestrom - rechte Seite</Reference>
-			<Range>449 0 449 0</Range>
+			<Range>2 0 2 0</Range>
 		</Assignment>
 
 		<Assignment type="Material" location="Element">
 			<Reference>Calsitherm Climate Board F [706]</Reference>
-			<Range>370 0 449 0</Range>
+			<Range>2 0 2 0</Range>
 		</Assignment>
 
 		<Assignment type="Material" location="Element">
 			<Reference>Calsitherm KP Glue Mortar [705]</Reference>
-			<Range>365 0 369 0</Range>
+			<Range>1 0 1 0</Range>
 		</Assignment>
 
 		<Assignment type="Material" location="Element">
 			<Reference>Old Building Brick Reithalle Potsdam (outer brick 2) [538]</Reference>
-			<Range>0 0 364 0</Range>
+			<Range>0 0 0 0</Range>
 		</Assignment>
 
 		<Assignment type="Interface" location="Left">
@@ -242,7 +247,7 @@
 
 		<Assignment type="Interface" location="Right">
 			<Reference>Room climate</Reference>
-			<Range>449 0 449 0</Range>
+			<Range>2 0 2 0</Range>
 		</Assignment>
 	</Assignments>
 
