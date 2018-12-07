@@ -1,4 +1,4 @@
-/*	Copyright (c) 2001-2017, Institut für Bauklimatik, TU Dresden, Germany
+/*	Copyright (c) 2001-today, Institut für Bauklimatik, TU Dresden, Germany
 
 	Written by Andreas Nicolai
 	All rights reserved.
@@ -45,6 +45,7 @@
 
 #include "Material.h"
 #include "Directories.h"
+#include "OpenHAMArgParser.h"
 
 class Outputs;
 
@@ -60,7 +61,7 @@ public:
 	};
 
 	/*! Init model from project file. */
-	void init(const IBK::SolverArgsParser & args, Outputs & outputs);
+	void init(const OpenHAMArgParser & args, Outputs & outputs);
 
 	/*! Reads CCD file into linear spline.
 		Values are converted into base IO unit upon read.
@@ -93,7 +94,7 @@ public:
 	// Member variables controling the integrator
 
 	/*! Command line arguments. */
-	IBK::SolverArgsParser	m_args;
+	OpenHAMArgParser		m_args;
 
 	/*! File paths to log, result and project directory. */
 	Directories				m_dirs;
@@ -216,12 +217,6 @@ public:
 	double						m_jvRight;
 	double						m_hvRight;
 
-
-private:
-	/*! Utility function to parse command line arguments.
-		\todo Move to command line parser at some point.
-	*/
-	void extractDiscretizationOptions(bool & variableDisc, double & dx, double & stretch);
 };
 
 #endif // ModelH

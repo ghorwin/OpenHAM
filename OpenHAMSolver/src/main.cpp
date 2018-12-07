@@ -1,4 +1,4 @@
-/*	Copyright (c) 2001-2017, Institut für Bauklimatik, TU Dresden, Germany
+/*	Copyright (c) 2001-today, Institut für Bauklimatik, TU Dresden, Germany
 
 	Written by Andreas Nicolai
 	All rights reserved.
@@ -44,7 +44,7 @@
 
 #include "Integrator.h"
 #include "Model.h"
-#include "OpenHamArgParser.h"
+#include "OpenHAMArgParser.h"
 
 /*! Version info string */
 const char * const PROGRAM_INFO =

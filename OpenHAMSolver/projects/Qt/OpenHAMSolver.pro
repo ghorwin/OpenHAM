@@ -34,7 +34,7 @@ SOURCES += \
 	../../src/Directories.cpp \
 	../../src/SolverFeedback.cpp \
 	../../src/Mesh.cpp \
-    ../../src/OpenHamArgParser.cpp
+    ../../src/OpenHAMArgParser.cpp
 HEADERS += \
 	../../src/Model.h \
 	../../src/Integrator.h \
@@ -44,7 +44,7 @@ HEADERS += \
 	../../src/Directories.h \
 	../../src/SolverFeedback.h \
 	../../src/Mesh.h \
-    ../../src/OpenHamArgParser.h
+    ../../src/OpenHAMArgParser.h
 
 DISTFILES += \
 	../../../data/tests/test01_steady_state/steady_state.d6p
