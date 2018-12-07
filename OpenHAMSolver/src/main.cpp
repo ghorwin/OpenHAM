@@ -41,10 +41,10 @@
 #include <IBK_messages.h>
 #include <IBK_StringUtils.h>
 #include <IBK_WaitOnExit.h>
-#include <IBK_SolverArgsParser.h>
 
 #include "Integrator.h"
 #include "Model.h"
+#include "OpenHamArgParser.h"
 
 /*! Version info string */
 const char * const PROGRAM_INFO =
@@ -53,38 +53,9 @@ const char * const PROGRAM_INFO =
 	"Copyright 2015-today Andreas Nicolai\n"
 	"Contact: andreas.nicolai [at] tu-dresden.de\n\n";
 
+
 /*! Function sets up output directory structure. */
 void setupDirectories(const IBK::SolverArgsParser & args, Model & model);
-
-class OpenHAMArgParser : public IBK::SolverArgsParser {
-public:
-	/*! Prints help page to std-output.
-		\param out	Stream buffer of the help output.
-	*/
-	void printHelp(std::ostream & out) const {
-		// re-use implementation of original help function
-		out << "Syntax: " << m_appname << " [options] <project file>\n\n";
-		const unsigned int TEXT_WIDTH = 79;
-		const unsigned int TAB_WIDTH = 26;
-		printFlags(out,TEXT_WIDTH,TAB_WIDTH);
-		printOptions(out,TEXT_WIDTH,TAB_WIDTH);
-		out << "\nExamples:\n\n"
-			<< "Generating an equi-distant grid with 2 mm grid cells:\n"
-			<< "> OpenHamSolver --disc=equi:0.002 project.d6p\n\n"
-			<< "Generating a grid with variable spacing with 1 mm grid cells at boundaries and stretch factor of about 1.3:\n"
-			<< "> OpenHamSolver --disc=var:0.001:1.3 project.d6p\n\n"
-			<< "Detailed progress output and writing statistics after each completed simulation step:\n"
-			<< "> OpenHamSolver --verbosity-level=3 --step-stats project.d6p\n\n";
-	}
-
-	/*! Prints man page to std-output.
-		\param out	Stream buffer of the manual output.
-	*/
-	void printManPage(std::ostream & out) const {
-		IBK::ArgParser::printManPage(out);
-	}
-
-};
 
 
 /*! Solver main() function. */
@@ -100,9 +71,6 @@ int main(int argc, char * argv[]) {
 		// *** Command line parsing ***
 
 		OpenHAMArgParser args;
-		args.setAppName("OpenHAMSolver");
-		args.addFlag(0, "no-disc", "Skip grid generation (use grid as written in project file)");
-		args.addOption(0, "disc", "Custom grid generation, either equidistant (within each layer) or variable grid.", "equi|var>:<min dx>[:<stretch>]", "");
 
 		// Note: Command line arguments are passed as char in local encoding, i.e. in german latin9 encoding
 		//       They are converted to UTF8 (on Windows) for the rest of the solver to work.

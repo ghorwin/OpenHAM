@@ -33,7 +33,8 @@ SOURCES += \
 	../../src/BandMatrix.cpp \
 	../../src/Directories.cpp \
 	../../src/SolverFeedback.cpp \
-	../../src/Mesh.cpp
+	../../src/Mesh.cpp \
+    ../../src/OpenHamArgParser.cpp
 HEADERS += \
 	../../src/Model.h \
 	../../src/Integrator.h \
@@ -42,7 +43,8 @@ HEADERS += \
 	../../src/BandMatrix.h \
 	../../src/Directories.h \
 	../../src/SolverFeedback.h \
-	../../src/Mesh.h
+	../../src/Mesh.h \
+    ../../src/OpenHamArgParser.h
 
 DISTFILES += \
 	../../../data/tests/test01_steady_state/steady_state.d6p
