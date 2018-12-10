@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<PostProc version="2.0.15" xmlns="http://www.bauklimatik-dresden.de" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:IBK="http://www.bauklimatik-dresden.de/IBK" xsi:schemaLocation="http://www.bauklimatik-dresden.de PostProc.xsd">
+	<!--List of all directories-->
+	<Directories>
+		<Directory>
+			<Path>.</Path>
+			<SubDir Color="#416fce" Checked="0">EN15026/EN15026-2007</SubDir>
+			<SubDir Color="#ffaa00" Checked="0">EN15026/reference_results</SubDir>
+			<SubDir Color="#45ad45" Checked="0">block_climate_condensation_test/block_climate_condensation_test</SubDir>
+			<SubDir Color="#aa0000" Checked="1">block_climate_condensation_test/block_climate_condensation_test_no_disc</SubDir>
+			<SubDir Color="#ff007f" Checked="1">block_climate_condensation_test/climate</SubDir>
+			<ExpandedSubDir>.</ExpandedSubDir>
+			<ExpandedSubDir>block_climate_condensation_test</ExpandedSubDir>
+		</Directory>
+	</Directories>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--All mappers.-->
+	<Mappers>
+		<Mapper name="Outside conditions">
+			<Extractors>
+				<Extractor>
+					<DataIOFileName>block_climate_condensation_test/climate/OutsideTemperature.tsv?1</DataIOFileName>
+					<CutType>NoCut</CutType>
+					<DataFormat>DF_2D</DataFormat>
+					<DataType>T_REFERENCE</DataType>
+					<ColumnIndex>0</ColumnIndex>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>block_climate_condensation_test/climate/OutsideRelativeHumidity.tsv?1</DataIOFileName>
+					<CutType>NoCut</CutType>
+					<DataFormat>DF_2D</DataFormat>
+					<DataType>T_REFERENCE</DataType>
+					<ColumnIndex>0</ColumnIndex>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+				</Extractor>
+			</Extractors>
+			<ChartModel chartType="2D">
+				<SeriesProperties>
+					<Series>
+						<TitleText>$quantity</TitleText>
+						<LineStyle>0</LineStyle>
+						<PenColor>#cc0000</PenColor>
+					</Series>
+					<Series leftAxis="0">
+						<TitleText>Relative Humidity</TitleText>
+						<LineStyle>0</LineStyle>
+						<PenColor>#3465a4</PenColor>
+					</Series>
+				</SeriesProperties>
+				<AxisProperties>
+					<Axis index="0">
+						<TitleText>Time [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">a</IBK:Unit>
+						<Maximum>2</Maximum>
+					</Axis>
+					<Axis index="1" autoscale="0">
+						<TitleText>$quantity [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">C</IBK:Unit>
+						<Maximum>44</Maximum>
+						<Minimum>-10</Minimum>
+					</Axis>
+					<Axis index="2" enabled="0" autoscale="0">
+						<TitleText>Relative Humidity [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">%</IBK:Unit>
+						<Maximum>100</Maximum>
+					</Axis>
+				</AxisProperties>
+				<ChartProperties>
+					<TitleText />
+					<Legend>
+						<Position>Inside</Position>
+						<MaxColumns>1</MaxColumns>
+					</Legend>
+				</ChartProperties>
+			</ChartModel>
+		</Mapper>
+		<Mapper name="Water Vapor Pressure">
+			<Extractors>
+				<Extractor>
+					<DataIOFileName>block_climate_condensation_test/block_climate_condensation_test_no_disc/results/Profile_VaporPressure.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT>90</CutIndexT>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>block_climate_condensation_test/block_climate_condensation_test_no_disc/results/Profile_Temperature.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT>90</CutIndexT>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+				</Extractor>
+			</Extractors>
+			<ChartModel chartType="2D">
+				<SeriesProperties>
+					<Series>
+						<TitleText>$filename</TitleText>
+						<LineStyle>0</LineStyle>
+					</Series>
+					<Series leftAxis="0">
+						<TitleText>$filename</TitleText>
+						<LineStyle>0</LineStyle>
+						<PenColor>#ff420e</PenColor>
+					</Series>
+				</SeriesProperties>
+				<AxisProperties>
+					<Axis index="0">
+						<TitleText>Koordinate [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">m</IBK:Unit>
+					</Axis>
+					<Axis index="1">
+						<TitleText>$quantity [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">Pa</IBK:Unit>
+					</Axis>
+					<Axis index="2" enabled="0">
+						<TitleText>$quantity [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">C</IBK:Unit>
+					</Axis>
+				</AxisProperties>
+				<ChartProperties>
+					<TitleText />
+					<Legend />
+				</ChartProperties>
+			</ChartModel>
+		</Mapper>
+		<Mapper name="Relative Humidity">
+			<Extractors>
+				<Extractor>
+					<DataIOFileName>block_climate_condensation_test/block_climate_condensation_test_no_disc/results/Profile_RelativeHumidity.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+				</Extractor>
+			</Extractors>
+			<ChartModel chartType="2D">
+				<SeriesProperties>
+					<Series>
+						<TitleText>$filename</TitleText>
+						<LineStyle>0</LineStyle>
+					</Series>
+				</SeriesProperties>
+				<AxisProperties>
+					<Axis index="0">
+						<TitleText>Koordinate [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">m</IBK:Unit>
+					</Axis>
+					<Axis index="1">
+						<TitleText>$quantity [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">%</IBK:Unit>
+					</Axis>
+					<Axis index="2" enabled="0">
+						<TitleText>$quantity [$unit]</TitleText>
+					</Axis>
+				</AxisProperties>
+				<ChartProperties>
+					<TitleText />
+					<Legend />
+				</ChartProperties>
+			</ChartModel>
+		</Mapper>
+	</Mappers>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Split window state.-->
+	<Splitting>
+		<Widget id="1" parent="0" viewTable="0" mapperIndex="1" size1="487" size2="610" orientation="2" />
+		<Widget id="2" parent="1" viewTable="0" mapperIndex="2" size1="487" size2="610" orientation="1" />
+		<FocusedWidget>1</FocusedWidget>
+	</Splitting>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+</PostProc>

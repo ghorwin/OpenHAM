@@ -115,7 +115,7 @@
 			<OutputGrid name="Felder und Profile">
 				<Interval>
 					<IBK:Parameter name="Duration" unit="a">0</IBK:Parameter>
-					<IBK:Parameter name="StepSize" unit="d">1.5</IBK:Parameter>
+					<IBK:Parameter name="StepSize" unit="d">1</IBK:Parameter>
 				</Interval>
 			</OutputGrid>
 			<OutputGrid name="Skalare">
