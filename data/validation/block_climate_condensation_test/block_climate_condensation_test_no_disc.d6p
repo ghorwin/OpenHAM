@@ -62,7 +62,7 @@
 			</ClimateCondition>
 
 			<ClimateCondition name="Outside RH" type="RelativeHumidity" kind="TabulatedData">
-				<Filename>/home/ghorwin/git/OpenHAM/data/validation/block_climate_condensation_test/climate/OutsideRelativeHumidity.tsv</Filename>
+				<Filename>${Project Directory}/climate/OutsideRelativeHumidity.tsv</Filename>
 				<IBK:Parameter name="ShiftValue" unit="%">0</IBK:Parameter>
 				<IBK:Flag name="Cyclic">false</IBK:Flag>
 			</ClimateCondition>
