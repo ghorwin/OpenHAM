@@ -1,3 +1,7 @@
 /.qmake.stash
 /Makefile.OpenHAMSolver
 /Makefile
+/Makefile.OpenHAMSolver.Debug
+/Makefile.OpenHAMSolver.Release
+/object_script.OpenHAMSolver.Debug
+/object_script.OpenHAMSolver.Release
