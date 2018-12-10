@@ -1,3 +1,5 @@
 /.qmake.stash
 /Makefile.DelphinLight
 /Makefile
+/Makefile.DelphinLight.Debug
+/Makefile.DelphinLight.Release

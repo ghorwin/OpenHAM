@@ -1,2 +1,6 @@
 /.qmake.stash
 /Makefile.IBK
+/Makefile.IBK.Debug
+/Makefile.IBK.Release
+/object_script.IBK.Debug
+/object_script.IBK.Release
