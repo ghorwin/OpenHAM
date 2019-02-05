@@ -58,7 +58,7 @@ Project::Project() {
 	m_initialRH.set("DefaultRelativeHumidity", "80 %");
 	m_simStart.set("Start", "0 d");
 	m_simDuration.set("Duration", "5 d");
-	m_maxTimeStep.set("MaxTimeStep", "30 d");
+	m_maxTimeStep.set("MaxTimeStep", "30 min");
 	m_minTimeStep.set("MinTimeStep", "1e-8 s");
 	m_initialTimeStep.set("InitialTimeStep", "0.01 s");
 	m_relTol.set("RelTol", "1e-5 ---");
