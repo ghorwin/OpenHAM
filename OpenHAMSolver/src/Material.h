@@ -78,9 +78,8 @@ public:
 	double			m_rho; 		///< Bulk density [kg/m3]
 	double			m_cT;		///< Heat capacity [J/kgK]
 	double			m_lambda;	///< Thermal conductivity [J/msK]
-	IBK::Parameter	m_mew;		///< Mu-value [---], if given.
-	double			m_Opor;		///< Open porosity in [m3/m3]
-	double			m_Oeff;		///< Effective saturation in [m3/m3]
+	IBK::Parameter	m_mew;		///< Mu-dry-value [---], if given.
+	double			m_Oeff;		///< Effective saturation moisture content in [m3/m3]; w_sat = Oeff*1000 kg/m3
 
 
 	/*! Moisture storage function: \f$\theta_\ell\left(p_C\right)\f$ */

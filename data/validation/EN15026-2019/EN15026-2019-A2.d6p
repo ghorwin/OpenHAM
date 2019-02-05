@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<DelphinProject xmlns="http://www.bauklimatik-dresden.de" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:IBK="http://www.bauklimatik-dresden.de/IBK" xsi:schemaLocation="http://www.bauklimatik-dresden.de DelphinProject.xsd" fileVersion="6.0">
+	<ProjectInfo created="Mi. Dez. 5 10:42:12 2018" lastEdited="Di. Feb. 5 10:54:05 2019">
+		<Comment>&#x0A;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Reference case for EN 15026-2019.&lt;/p&gt;&#x0A;&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Wall with interior insulation subjected to block climate&lt;/p&gt;</Comment>
+	</ProjectInfo>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Model data, solver settings, general parameters-->
+	<Init>
+		<SimulationParameter>
+			<BalanceEquationModule>BEHeatMoisture</BalanceEquationModule>
+			<Interval>
+				<IBK:Parameter name="Duration" unit="a">2</IBK:Parameter>
+			</Interval>
+			<IBK:Parameter name="Longitude" unit="Deg">13.4</IBK:Parameter>
+			<IBK:Parameter name="Latitude" unit="Deg">51.3</IBK:Parameter>
+			<IBK:Flag name="UseCustomLocation">true</IBK:Flag>
+		</SimulationParameter>
+		<SolverParameter>
+			<IBK:Parameter name="RelTol" unit="---">1e-06</IBK:Parameter>
+		</SolverParameter>
+	</Init>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--List of all materials used in this construction-->
+	<Materials>
+		<MaterialReference name="Brick" color="#ffa40000" hatchCode="13">built-in:3</MaterialReference>
+		<MaterialReference name="Glue Mortar" color="#ffc4a000" hatchCode="9">built-in:4</MaterialReference>
+		<MaterialReference name="Insulation Board" color="#fff9d895" hatchCode="13">built-in:5</MaterialReference>
+	</Materials>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Discretization data (grid and sketches)-->
+	<Discretization>
+		<XSteps unit="m">0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 </XSteps>
+	</Discretization>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Conditions data, specifies how construction interacts with environment-->
+	<Conditions>
+
+		<Interfaces>
+			<Interface name="Outside climate" type="Detailed">
+				<IBK:Parameter name="Orientation" unit="Deg">270</IBK:Parameter>
+				<BCReference>Outside climate:IndoorHeatConduction</BCReference>
+				<BCReference>Outside climate:IndoorVaporDiffusion</BCReference>
+			</Interface>
+			<Interface name="Room climate" type="Detailed">
+				<IBK:Parameter name="Orientation" unit="Deg">270</IBK:Parameter>
+				<BCReference>Room climate:IndoorHeatConduction</BCReference>
+				<BCReference>Room climate:IndoorVaporDiffusion</BCReference>
+			</Interface>
+		</Interfaces>
+
+		<ClimateConditions>
+
+			<ClimateCondition name="Outside Temperature" type="Temperature" kind="TabulatedData">
+				<Filename>${Project Directory}/climate/OutsideTemperature.tsv</Filename>
+				<IBK:Parameter name="ShiftValue" unit="K">0</IBK:Parameter>
+				<IBK:Flag name="ExtendData">true</IBK:Flag>
+				<IBK:Flag name="Cyclic">false</IBK:Flag>
+			</ClimateCondition>
+
+			<ClimateCondition name="Outside RH" type="RelativeHumidity" kind="TabulatedData">
+				<Filename>${Project Directory}/climate/OutsideRelativeHumidity.tsv</Filename>
+				<IBK:Parameter name="ShiftValue" unit="%">0</IBK:Parameter>
+				<IBK:Flag name="ExtendData">true</IBK:Flag>
+				<IBK:Flag name="Cyclic">false</IBK:Flag>
+			</ClimateCondition>
+		</ClimateConditions>
+
+		<BoundaryConditions>
+
+			<BoundaryCondition name="Outside climate:IndoorHeatConduction" type="HeatConduction" kind="Exchange">
+				<IBK:Parameter name="ExchangeCoefficient" unit="W/m2K">17</IBK:Parameter>
+				<CCReference type="Temperature">Outside Temperature</CCReference>
+			</BoundaryCondition>
+
+			<BoundaryCondition name="Outside climate:IndoorVaporDiffusion" type="VaporDiffusion" kind="Exchange">
+				<IBK:Parameter name="ExchangeCoefficient" unit="s/m">7.5e-08</IBK:Parameter>
+				<IBK:Parameter name="SDValue" unit="m">0</IBK:Parameter>
+				<CCReference type="Temperature">Outside Temperature</CCReference>
+				<CCReference type="RelativeHumidity">Outside RH</CCReference>
+			</BoundaryCondition>
+
+			<BoundaryCondition name="Room climate:IndoorHeatConduction" type="HeatConduction" kind="Exchange">
+				<IBK:Parameter name="ExchangeCoefficient" unit="W/m2K">8</IBK:Parameter>
+				<CCReference type="Temperature">20 C</CCReference>
+			</BoundaryCondition>
+
+			<BoundaryCondition name="Room climate:IndoorVaporDiffusion" type="VaporDiffusion" kind="Exchange">
+				<IBK:Parameter name="ExchangeCoefficient" unit="s/m">2.5e-08</IBK:Parameter>
+				<IBK:Parameter name="SDValue" unit="m">0</IBK:Parameter>
+				<CCReference type="Temperature">20 C</CCReference>
+				<CCReference type="RelativeHumidity">60 %</CCReference>
+			</BoundaryCondition>
+		</BoundaryConditions>
+	</Conditions>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Contains definitions of output files and schedules for outputs.-->
+	<Outputs>
+		<!--General parameters-->
+		<IBK:Unit name="TimeUnit">h</IBK:Unit>
+		<!--List of all Output schedules-->
+		<OutputGrids>
+			<OutputGrid name="Felder und Profile">
+				<Interval>
+					<IBK:Parameter name="Duration" unit="a">0</IBK:Parameter>
+					<IBK:Parameter name="StepSize" unit="d">1.5</IBK:Parameter>
+				</Interval>
+			</OutputGrid>
+			<OutputGrid name="Skalare">
+				<Interval>
+					<IBK:Parameter name="Duration" unit="a">0</IBK:Parameter>
+					<IBK:Parameter name="StepSize" unit="h">1</IBK:Parameter>
+				</Interval>
+			</OutputGrid>
+		</OutputGrids>
+		<!--List of all Output files-->
+		<OutputFiles>
+			<OutputFile name="Temperaturprofil">
+				<Quantity unit="C">Temperature</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Felder und Profile</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Luftfeuchteprofil">
+				<Quantity unit="%">RelativeHumidity</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Felder und Profile</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Feuchtegehaltsprofil">
+				<Quantity unit="kg/m3">MoistureMassDensity</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Felder und Profile</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Feuchtegehaltsintegral">
+				<Quantity unit="kg">MoistureMassDensity</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Integral</SpaceType>
+				<OutputGrid>Skalare</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Oberflächentemperatur - linke Seite">
+				<Quantity unit="C">Temperature</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Skalare</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Oberflächentemperatur - rechte Seite">
+				<Quantity unit="C">Temperature</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Skalare</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Relative Luftfeuchte an der Oberfläche - linke Seite">
+				<Quantity unit="%">RelativeHumidity</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Felder und Profile</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Relative Luftfeuchte an der Oberfläche - rechte Seite">
+				<Quantity unit="%">RelativeHumidity</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Felder und Profile</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Oberflächenwärmestrom - linke Seite">
+				<Quantity unit="W/m2">TotalFluxHeat</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Skalare</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Oberflächenwärmestrom - rechte Seite">
+				<Quantity unit="W/m2">TotalFluxHeat</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Skalare</OutputGrid>
+			</OutputFile>
+		</OutputFiles>
+	</Outputs>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--List of all assignments of materials and conditions-->
+	<Assignments>
+
+		<Assignment type="Output" location="Element">
+			<Reference>Temperaturprofil</Reference>
+			<Range>0 0 449 0</Range>
+		</Assignment>
+
+		<Assignment type="Output" location="Element">
+			<Reference>Luftfeuchteprofil</Reference>
+			<Range>0 0 449 0</Range>
+		</Assignment>
+
+		<Assignment type="Output" location="Element">
+			<Reference>Feuchtegehaltsprofil</Reference>
+			<Range>0 0 449 0</Range>
+		</Assignment>
+
+		<Assignment type="Output" location="Element">
+			<Reference>Feuchtegehaltsintegral</Reference>
+			<Range>0 0 449 0</Range>
+		</Assignment>
+
+		<Assignment type="Output" location="Left">
+			<Reference>Oberflächenwärmestrom - linke Seite</Reference>
+			<Range>0 0 0 0</Range>
+		</Assignment>
+
+		<Assignment type="Output" location="Right">
+			<Reference>Oberflächenwärmestrom - rechte Seite</Reference>
+			<Range>449 0 449 0</Range>
+		</Assignment>
+
+		<Assignment type="Material" location="Element">
+			<Reference>Insulation Board</Reference>
+			<Range>370 0 449 0</Range>
+		</Assignment>
+
+		<Assignment type="Material" location="Element">
+			<Reference>Glue Mortar</Reference>
+			<Range>365 0 369 0</Range>
+		</Assignment>
+
+		<Assignment type="Material" location="Element">
+			<Reference>Brick</Reference>
+			<Range>0 0 364 0</Range>
+		</Assignment>
+
+		<Assignment type="Interface" location="Left">
+			<Reference>Outside climate</Reference>
+			<Range>0 0 0 0</Range>
+		</Assignment>
+
+		<Assignment type="Interface" location="Right">
+			<Reference>Room climate</Reference>
+			<Range>449 0 449 0</Range>
+		</Assignment>
+	</Assignments>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+</DelphinProject>

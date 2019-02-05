@@ -59,7 +59,6 @@ void Material::init(int index) {
 			m_rho		= 2005;
 			m_cT		= 840;
 			m_lambda	= 0.5;
-			m_Opor		= 0.157;
 			m_Oeff		= 0.157;
 			m_isAir		= false;
 			logKlSplineOl =
@@ -75,19 +74,50 @@ void Material::init(int index) {
 			m_rho		= 790;
 			m_cT		= 870;
 			m_lambda	= 0.2;
-			m_Opor		= 0.209;
 			m_Oeff		= 0.209;
 			m_isAir		= false;
 			break;
 
-		// EN 15026 Material
+		// EN 15026-2007 Material
 		case 2 :
 			m_name		= "EN 15026 Material";
 			m_rho		= 1824;
 			m_cT		= 1000;
 			m_lambda	= 1.5;
 			m_Oeff		= 0.146;
-			m_Opor		= 0.146;
+			m_isAir		= false;
+			break;
+
+		// EN 15026-2019 - Brick
+		case 3 :
+			m_name		= "EN 15026-2019 Brick";
+			m_rho		= 1852;
+			m_cT		= 809;
+			m_lambda	= 0.682;
+			m_Oeff		= 0.2871;
+			m_mew.set("MEW", 27.07, "---");
+			m_isAir		= false;
+			break;
+
+		// EN 15026-2019 - Glue Mortar
+		case 4 :
+			m_name		= "EN 15026-2019 Glue Mortar";
+			m_rho		= 1410;
+			m_cT		= 1060;
+			m_lambda	= 0.6;
+			m_Oeff		= 0.340;
+			m_mew.set("MEW", 22.89, "---");
+			m_isAir		= false;
+			break;
+
+		// EN 15026-2019 - Insulation Board
+		case 5 :
+			m_name		= "EN 15026-2019 Insulation Board";
+			m_rho		= 267;
+			m_cT		= 1150;
+			m_lambda	= 0.074;
+			m_Oeff		= 0.88125;
+			m_mew.set("MEW", 6.59, "---");
 			m_isAir		= false;
 			break;
 
@@ -140,7 +170,6 @@ void Material::readFromFile(const IBK::Path & m6FilePath) {
 
 	m_mew.clear();
 	m_Oeff = 0;
-	m_Opor = 0;
 
 	try {
 		std::vector<std::string> lines;
@@ -179,7 +208,6 @@ void Material::readFromFile(const IBK::Path & m6FilePath) {
 			IBK::Parameter p;
 			p.set("RHO", keyValuePairs["RHO"]); m_rho = p.value;
 			p.set("CE", keyValuePairs["CE"]); m_cT = p.value;
-			p.set("THETA_POR", keyValuePairs["THETA_POR"]); m_Opor = p.value;
 			p.set("THETA_EFF", keyValuePairs["THETA_EFF"]); m_Oeff = p.value;
 
 			if (m_Oeff <= 0)
@@ -382,6 +410,48 @@ double Material::Ol_pc(double pc) const {
 			return 0.146/IBK::f_pow(1+IBK::f_pow(-8e-8*pc, 1.6),0.375);
 		}
 
+		// EN 15026-2019 - Brick
+		case 3 :
+		{
+			const double retl[3] = {4.441E-01, 1.013E-01, 4.551E-01};
+			const double retc[3] = {4.004E-06, 2.497E-06, 4.526E-07};
+			const double retn[3] = {1.413E+00, 2.267E+00, 3.056E+00};
+			for (int i=0; i<3; ++i) {
+				double tmp = 1 + IBK::f_pow(retc[i]*(-pc), retn[i]);
+				double tmp2 = IBK::f_pow(tmp, (retn[i]-1)/retn[i]);
+				Ol += retl[i] / tmp2;
+			}
+			Ol *= m_Oeff;
+			return Ol;
+		}
+		// EN 15026-2019 - Glue Mortar
+		case 4 :
+		{
+			const double retl[3] = {3.884E-01, 2.335E-01, 3.812E-01};
+			const double retc[3] = {3.410E-07, 1.595E-08, 4.937E-06};
+			const double retn[3] = {1.670E+00, 2.909E+00, 1.633E+00};
+			for (int i=0; i<3; ++i) {
+				double tmp = 1 + IBK::f_pow(retc[i]*(-pc), retn[i]);
+				double tmp2 = IBK::f_pow(tmp, (retn[i]-1)/retn[i]);
+				Ol += retl[i] / tmp2;
+			}
+			Ol *= m_Oeff;
+			return Ol;
+		}
+		// EN 15026-2019 - Insulation Board
+		case 5 :
+		{
+			const double retl[2] = {8.176E-01, 1.797E-01};
+			const double retc[2] = {7.596E-06, 3.675E-06};
+			const double retn[2] = {8.626E+00,1.706E+00};
+			for (int i=0; i<2; ++i) {
+				double tmp = 1 + IBK::f_pow(retc[i]*(-pc), retn[i]);
+				double tmp2 = IBK::f_pow(tmp, (retn[i]-1)/retn[i]);
+				Ol += retl[i] / tmp2;
+			}
+			Ol *= m_Oeff;
+			return Ol;
+		}
 	}
 	// must be a material from data file, use linear spline interpolation
 	return m_Ol_pC_Spline.value(IBK::f_log10(-pc));
@@ -396,6 +466,12 @@ double Material::lambda_Ol(double Ol) const {
 		case 1 : return m_lambda + 4.5 * Ol;
 		// EN 15026 Material
 		case 2 : return m_lambda + 15.8 * Ol;
+		// EN 15026-2019 - Brick
+		// EN 15026-2019 - Glue Mortar
+		// EN 15026-2019 - Insulation Board
+		case 3 :
+		case 4 :
+		case 5 : return m_lambda + 0.56 * Ol;
 	}
 	// use standard model
 	if (m_lambda_Ol_Spline.valid())
@@ -412,8 +488,7 @@ double Material::Kl_Ol(double Ol) const {
 			return IBK::f_pow10(m_lgKl_Ol_Spline.value(Ol));
 
 		// Hamstad Finishing Material
-		case 1 :
-		{
+		case 1 : {
 			double tmp = (Ol-0.120)*1000;
 			tmp = -33.0 + 7.04e-2*tmp - 1.742e-4*tmp*tmp - 2.7953e-6*tmp*tmp*tmp
 				  -1.1566e-7*tmp*tmp*tmp*tmp + 2.5969e-9*tmp*tmp*tmp*tmp*tmp;
@@ -422,13 +497,32 @@ double Material::Kl_Ol(double Ol) const {
 		}
 
 		// EN 15026 Material
-		case 2 :
-		{
+		case 2 : {
 			double w2 = Ol*1000-73;
 			double lnK = -39.2619 + w2*(0.0704 + w2*(-1.7420e-4 + w2*(-2.7953e-6 + w2*(-1.1566e-7 + w2*2.5969e-9))));
 			return IBK::f_exp(lnK);
 		}
 
+		// EN 15026-2019 - Brick
+		case 3 : {
+			double w = Ol*1000;
+			double lgK = -2.0000E+01 + w*(1.3706E-01 + w*(-8.0590E-04 + w*1.5795E-06));
+			return IBK::f_pow10(lgK);
+		}
+
+		// EN 15026-2019 - Glue Mortar
+		case 4 : {
+			double w = Ol*1000;
+			double lgK = -1.9948E+01 + w*(6.7183E-02 + w*(-2.9458E-04 + w*5.0157E-07)) + 2.4531E-02*IBK::f_log(w);
+			return IBK::f_pow10(lgK);
+		}
+
+		// EN 15026-2019 - Insulation Board
+		case 5 : {
+			double w = Ol*1000;
+			double lgK = -1.7332E+01 + w*(3.2613E-02 + w*(-5.5380E-05 + w*3.1358E-08)) + 3.4077E-01*IBK::f_log(w);
+			return IBK::f_pow10(lgK);
+		}
 	}
 	return IBK::f_pow10(m_lgKl_Ol_Spline.value(Ol));
 }
@@ -462,6 +556,15 @@ double Material::Kv_Ol(double T, double Ol) const {
 			double normalizedW = 1 - Ol/0.146;
 			const double mew = 200;
 			return IBK::DV_AIR/(IBK::R_VAPOR*293.15*mew)*normalizedW/(0.503*normalizedW*normalizedW + 0.497);
+		}
+		// EN 15026-2019 - Brick
+		// EN 15026-2019 - Glue Mortar
+		// EN 15026-2019 - Insulation Board
+		case 3 :
+		case 4 :
+		case 5 : {
+			const double delta_a = IBK::DV_AIR/(IBK::R_VAPOR*293.15);
+			return delta_a/m_mew.value;
 		}
 	}
 	if (m_lgKv_Ol_Spline.valid())
