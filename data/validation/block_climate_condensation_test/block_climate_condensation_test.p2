@@ -5,7 +5,6 @@
 		<Directory>
 			<Path>.</Path>
 			<SubDir Color="#416fce" Checked="1">block_climate_condensation_test</SubDir>
-			<SubDir Color="#d02000" Checked="1">block_climate_condensation_test_no_disc</SubDir>
 			<SubDir Color="#ff007f" Checked="0">climate</SubDir>
 			<ExpandedSubDir>.</ExpandedSubDir>
 		</Directory>
@@ -82,7 +81,7 @@
 					<DataIOFileName>block_climate_condensation_test/results/Luftfeuchteprofil.d6o</DataIOFileName>
 					<CutType>TimeCut</CutType>
 					<DataFormat>DF_3D</DataFormat>
-					<CutIndexT>285</CutIndexT>
+					<CutIndexT>0</CutIndexT>
 					<CutLockXDir>0</CutLockXDir>
 					<CutLockYDir>0</CutLockYDir>
 					<CutLockZDir>0</CutLockZDir>
@@ -237,13 +236,52 @@
 				</ChartProperties>
 			</ChartModel>
 		</Mapper>
+		<Mapper name="Total mass density of liquid water, water vapor and ice [$filename]">
+			<Extractors>
+				<Extractor>
+					<DataIOFileName>block_climate_condensation_test/results/Feuchtegehaltsintegral.d6o</DataIOFileName>
+					<CutType>NoCut</CutType>
+					<DataFormat>DF_2D</DataFormat>
+					<CutLockXDir>0</CutLockXDir>
+					<CutLockYDir>0</CutLockYDir>
+					<CutLockZDir>0</CutLockZDir>
+					<CutLockTDir>0</CutLockTDir>
+					<Manipulator type="2DScaling">-1</Manipulator>
+				</Extractor>
+			</Extractors>
+			<ChartModel chartType="2D">
+				<SeriesProperties>
+					<Series>
+						<TitleText>$filename</TitleText>
+						<LineStyle>0</LineStyle>
+					</Series>
+				</SeriesProperties>
+				<AxisProperties>
+					<Axis index="0">
+						<TitleText>Zeit [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">h</IBK:Unit>
+					</Axis>
+					<Axis index="1">
+						<TitleText>$quantity [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">kg</IBK:Unit>
+					</Axis>
+					<Axis index="2" enabled="0">
+						<TitleText>$quantity [$unit]</TitleText>
+					</Axis>
+				</AxisProperties>
+				<ChartProperties>
+					<TitleText>Total mass density of liquid water, water vapor and ice [$filename]</TitleText>
+					<Legend />
+				</ChartProperties>
+			</ChartModel>
+		</Mapper>
 	</Mappers>
 
 	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 	<!--Split window state.-->
 	<Splitting>
-		<Widget id="1" parent="0" viewTable="0" mapperIndex="2" size1="1" size2="1" orientation="2" />
+		<Widget id="1" parent="0" viewTable="0" mapperIndex="4" size1="1" size2="1" orientation="2" />
 		<FocusedWidget>0</FocusedWidget>
 	</Splitting>
 
