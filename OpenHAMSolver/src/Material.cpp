@@ -454,6 +454,8 @@ double Material::Ol_pc(double pc) const {
 		}
 	}
 	// must be a material from data file, use linear spline interpolation
+	if (pc >= 0)
+		return m_Ol_pC_Spline.y().front();
 	return m_Ol_pC_Spline.value(IBK::f_log10(-pc));
 }
 
@@ -606,9 +608,11 @@ const char * const MRC_GNUPLOT =
 	"plot \"layer_${IDX}_mrc.dat\" using 3:2 with lines\n"
 	"\n";
 
-void Material::createPlots(const IBK::Path & plotDir, unsigned int layerIdx) const {
+void Material::createPlots(const IBK::Path & plotDir, const std::string & matref) const {
 	// generate material file name
-	IBK::Path fileNameRoot = plotDir / IBK::FormatString("layer_%1").arg(layerIdx).str();
+	std::string fname = matref;
+	fname = IBK::replace_string(fname, ":", "_");
+	IBK::Path fileNameRoot = plotDir / fname;
 
 	IBK::Path mrcDataFile(fileNameRoot + "_mrc.dat");
 	std::ofstream fout;
@@ -619,7 +623,7 @@ void Material::createPlots(const IBK::Path & plotDir, unsigned int layerIdx) con
 		double pC = 10.0*i/NUM_VALUES;
 		double pc = -IBK::f_pow10(pC);
 		double rh = IBK::f_relhum(293.15, pc);
-		fout << pC << " " << Ol_pc(-IBK::f_pow10(pC)) << " " << rh*100 << std::endl;
+		fout << pC << " " << Ol_pc(pc) << " " << rh*100 << std::endl;
 	}
 	fout.close();
 
@@ -628,12 +632,31 @@ void Material::createPlots(const IBK::Path & plotDir, unsigned int layerIdx) con
 	openFileUtf8(mrcDataFile, fout);
 
 	std::string mrc_plot_text = MRC_GNUPLOT;
-	mrc_plot_text = IBK::replace_string(mrc_plot_text, "${IDX}", IBK::val2string(layerIdx));
+	mrc_plot_text = IBK::replace_string(mrc_plot_text, "${IDX}", IBK::val2string(matref));
 	fout << mrc_plot_text;
 	fout.close();
 
-
 	IBK::Path dataFile(fileNameRoot + "_transport.dat");
 	openFileUtf8(dataFile, fout);
+	double OlMax = Ol_pc(0);
+	for (unsigned int i=0; i<NUM_VALUES; ++i) {
+		double Ol = OlMax/NUM_VALUES*(i+1);
+		fout << Ol << " " << Kl_Ol(Ol) << " " << Kv_Ol(293.15, Ol) << " " << lambda_Ol(Ol) << std::endl;
+	}
+	fout.close();
+
+	IBK::Path dataFile2(fileNameRoot + "_kl.txt");
+	openFileUtf8(dataFile2, fout);
+	for (unsigned int i=0; i<NUM_VALUES; ++i) {
+		double Ol = OlMax/NUM_VALUES*(i+1);
+		fout << Ol << " ";
+	}
+	fout << std::endl;
+	for (unsigned int i=0; i<NUM_VALUES; ++i) {
+		double Ol = OlMax/NUM_VALUES*(i+1);
+		fout << Kl_Ol(Ol) << " ";
+	}
+	fout << std::endl;
+	fout.close();
 
 }

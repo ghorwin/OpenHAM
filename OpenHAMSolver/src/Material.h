@@ -66,7 +66,7 @@ public:
 	double Kv_Ol(double T, double Ol) const;
 
 	/*! Creates some plots for the material functions in this material, useful for generating reports. */
-	void createPlots(const IBK::Path & plotDir, unsigned int layerIdx) const;
+	void createPlots(const IBK::Path & plotDir, const std::string & matref) const;
 
 	int				m_i;		///< Material index number
 	IBK::Path		m_filepath;	///< The file path that the material was read from (set in readFromFile()).

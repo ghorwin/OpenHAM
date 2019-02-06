@@ -112,6 +112,8 @@ void Model::init(const OpenHAMArgParser & args, Outputs & outputs) {
 		args.extractDiscretizationOptions(variableDisc, dx, stretch);
 
 		{
+			std::set<std::string> usedMatRefs;
+
 			IBK::IBK_Message( IBK::FormatString("Setting up layers\n"), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 			IBK::MessageIndentor indent2; (void)indent2;
 			// process material layers
@@ -152,6 +154,7 @@ void Model::init(const OpenHAMArgParser & args, Outputs & outputs) {
 					IBK::IBK_Message(IBK::FormatString("Material file reference: %1\n").arg(matref), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 					// resolve path placeholder and read material file
 					IBK::Path fullMatFilePath = IBK::Path(matref).withReplacedPlaceholders(m_project.m_placeholders);
+					matref = fullMatFilePath.withoutExtension().filename().str();
 					// check if we already have this material in the list of materials
 					for (materialIndex=0; materialIndex<m_materials.size(); ++materialIndex) {
 						if (m_materials[materialIndex].m_filepath == fullMatFilePath)
@@ -174,6 +177,11 @@ void Model::init(const OpenHAMArgParser & args, Outputs & outputs) {
 
 				// 'materialIndex' now holds the index of the current grid cell's material in the m_materials vector
 
+				// dump out material functions for plotting (only once per material
+				if (usedMatRefs.find(matref) == usedMatRefs.end()) {
+					usedMatRefs.insert(matref);
+					m_materials.back().createPlots(m_dirs.m_varDir, matref);
+				}
 
 
 				// *** Discretization ***
@@ -270,9 +278,6 @@ void Model::init(const OpenHAMArgParser & args, Outputs & outputs) {
 						IBK::IBK_Message( IBK::FormatString("dx = %1 m\n").arg(equi_dx), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_STANDARD);
 					}
 				}
-
-				// dump out material functions for plotting
-				m_materials.back().createPlots(m_dirs.m_varDir, i+1);
 			}
 		}
 
