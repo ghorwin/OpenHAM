@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <DelphinProject xmlns="http://www.bauklimatik-dresden.de" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:IBK="http://www.bauklimatik-dresden.de/IBK" xsi:schemaLocation="http://www.bauklimatik-dresden.de DelphinProject.xsd" fileVersion="6.0">
-	<ProjectInfo created="Mi. Dez. 5 10:42:12 2018" lastEdited="Di. Feb. 5 15:00:03 2019">
-		<Comment>&#x0A;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Reference case for EN 15026-2019.&lt;/p&gt;&#x0A;&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&#x0A;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Wall with interior insulation subjected to block climate&lt;/p&gt;</Comment>
+	<ProjectInfo created="Di Feb 5 17:05:34 2019" lastEdited="Do. Feb. 7 10:04:05 2019">
+		<Comment>&#x0A;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;EN ISo 15026 Test for Appendix A&lt;/p&gt;</Comment>
 	</ProjectInfo>
 
 	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -11,25 +11,18 @@
 		<SimulationParameter>
 			<BalanceEquationModule>BEHeatMoisture</BalanceEquationModule>
 			<Interval>
-				<IBK:Parameter name="Duration" unit="a">2</IBK:Parameter>
+				<IBK:Parameter name="Duration" unit="d">730</IBK:Parameter>
 			</Interval>
-			<IBK:Parameter name="Longitude" unit="Deg">13.4</IBK:Parameter>
-			<IBK:Parameter name="Latitude" unit="Deg">51.3</IBK:Parameter>
-			<IBK:Flag name="UseCustomLocation">true</IBK:Flag>
 		</SimulationParameter>
-		<SolverParameter>
-			<IBK:Parameter name="MaxTimeStep" unit="h">2</IBK:Parameter>
-			<IBK:Parameter name="RelTol" unit="---">1e-06</IBK:Parameter>
-		</SolverParameter>
 	</Init>
 
 	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 	<!--List of all materials used in this construction-->
 	<Materials>
-		<MaterialReference name="Brick" color="#ffa40000" hatchCode="13">built-in:3</MaterialReference>
-		<MaterialReference name="Glue Mortar" color="#ffc4a000" hatchCode="9">built-in:4</MaterialReference>
-		<MaterialReference name="Insulation Board" color="#fff9d895" hatchCode="13">built-in:5</MaterialReference>
+		<MaterialReference name="Insulation board" color="#ff5eaeae" hatchCode="10">built-in:5</MaterialReference>
+		<MaterialReference name="Glue Mortar" color="#ff8000ff" hatchCode="9">built-in:4</MaterialReference>
+		<MaterialReference name="Brick" color="#ffffaa00" hatchCode="13">built-in:3</MaterialReference>
 	</Materials>
 
 	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -45,59 +38,57 @@
 	<Conditions>
 
 		<Interfaces>
-			<Interface name="Outside climate" type="Detailed">
+			<Interface name="Outside" type="Detailed">
 				<IBK:Parameter name="Orientation" unit="Deg">270</IBK:Parameter>
-				<BCReference>Outside climate:IndoorHeatConduction</BCReference>
-				<BCReference>Outside climate:IndoorVaporDiffusion</BCReference>
+				<BCReference>Outside:HeatConduction</BCReference>
+				<BCReference>Outside:VaporDiffusion</BCReference>
 			</Interface>
-			<Interface name="Room climate" type="Detailed">
+			<Interface name="Inside" type="Detailed">
 				<IBK:Parameter name="Orientation" unit="Deg">270</IBK:Parameter>
-				<BCReference>Room climate:IndoorHeatConduction</BCReference>
-				<BCReference>Room climate:IndoorVaporDiffusion</BCReference>
+				<BCReference>Inside:IndoorHeatConduction</BCReference>
+				<BCReference>Inside:IndoorVaporDiffusion</BCReference>
 			</Interface>
 		</Interfaces>
 
 		<ClimateConditions>
 
-			<ClimateCondition name="Outside Temperature" type="Temperature" kind="TabulatedData">
+			<ClimateCondition name="Outdoor temperature" type="Temperature" kind="TabulatedData">
 				<Filename>${Project Directory}/climate/OutsideTemperature.tsv</Filename>
 				<IBK:Parameter name="ShiftValue" unit="K">0</IBK:Parameter>
-				<IBK:Flag name="ExtendData">true</IBK:Flag>
 				<IBK:Flag name="Cyclic">false</IBK:Flag>
 			</ClimateCondition>
 
-			<ClimateCondition name="Outside RH" type="RelativeHumidity" kind="TabulatedData">
+			<ClimateCondition name="Outdoor RH" type="RelativeHumidity" kind="TabulatedData">
 				<Filename>${Project Directory}/climate/OutsideRelativeHumidity.tsv</Filename>
 				<IBK:Parameter name="ShiftValue" unit="%">0</IBK:Parameter>
-				<IBK:Flag name="ExtendData">true</IBK:Flag>
 				<IBK:Flag name="Cyclic">false</IBK:Flag>
 			</ClimateCondition>
 		</ClimateConditions>
 
 		<BoundaryConditions>
 
-			<BoundaryCondition name="Outside climate:IndoorHeatConduction" type="HeatConduction" kind="Exchange">
-				<IBK:Parameter name="ExchangeCoefficient" unit="W/m2K">17</IBK:Parameter>
-				<CCReference type="Temperature">Outside Temperature</CCReference>
-			</BoundaryCondition>
-
-			<BoundaryCondition name="Outside climate:IndoorVaporDiffusion" type="VaporDiffusion" kind="Exchange">
-				<IBK:Parameter name="ExchangeCoefficient" unit="s/m">7.5e-08</IBK:Parameter>
-				<IBK:Parameter name="SDValue" unit="m">0</IBK:Parameter>
-				<CCReference type="Temperature">Outside Temperature</CCReference>
-				<CCReference type="RelativeHumidity">Outside RH</CCReference>
-			</BoundaryCondition>
-
-			<BoundaryCondition name="Room climate:IndoorHeatConduction" type="HeatConduction" kind="Exchange">
+			<BoundaryCondition name="Inside:IndoorHeatConduction" type="HeatConduction" kind="Exchange">
 				<IBK:Parameter name="ExchangeCoefficient" unit="W/m2K">8</IBK:Parameter>
 				<CCReference type="Temperature">20 C</CCReference>
 			</BoundaryCondition>
 
-			<BoundaryCondition name="Room climate:IndoorVaporDiffusion" type="VaporDiffusion" kind="Exchange">
+			<BoundaryCondition name="Inside:IndoorVaporDiffusion" type="VaporDiffusion" kind="Exchange">
 				<IBK:Parameter name="ExchangeCoefficient" unit="s/m">2.5e-08</IBK:Parameter>
 				<IBK:Parameter name="SDValue" unit="m">0</IBK:Parameter>
 				<CCReference type="Temperature">20 C</CCReference>
 				<CCReference type="RelativeHumidity">60 %</CCReference>
+			</BoundaryCondition>
+
+			<BoundaryCondition name="Outside:HeatConduction" type="HeatConduction" kind="Exchange">
+				<IBK:Parameter name="ExchangeCoefficient" unit="W/m2K">17</IBK:Parameter>
+				<CCReference type="Temperature">Outdoor temperature</CCReference>
+			</BoundaryCondition>
+
+			<BoundaryCondition name="Outside:VaporDiffusion" type="VaporDiffusion" kind="Exchange">
+				<IBK:Parameter name="ExchangeCoefficient" unit="s/m">7.5e-08</IBK:Parameter>
+				<IBK:Parameter name="SDValue" unit="m">0</IBK:Parameter>
+				<CCReference type="Temperature">Outdoor temperature</CCReference>
+				<CCReference type="RelativeHumidity">Outdoor RH</CCReference>
 			</BoundaryCondition>
 		</BoundaryConditions>
 	</Conditions>
@@ -110,12 +101,6 @@
 		<IBK:Unit name="TimeUnit">h</IBK:Unit>
 		<!--List of all Output schedules-->
 		<OutputGrids>
-			<OutputGrid name="Felder und Profile">
-				<Interval>
-					<IBK:Parameter name="Duration" unit="a">0</IBK:Parameter>
-					<IBK:Parameter name="StepSize" unit="d">1.5</IBK:Parameter>
-				</Interval>
-			</OutputGrid>
 			<OutputGrid name="Skalare">
 				<Interval>
 					<IBK:Parameter name="Duration" unit="a">0</IBK:Parameter>
@@ -129,19 +114,19 @@
 				<Quantity unit="C">Temperature</Quantity>
 				<TimeType>None</TimeType>
 				<SpaceType>Single</SpaceType>
-				<OutputGrid>Felder und Profile</OutputGrid>
+				<OutputGrid>Skalare</OutputGrid>
 			</OutputFile>
 			<OutputFile name="Luftfeuchteprofil">
 				<Quantity unit="%">RelativeHumidity</Quantity>
 				<TimeType>None</TimeType>
 				<SpaceType>Single</SpaceType>
-				<OutputGrid>Felder und Profile</OutputGrid>
+				<OutputGrid>Skalare</OutputGrid>
 			</OutputFile>
 			<OutputFile name="Feuchtegehaltsprofil">
 				<Quantity unit="kg/m3">MoistureMassDensity</Quantity>
 				<TimeType>None</TimeType>
 				<SpaceType>Single</SpaceType>
-				<OutputGrid>Felder und Profile</OutputGrid>
+				<OutputGrid>Skalare</OutputGrid>
 			</OutputFile>
 			<OutputFile name="Feuchtegehaltsintegral">
 				<Quantity unit="kg">MoistureMassDensity</Quantity>
@@ -149,38 +134,26 @@
 				<SpaceType>Integral</SpaceType>
 				<OutputGrid>Skalare</OutputGrid>
 			</OutputFile>
-			<OutputFile name="Oberflächentemperatur - linke Seite">
+			<OutputFile name="Oberflächenwärmestrom - außen">
+				<Quantity unit="W/m2">TotalFluxHeat</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Mean</SpaceType>
+				<OutputGrid>Skalare</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Oberflächenwärmestrom - innen">
+				<Quantity unit="W/m2">TotalFluxHeat</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Mean</SpaceType>
+				<OutputGrid>Skalare</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Oberflächentemperatur - innen">
 				<Quantity unit="C">Temperature</Quantity>
 				<TimeType>None</TimeType>
 				<SpaceType>Single</SpaceType>
 				<OutputGrid>Skalare</OutputGrid>
 			</OutputFile>
-			<OutputFile name="Oberflächentemperatur - rechte Seite">
-				<Quantity unit="C">Temperature</Quantity>
-				<TimeType>None</TimeType>
-				<SpaceType>Single</SpaceType>
-				<OutputGrid>Skalare</OutputGrid>
-			</OutputFile>
-			<OutputFile name="Relative Luftfeuchte an der Oberfläche - linke Seite">
+			<OutputFile name="Relative Luftfeuchte an der Oberfläche - innen">
 				<Quantity unit="%">RelativeHumidity</Quantity>
-				<TimeType>None</TimeType>
-				<SpaceType>Single</SpaceType>
-				<OutputGrid>Felder und Profile</OutputGrid>
-			</OutputFile>
-			<OutputFile name="Relative Luftfeuchte an der Oberfläche - rechte Seite">
-				<Quantity unit="%">RelativeHumidity</Quantity>
-				<TimeType>None</TimeType>
-				<SpaceType>Single</SpaceType>
-				<OutputGrid>Felder und Profile</OutputGrid>
-			</OutputFile>
-			<OutputFile name="Oberflächenwärmestrom - linke Seite">
-				<Quantity unit="W/m2">TotalFluxHeat</Quantity>
-				<TimeType>None</TimeType>
-				<SpaceType>Single</SpaceType>
-				<OutputGrid>Skalare</OutputGrid>
-			</OutputFile>
-			<OutputFile name="Oberflächenwärmestrom - rechte Seite">
-				<Quantity unit="W/m2">TotalFluxHeat</Quantity>
 				<TimeType>None</TimeType>
 				<SpaceType>Single</SpaceType>
 				<OutputGrid>Skalare</OutputGrid>
@@ -214,18 +187,18 @@
 		</Assignment>
 
 		<Assignment type="Output" location="Left">
-			<Reference>Oberflächenwärmestrom - linke Seite</Reference>
+			<Reference>Oberflächenwärmestrom - außen</Reference>
 			<Range>0 0 0 0</Range>
 		</Assignment>
 
 		<Assignment type="Output" location="Right">
-			<Reference>Oberflächenwärmestrom - rechte Seite</Reference>
+			<Reference>Oberflächenwärmestrom - innen</Reference>
 			<Range>2 0 2 0</Range>
 		</Assignment>
 
 		<Assignment type="Material" location="Element">
-			<Reference>Insulation Board</Reference>
-			<Range>2 0 2 0</Range>
+			<Reference>Brick</Reference>
+			<Range>0 0 0 0</Range>
 		</Assignment>
 
 		<Assignment type="Material" location="Element">
@@ -234,18 +207,28 @@
 		</Assignment>
 
 		<Assignment type="Material" location="Element">
-			<Reference>Brick</Reference>
-			<Range>0 0 0 0</Range>
+			<Reference>Insulation board</Reference>
+			<Range>2 0 2 0</Range>
 		</Assignment>
 
 		<Assignment type="Interface" location="Left">
-			<Reference>Outside climate</Reference>
+			<Reference>Outside</Reference>
 			<Range>0 0 0 0</Range>
 		</Assignment>
 
 		<Assignment type="Interface" location="Right">
-			<Reference>Room climate</Reference>
+			<Reference>Inside</Reference>
 			<Range>2 0 2 0</Range>
+		</Assignment>
+
+		<Assignment type="Output" location="Coordinate">
+			<Reference>Oberflächentemperatur - innen</Reference>
+			<IBK:Point3D>0.4495 0.5 0.5</IBK:Point3D>
+		</Assignment>
+
+		<Assignment type="Output" location="Coordinate">
+			<Reference>Relative Luftfeuchte an der Oberfläche - innen</Reference>
+			<IBK:Point3D>0.4495 0.5 0.5</IBK:Point3D>
 		</Assignment>
 	</Assignments>
 
