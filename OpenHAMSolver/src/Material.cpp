@@ -647,14 +647,19 @@ void Material::createPlots(const IBK::Path & plotDir, const std::string & matref
 
 	IBK::Path dataFile2(fileNameRoot + "_kl.txt");
 	openFileUtf8(dataFile2, fout);
+	fout.precision(15);
 	for (unsigned int i=0; i<NUM_VALUES; ++i) {
-		double Ol = OlMax/NUM_VALUES*(i+1);
+		double pC = 10-10.0*i/NUM_VALUES;
+		double pc = -IBK::f_pow10(pC);
+		double Ol = Ol_pc(pc);
 		fout << Ol << " ";
 	}
 	fout << std::endl;
 	for (unsigned int i=0; i<NUM_VALUES; ++i) {
-		double Ol = OlMax/NUM_VALUES*(i+1);
-		fout << Kl_Ol(Ol) << " ";
+		double pC = 10-10.0*i/NUM_VALUES;
+		double pc = -IBK::f_pow10(pC);
+		double Ol = Ol_pc(pc);
+		fout << IBK::f_log10(Kl_Ol(Ol)) << " ";
 	}
 	fout << std::endl;
 	fout.close();
