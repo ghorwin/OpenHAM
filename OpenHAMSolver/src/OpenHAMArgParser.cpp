@@ -37,6 +37,7 @@
 OpenHAMArgParser::OpenHAMArgParser() {
 	addFlag(0, "no-disc", "Skip grid generation (use grid as written in project file)");
 	addOption(0, "disc", "Custom grid generation, either equidistant (within each layer) or variable grid.", "equi|var>:<min dx>[:<stretch>]", "");
+	m_appname = "OpenHAMSolver";
 }
 
 void OpenHAMArgParser::printHelp(std::ostream & out) const {
