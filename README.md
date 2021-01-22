@@ -7,5 +7,5 @@ See [OpenHAM-wiki](../../wiki) for details.
 
 
 ----
-![Github All Releases](https://img.shields.io/github/downloads/ghorwin/OpenHAM/total.svg)
+[![Github All Releases](https://img.shields.io/github/downloads/ghorwin/OpenHAM/total.svg)]()
 
