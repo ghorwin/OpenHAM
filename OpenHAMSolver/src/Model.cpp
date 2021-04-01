@@ -632,6 +632,7 @@ void Model::updateBoundaryConditions() {
 	if (m_materials[m_matIdx[0]].moistureTight()) {
 		m_jvLeft = 0;
 		m_hvLeft = 0;
+		m_hwLeft = 0;
 	}
 	else {
 		m_jvLeft = m_project.m_leftInterface.beta.value*(m_pvLeft - m_pv[0]);

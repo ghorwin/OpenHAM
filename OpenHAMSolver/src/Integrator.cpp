@@ -409,6 +409,13 @@ void Integrator::generateJacobian() {
 
 	} // for i
 
+	// insert 1 into Jacobian for all moisture-tight materials
+	for (unsigned int i=0; i<m_model.m_nElements; ++i) {
+		if (m_model.m_materials[m_model.m_matIdx[i]].moistureTight()) {
+			m_jacobian(i*2+1,i*2+1) = 1;
+		}
+	}
+
 //#define DUMP_JACOBIAN
 #ifdef DUMP_JACOBIAN
 	std::ofstream jacdump((m_model.m_dirs.m_varDir / "jacobian.txt").c_str());
