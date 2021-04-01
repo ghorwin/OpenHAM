@@ -48,7 +48,7 @@
 
 /*! Version info string */
 const char * const PROGRAM_INFO =
-	"OpenHAM Solver, Version 0.3\n"
+	"OpenHAM Solver, Version 0.4\n"
 	"All rights reserved. Distributed under GPL v3.\n\n"
 	"Copyright 2015-today Andreas Nicolai\n"
 	"Contact: andreas.nicolai [at] tu-dresden.de\n\n";

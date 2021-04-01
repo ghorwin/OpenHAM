@@ -623,54 +623,68 @@ void Model::updateBoundaryConditions() {
 	else if (!m_project.m_rightInterface.pv_spline.empty())
 		m_pvRight = m_project.m_rightInterface.pv_spline.value(m_t);
 
-	// Left is ambient climate
-	m_qLeft = m_project.m_leftInterface.alpha.value*(m_TLeft - m_T[0]);
-	m_jvLeft = m_project.m_leftInterface.beta.value*(m_pvLeft - m_pv[0]);
-	// for enthalpy use upwinding
-	if (m_jvLeft > 0)
-		m_hvLeft = m_jvLeft*(IBK::C_VAPOR*m_TLeft + IBK::H_EVAP); // outside in
-	else
-		m_hvLeft = m_jvLeft*(IBK::C_VAPOR*m_T[0] + IBK::H_EVAP); // inside out
-
-	// for rain
-	if (m_gRain != 0) {
-		m_jwLeft = m_gRain;
-		// Note: "rain" can be negative, if one wants to model "outflow of water"
-
-		double Train;
-		if (!m_project.m_leftInterface.Train.name.empty())
-			Train = m_project.m_leftInterface.Train.value;
-		else if (m_project.m_leftInterface.Train_spline.valid()) {
-			Train = m_project.m_leftInterface.Train_spline.value(m_t);
-		}
-		else {
-			Train = m_TLeft;
-		}
-
-
-		// for enthalpy use upwinding
-		if (m_jwLeft > 0)
-			m_hwLeft = m_jwLeft*IBK::C_WATER*Train; // outside in
-		else
-			m_hwLeft = m_jwLeft*IBK::C_WATER*m_T[0]; // inside out
-	}
-	else {
-		m_jwLeft = 0;
-		m_hwLeft = 0;
-	}
-
 
 	// *** Compute boundary fluxes ***
+
+
+	// Left is ambient climate
+	m_qLeft = m_project.m_leftInterface.alpha.value*(m_TLeft - m_T[0]);
+	if (m_materials[m_matIdx[0]].moistureTight()) {
+		m_jvLeft = 0;
+		m_hvLeft = 0;
+	}
+	else {
+		m_jvLeft = m_project.m_leftInterface.beta.value*(m_pvLeft - m_pv[0]);
+		// for enthalpy use upwinding
+		if (m_jvLeft > 0)
+			m_hvLeft = m_jvLeft*(IBK::C_VAPOR*m_TLeft + IBK::H_EVAP); // outside in
+		else
+			m_hvLeft = m_jvLeft*(IBK::C_VAPOR*m_T[0] + IBK::H_EVAP); // inside out
+
+		// for rain
+		if (m_gRain != 0.0) {
+			m_jwLeft = m_gRain;
+			// Note: "rain" can be negative, if one wants to model "outflow of water"
+
+			double Train;
+			if (!m_project.m_leftInterface.Train.name.empty())
+				Train = m_project.m_leftInterface.Train.value;
+			else if (m_project.m_leftInterface.Train_spline.valid()) {
+				Train = m_project.m_leftInterface.Train_spline.value(m_t);
+			}
+			else {
+				Train = m_TLeft;
+			}
+
+
+			// for enthalpy use upwinding
+			if (m_jwLeft > 0)
+				m_hwLeft = m_jwLeft*IBK::C_WATER*Train; // outside in
+			else
+				m_hwLeft = m_jwLeft*IBK::C_WATER*m_T[0]; // inside out
+		}
+		else {
+			m_jwLeft = 0;
+			m_hwLeft = 0;
+		}
+	}
+
 
 	const unsigned int n1 = m_nElements-1;
 	// Right is indoor climate (no rain)
 	m_qRight = m_project.m_rightInterface.alpha.value*(m_T[n1] - m_TRight);
-	m_jvRight = m_project.m_rightInterface.beta.value*(m_pv[n1] - m_pvRight);
-	// for enthalpy use upwinding
-	if (m_jvRight > 0)
-		m_hvRight = m_jvRight*(IBK::C_VAPOR*m_T[n1] + IBK::H_EVAP); // inside out
-	else
-		m_hvRight = m_jvRight*(IBK::C_VAPOR*m_TRight + IBK::H_EVAP); // outside in
+	if (m_materials[m_matIdx[n1]].moistureTight()) {
+		m_jvRight = 0;
+		m_hvRight = 0;
+	}
+	else {
+		m_jvRight = m_project.m_rightInterface.beta.value*(m_pv[n1] - m_pvRight);
+		// for enthalpy use upwinding
+		if (m_jvRight > 0)
+			m_hvRight = m_jvRight*(IBK::C_VAPOR*m_T[n1] + IBK::H_EVAP); // inside out
+		else
+			m_hvRight = m_jvRight*(IBK::C_VAPOR*m_TRight + IBK::H_EVAP); // outside in
+	}
 
 	// store in flux vectors
 	m_q[0] = m_qLeft;
@@ -705,31 +719,39 @@ void Model::updateFluxes() {
 		m_q[i] = q;
 
 
-		// vapor diffusion
-		double KV_mean = (m_dx[eL]*m_Kv[eL] + m_dx[eR]*m_Kv[eR])/gx2;
-		m_jv[i] = KV_mean*(m_pv[eL] - m_pv[eR])/(0.5*gx2);
-		// limit flux when target element approaches saturation
-		if (m_jv[i] > 0) {
-			double normDelta = (m_materials[m_matIdx[eR]].m_Oeff*1000 - m_rhowv[eR])/1;
-			if (normDelta < 1)
-				m_jv[i] *= IBK::scale(normDelta);
-			m_hv[i] = m_jv[i]*(IBK::C_VAPOR*m_T[eL] + IBK::H_EVAP);
+		if (m_materials[m_matIdx[i]].moistureTight()) {
+			m_jv[i] = 0;
+			m_hv[i] = 0;
+			m_jw[i] = 0;
+			m_hw[i] = 0;
 		}
 		else {
-			double normDelta = (m_materials[m_matIdx[eL]].m_Oeff*1000 - m_rhowv[eL])/1;
-			if (normDelta < 1)
-				m_jv[i] *= IBK::scale(normDelta);
-			m_hv[i] = m_jv[i]*(IBK::C_VAPOR*m_T[eR] + IBK::H_EVAP);
+			// vapor diffusion
+			double KV_mean = (m_dx[eL]*m_Kv[eL] + m_dx[eR]*m_Kv[eR])/gx2;
+			m_jv[i] = KV_mean*(m_pv[eL] - m_pv[eR])/(0.5*gx2);
+			// limit flux when target element approaches saturation
+			if (m_jv[i] > 0) {
+				double normDelta = (m_materials[m_matIdx[eR]].m_Oeff*1000 - m_rhowv[eR])/1;
+				if (normDelta < 1)
+					m_jv[i] *= IBK::scale(normDelta);
+				m_hv[i] = m_jv[i]*(IBK::C_VAPOR*m_T[eL] + IBK::H_EVAP);
+			}
+			else {
+				double normDelta = (m_materials[m_matIdx[eL]].m_Oeff*1000 - m_rhowv[eL])/1;
+				if (normDelta < 1)
+					m_jv[i] *= IBK::scale(normDelta);
+				m_hv[i] = m_jv[i]*(IBK::C_VAPOR*m_T[eR] + IBK::H_EVAP);
+			}
+
+
+			// liquid conduction
+			double Kl_mean = (m_dx[eL]*m_Kl[eL] + m_dx[eR]*m_Kl[eR])/gx2;
+			m_jw[i] = Kl_mean*(m_pc[eL] - m_pc[eR])/(0.5*gx2);
+			if (m_jw[i] > 0)
+				m_hw[i] = m_jw[i]*IBK::C_WATER*m_T[eL];
+			else
+				m_hw[i] = m_jw[i]*IBK::C_WATER*m_T[eR];
 		}
-
-
-		// liquid conduction
-		double Kl_mean = (m_dx[eL]*m_Kl[eL] + m_dx[eR]*m_Kl[eR])/gx2;
-		m_jw[i] = Kl_mean*(m_pc[eL] - m_pc[eR])/(0.5*gx2);
-		if (m_jw[i] > 0)
-			m_hw[i] = m_jw[i]*IBK::C_WATER*m_T[eL];
-		else
-			m_hw[i] = m_jw[i]*IBK::C_WATER*m_T[eR];
 	}
 }
 

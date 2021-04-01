@@ -46,5 +46,4 @@ HEADERS += \
 	../../src/Mesh.h \
     ../../src/OpenHAMArgParser.h
 
-DISTFILES += \
-	../../../data/tests/test01_steady_state/steady_state.d6p
+DISTFILES +=

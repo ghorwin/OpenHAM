@@ -65,6 +65,11 @@ public:
 	/*! Returns vapor permeability [s] for moisture content [m3/m3]. */
 	double Kv_Ol(double T, double Ol) const;
 
+	/*! Returns true, if material does not have an MRC function and thus does not compute moisture balances.
+		Only useful when running thermal-only calculations.
+	*/
+	bool moistureTight() const;
+
 	/*! Creates some plots for the material functions in this material, useful for generating reports. */
 	void createPlots(const IBK::Path & plotDir, const std::string & matref) const;
 

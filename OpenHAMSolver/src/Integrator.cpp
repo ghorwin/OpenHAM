@@ -142,12 +142,14 @@ void Integrator::run() {
 			// Note: m_z == m_zn, m_y == m_yn, m_t := m_t + m_dt
 
 			// write step statistics to output only when in DETAILED verbosity mode
-			std::stringstream strm;
-			strm << std::setw(10) << m_t/3600 << '\t'
-							 << std::setw(10) << m_dt << '\t'
-							 << std::setw(5) << m_statNumSteps << '\t'
-							 << std::setw(5) << m_statNonLinIters << std::endl;
-			IBK::IBK_Message(strm.str(), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_DETAILED);
+			if (IBK::MessageHandlerRegistry::instance().messageHandler()->consoleVerbosityLevel() >= IBK::VL_DETAILED) {
+				std::stringstream strm;
+				strm << std::setw(10) << m_t/3600 << '\t'
+								 << std::setw(10) << m_dt << '\t'
+								 << std::setw(5) << m_statNumSteps << '\t'
+								 << std::setw(5) << m_statNonLinIters << std::endl;
+				IBK::IBK_Message(strm.str(), IBK::MSG_PROGRESS, FUNC_ID, IBK::VL_DETAILED);
+			}
 
 			// write step statistics to file if requested
 			if (m_solverStepStats) {
@@ -354,6 +356,8 @@ bool Integrator::solveNewton() {
 
 
 void Integrator::generateJacobian() {
+	FUNCID(Integrator::generateJacobian);
+
 	// create backup copy of residuals and z
 	copyVec(m_res, m_resJac);
 	copyVec(m_z, m_zJac);
@@ -412,7 +416,8 @@ void Integrator::generateJacobian() {
 #endif // DUMP_JACOBIAN
 
 	// perform LU-factorization of the jacobian
-	m_jacobian.lu();
+	if (m_jacobian.lu() != 0)
+		throw IBK::Exception("Zero pivot element in Jacobian.", FUNC_ID);
 
 	// update solver statistics
 	++m_statJacEvals;

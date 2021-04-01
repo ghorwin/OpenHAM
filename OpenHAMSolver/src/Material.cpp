@@ -453,6 +453,11 @@ double Material::Ol_pc(double pc) const {
 			return Ol;
 		}
 	}
+
+	// no MRC data? return very small capacity by default (metal, glas and such materials)
+	if (m_Ol_pC_Spline.empty())
+		return 0;
+
 	// must be a material from data file, use linear spline interpolation
 	if (pc >= 0)
 		return m_Ol_pC_Spline.y().front();
@@ -526,12 +531,15 @@ double Material::Kl_Ol(double Ol) const {
 			return IBK::f_pow10(lgK);
 		}
 	}
+
+	if (m_lgKl_Ol_Spline.empty())
+		return 1e-20;
 	return IBK::f_pow10(m_lgKl_Ol_Spline.value(Ol));
 }
 
 
 double Material::Kv_Ol(double T, double Ol) const {
-	const char * const FUNC_ID = "[Material::Kv_Ol]";
+//	const char * const FUNC_ID = "[Material::Kv_Ol]";
 
 	switch (m_i) {
 		// Hamstad Brick
@@ -572,10 +580,18 @@ double Material::Kv_Ol(double T, double Ol) const {
 	if (m_lgKv_Ol_Spline.valid())
 		return IBK::f_pow10(m_lgKv_Ol_Spline.value(Ol));
 	if (m_mew.name.empty())
-		throw IBK::Exception("Missing parametrization for Kv(Ol), neither lgKv(Ol) spline nor MEW parameter provided.", FUNC_ID);
+		return 0; // no diffusion parameters -> mew value = 0
 	else
 		return IBK::DV_AIR/(IBK::R_VAPOR*293.15*m_mew.value)*(1-Ol/m_Oeff);
 }
+
+
+bool Material::moistureTight() const {
+	if (m_i != -1)
+		return false;
+	return !m_Ol_pC_Spline.valid();
+}
+
 
 // open file
 
@@ -609,6 +625,7 @@ const char * const MRC_GNUPLOT =
 	"\n";
 
 void Material::createPlots(const IBK::Path & plotDir, const std::string & matref) const {
+	// skip this, if we do not have moisture data
 	// generate material file name
 	std::string fname = matref;
 	fname = IBK::replace_string(fname, ":", "_");
