@@ -45,6 +45,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iterator>
+#include <clocale>
 
 #include <sstream>
 
@@ -96,7 +97,8 @@ bool UnitList::read_file(const std::string& filename, bool overwrite) {
 
 // Reads the unitlist from default string
 bool UnitList::read_default() {
-	const char * const FUNC_ID = "[UnitList::read_default]";
+	FUNCID(UnitList::read_default);
+
 #define NO_ATOF
 	std::vector<char> defaultVector;
 	std::copy(DEFAULT_UNITS, DEFAULT_UNITS + std::strlen(DEFAULT_UNITS), std::back_inserter(defaultVector));
@@ -105,12 +107,12 @@ bool UnitList::read_default() {
 	std::vector<std::vector<char> > lines;
 	// divide unit list into lines
 	char* line = std::strtok(defaultList, ";");
-	while( line != NULL) {
+	while( line != nullptr) {
 		std::vector<char> tmp;
 		std::copy(line, line + std::strlen(line), std::back_inserter(tmp));
 		tmp.push_back('\0');
 		lines.push_back(tmp);
-		line = strtok(NULL, ";");
+		line = strtok(nullptr, ";");
 	}
 
 	std::set<std::string> all_units; // temporary set of units, used in duplicate check
@@ -119,7 +121,7 @@ bool UnitList::read_default() {
 	for( unsigned int i=0; i<lines.size(); ++i) {
 		char* line = &(lines[i][0]);
 		char* str = std::strtok(line, "\t ");
-		if( str == NULL)
+		if( str == nullptr)
 			continue;
 
 		// sanity check, ensure uniqueness of units
@@ -128,10 +130,10 @@ bool UnitList::read_default() {
 		all_units.insert(str);
 
 		add(new UnitData(current_index, str, base_index, 1.0, OP_NONE));
-		char* op = strtok(NULL, "\t ");
-		while( op != NULL) {
-			char* fact = strtok(NULL, "\t ");
-			if( fact == NULL)
+		char* op = strtok(nullptr, "\t ");
+		while( op != nullptr) {
+			char* fact = strtok(nullptr, "\t ");
+			if( fact == nullptr)
 				break;
 #ifdef NO_ATOF
 			double factor = IBK::string2val<double>(fact);
@@ -139,8 +141,8 @@ bool UnitList::read_default() {
 			double factor = std::atof(fact);
 #endif // NO_ATOF
 
-			str = strtok(NULL, "\t ");
-			if( str == NULL)
+			str = strtok(nullptr, "\t ");
+			if( str == nullptr)
 				break;
 
 			// sanity check, ensure uniqueness of units
@@ -164,7 +166,7 @@ bool UnitList::read_default() {
 			else {
 				add(new UnitData(current_index, str, base_index, factor, op_id));
 			}
-			op = strtok(NULL, "\t ");
+			op = strtok(nullptr, "\t ");
 		}
 		current_index++;          // next unit
 		base_index=current_index; // is also the base unit
@@ -174,7 +176,7 @@ bool UnitList::read_default() {
 
 // Reads the unitlist from an input filestream
 bool UnitList::read(std::istream& stream, bool overwrite) {
-	const char * const FUNC_ID = "[UnitList::read]";
+	FUNCID(UnitList::read);
 	if (!overwrite && !empty())  return true; // do not read the list again
 	if (!stream)  return false;
 
@@ -364,7 +366,7 @@ const UnitData* UnitList::retrieve(const std::string &str) const {
 			return unit;
 		++it;
 	};
-	return NULL;
+	return nullptr;
 }
 // ---------------------------------------------------------------------------
 
@@ -594,7 +596,7 @@ void UnitList::convert_special(const UnitData* src, const UnitData* target, doub
 // ---------------------------------------------------------------------------
 
 IBK::Unit UnitList::integralQuantity(const IBK::Unit & srcUnit, bool spaceIntegral, bool timeIntegral) {
-	const char * const FUNC_ID = "[UnitList::integralQuantity]";
+	FUNCID(UnitList::integralQuantity);
 	// first retrieve name of base unit
 	std::string base_name = srcUnit.base_unit().name();
 	// convert all cases
@@ -665,7 +667,7 @@ IBK::Unit UnitList::integralQuantity(const IBK::Unit & srcUnit, bool spaceIntegr
 // ---------------------------------------------------------------------------
 
 std::string UnitList::replaceUnitWithIntegralUnit(const std::string & original) {
-	const char * const FUNC_ID = "[UnitList::replaceUnitWithIntegralUnit]";
+	FUNCID(UnitList::replaceUnitWithIntegralUnit);
 	// extract unit string
 	std::string::size_type pos1 = original.find('[');
 	std::string::size_type pos2 = original.find(']');
@@ -705,13 +707,13 @@ const char * const DEFAULT_UNITS =
 "m/s          * 100 cm/s          * 360000 cm/h       * 8.64e+06 cm/d     ;"
 "m2/s         * 10000 cm2/s       * 3600 m2/h         * 3.6e+07 cm2/h     ;"
 "m/s2         ;"
-"s/m          ;"
+"s/m          * 1 kg/m2sPa        ;"
 "s2/m2        ;"
 "kg           * 1000 g            * 1e+06 mg          ;"
 "kg/ms        ;"
-"kg/s         * 3600 kg/h         * 86400 kg/d        * 8.64e+07 g/d      * 31536e6 g/a   * 1e6 mg/s      * 1e9 µg/s    ;"
+"kg/s         * 3600 kg/h         * 86400 kg/d        * 1000 g/s          * 3.6e6 g/h         * 8.64e+07 g/d      * 31536e6 g/a   * 1e6 mg/s      * 1e9 µg/s    ;"
 "kg/m2        / 100 kg/dm2        * 10 g/dm2          / 10 g/cm2          * 1e6 mg/m2     ;"
-"kg/m2s       * 1000 g/m2s        * 3.6e+06 g/m2h     * 3600 kg/m2h       * 1e6 mg/m2s    * 1e9 µg/m2s  * 3.6e9 mg/m2h    * 3.6e12 µg/m2h ;"
+"kg/m2s       * 1000 g/m2s        * 3.6e+06 g/m2h     * 86.4e+06 g/m2d    * 3600 kg/m2h       * 1e6 mg/m2s    * 1e9 µg/m2s  * 3.6e9 mg/m2h    * 3.6e12 µg/m2h ;"
 "kg/m3        / 1000 kg/dm3       * 1 g/dm3           / 1000 g/cm3        * 1000 g/m3     * 1e6 mg/m3   * 1e9 µg/m3       % 0      log(kg/m3)    % 0    log(g/m3)    % 0    log(mg/m3)    % 0    log(µg/m3);"
 "kg/m3s       * 1000 g/m3s        * 3.6e+06 g/m3h     * 3600 kg/m3h       * 1e6 mg/m3s    * 1e9 µg/m3s  * 3.6e9 mg/m3h    * 3.6e12 µg/m3h ;"
 "kg/m         * 1000 g/m          * 1 g/mm            / 1000 kg/mm        ;"
@@ -733,10 +735,11 @@ const char * const DEFAULT_UNITS =
 "l/m2s        * 3600 l/m2h        * 86400 l/m2d       * 86400 mm/d        * 3600 mm/h         ;"
 "l/m3s        * 3600 l/m3h        ;"
 "m3/m2s       * 3600 m3/m2h       * 1000 dm3/m2s      * 3.6e+06 dm3/m2h   ;"
+"m3/m2sPa     * 3600 m3/m2hPa     ;"
 "m3/s         * 3600 m3/h         * 1000 dm3/s        * 3.6e+06 dm3/h   ;"
 "m3/m3        * 100 Vol%          ;"
 "m3/m3d       * 100 Vol%/d        ;"
-"---          * 100 %             * 1 1             ;"
+"---          * 100 %             * 1 1               * 10 1/10           * 8 1/8         ;"
 "---/d        * 100 %/d           ;"
 "K            - 273.15 C          ;"
 "1/K          ;"
@@ -773,7 +776,8 @@ const char * const DEFAULT_UNITS =
 "W/K          ;"
 "kWh/m2a;"
 "kWh/a;"
-"m2/m3;";
+"m2/m3;"
+"Kh;";
 
 
 }  // namespace IBK

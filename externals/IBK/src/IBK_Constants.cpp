@@ -42,7 +42,9 @@ namespace IBK {
 
 const unsigned int INVALID_ELEMENT = 0xFFFFFFFF;
 
-const char * const VERSION = "4.2.4";
+const int INVALID_YEAR = -1000000;
+
+const char * const VERSION = "4.3.0";
 
 
 const char * const  MONTH_NAMES[12]         = { "Jan", "Feb", "Mar", "Apr",
@@ -52,6 +54,13 @@ const char * const  MONTH_NAMES[12]         = { "Jan", "Feb", "Mar", "Apr",
 unsigned int SECONDS_PER_MONTH[12] 			= { 31*86400, 28*86400, 31*86400, 30*86400,
 												31*86400, 30*86400, 31*86400, 31*86400,
 												30*86400, 31*86400, 30*86400, 31*86400 };
+
+unsigned int SECONDS_UNTIL_MONTH[12]	= { 0, 31*86400, (31+28)*86400, (31+28+31)*86400,
+												(31+28+31+30)*86400, (31+28+31+30+31)*86400,
+												(31+28+31+30+31+30)*86400, (31+28+31+30+31+30+31)*86400,
+												(31+28+31+30+31+30+31+31)*86400, (31+28+31+30+31+30+31+31+30)*86400,
+												(31+28+31+30+31+30+31+31+30+31)*86400, (31+28+31+30+31+30+31+31+30+31+30)*86400 };
+
 
 const unsigned int SECONDS_PER_YEAR = 31536000;
 
@@ -64,7 +73,7 @@ const unsigned int VOID_ID = (unsigned int)(-1);
 
 const char * const PLACEHOLDER_PROJECT_DIR = "Project Directory";
 
-const char * const PLACEHOLDER_DATABASE_ROOT = "Database Root";
+const char * const PLACEHOLDER_INSTALL_DIR = "Install Directory";
 
 const char * const PLACEHOLDER_MATERIALS_DIR = "Material Database";
 

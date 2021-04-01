@@ -74,7 +74,7 @@ SolverArgsParser::SolverArgsParser() :
 }
 
 void SolverArgsParser::parse(int argc, const char * const argv[]) {
-	const char * const FUNC_ID = "[SolverArgsParser::parse]";
+	FUNCID(SolverArgsParser::parse);
 
 	// parse parent
 	IBK::ArgParser::parse(argc, argv);
@@ -83,9 +83,20 @@ void SolverArgsParser::parse(int argc, const char * const argv[]) {
 	if (args().size() > 0) {
 		m_executablePath = args()[0];
 	}
-
 	if (args().size() > 1) {
 		m_projectFile = args()[1];
+		// remove leading "file://" prefix if existing
+		if (IBK::string_nocase_find(m_projectFile.str(), "file://") == 0) {
+			// special check for Windows file:///C:\blabla
+			if (IBK::string_nocase_find(m_projectFile.str(), "file:///") == 0 &&
+					m_projectFile.str().size() > 10 &&
+					m_projectFile.str()[9] == ':')
+			{
+				m_projectFile = IBK::Path( m_projectFile.str().substr(8));
+			}
+			else
+				m_projectFile = IBK::Path( m_projectFile.str().substr(7));
+		}
 	}
 
 	// check restart option
@@ -277,7 +288,7 @@ const std::string & SolverArgsParser::option(int index) const {
 
 
 bool SolverArgsParser::handleErrors(std::ostream & errstrm) {
-	const char * const FUNC_ID = "[SolverArgsParser::handleErrors]";
+	FUNCID(SolverArgsParser::handleErrors);
 	// check for valid project file
 	try {
 		if (!m_projectFile.isValid())
@@ -340,6 +351,7 @@ std::string SolverArgsParser::keyword( int index ) const {
 		case DO_RESTART_INFO				: return "restart-info";
 		case GO_RESTART						: return "restart";
 		case GO_RESTART_FROM				: return "restart-from";
+		case GO_DISABLE_PERIODIC_RESTART_FILE_WRITING	: return "disable-periodic-restart-file-writing";
 		case GO_TEST_INIT					: return "test-init";
 		case GO_OUTPUT_DIR					: return "output-dir";
 		case GO_PARALLEL_THREADS			: return "parallel-threads";
@@ -360,7 +372,8 @@ std::string SolverArgsParser::description( int index ) const {
 		case DO_CLOSE_ON_EXIT				: return "Close console window after finishing simulation.";
 		case DO_RESTART_INFO				: return "Prints information about the restart file (if available).";
 		case GO_RESTART						: return "Continue stopped simulation from last restart check-point.";
-		case GO_RESTART_FROM				: return "Continue stopped simulation from the given restart time. ";
+		case GO_RESTART_FROM				: return "Continue stopped simulation from the given restart time.";
+		case GO_DISABLE_PERIODIC_RESTART_FILE_WRITING	: return "Disable periodic restart file writing (do not write restart file during simulation, only at end of simulation).";
 		case GO_TEST_INIT					: return "Run the solver initialization and stop.";
 		case GO_OUTPUT_DIR					: return "Writes solver output to different base directory.";
 		case GO_PARALLEL_THREADS			: return "Number of threads to use by the solver, 0 means use of OMP_NUM_THREADS environment variable.";
@@ -385,6 +398,7 @@ std::string SolverArgsParser::descriptionValue( int index ) const {
 		case DO_RESTART_INFO				: return "true|false";
 		case GO_RESTART						: return "true|false";
 		case GO_RESTART_FROM				: return "value unit";
+		case GO_DISABLE_PERIODIC_RESTART_FILE_WRITING	: return "true|false";
 		case GO_TEST_INIT					: return "true|false";
 		case GO_OUTPUT_DIR					: return "directory";
 		case GO_PARALLEL_THREADS			: return "0...MaxNumThreads";
@@ -408,6 +422,7 @@ std::string SolverArgsParser::defaultValue( int index ) const {
 		case DO_RESTART_INFO				: return "false";
 		case GO_RESTART						: return "false";
 		case GO_RESTART_FROM				: return "";
+		case GO_DISABLE_PERIODIC_RESTART_FILE_WRITING	: return "false";
 		case GO_TEST_INIT					: return "false";
 		case GO_OUTPUT_DIR					: return "";
 		case GO_PARALLEL_THREADS			: return "1"; // by default sequential run
@@ -430,6 +445,7 @@ std::vector< std::string > SolverArgsParser::options( int index ) const {
 		case GO_TEST_INIT :
 		case DO_STEP_STATS :
 		case DO_RESTART_INFO :
+		case GO_DISABLE_PERIODIC_RESTART_FILE_WRITING :
 		case DO_VERSION  :
 				vec.push_back( "true");
 				vec.push_back( "false");

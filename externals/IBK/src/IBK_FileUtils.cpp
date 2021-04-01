@@ -136,6 +136,44 @@ std::string file2String(const IBK::Path & fname) {
 	return strm.str();
 }
 
+
+std::string read_one_line(const IBK::Path & fname) {
+	std::ifstream in;
+#if defined(_WIN32) && !defined(__MINGW32__)
+	in.open(fname.wstr().c_str());
+#else
+	in.open(fname.c_str());
+#endif // _WIN32
+	std::string line;
+	if (!std::getline(in, line))
+		throw IBK::Exception("Error reading file '"+ fname.str() + "'", "[IBK::readFirstLine]");
+
+	return line;
+}
+
+
+bool extract_number_suffix(const IBK::Path & fname, IBK::Path & adjustedFileName, int & number) {
+	std::string extension = fname.extension();
+	std::size_t pos = extension.find('?');
+	if (pos == std::string::npos) {
+		adjustedFileName = fname;
+		return false;
+	}
+	std::string numberStr = extension.substr(pos+1);
+	int numberNew;
+	try {
+		numberNew = IBK::string2val<unsigned int>(numberStr);
+		number = numberNew;
+		adjustedFileName = fname.withoutExtension() + "." + extension.substr(0, pos); // strip ?
+	}
+	catch (...) {
+		adjustedFileName = fname;
+		return false;
+	}
+	return true;
+}
+
+
 IBK::Path userDirectory() {
 	std::string result;
 
@@ -151,7 +189,7 @@ IBK::Path userDirectory() {
 	// if we were able to get the shell malloc object, then
 	// proceed by fetching the pidl
 	LPITEMIDLIST  pidl;
-	HRESULT hdres = SHGetSpecialFolderLocation(NULL, CSIDL_APPDATA, &pidl);
+	HRESULT hdres = SHGetSpecialFolderLocation(nullptr, CSIDL_APPDATA, &pidl);
 	if(hdres == S_OK) {
 		// return is true if success
 		#ifdef IBK_ENABLE_UTF8
@@ -181,7 +219,7 @@ IBK::Path userDirectory() {
 
 	struct passwd *pw = getpwuid(getuid());
 
-	if (pw != NULL) {
+	if (pw != nullptr) {
 
 		const char *homedir = pw->pw_dir;
 		result = homedir;
@@ -191,6 +229,38 @@ IBK::Path userDirectory() {
 #endif
 	return IBK::Path(result);
 }
+
+std::ofstream * create_ofstream(const IBK::Path& file, std::ios_base::openmode mode) {
+#if defined(_MSC_VER)
+
+#if defined(_MSC_VER)
+	return new std::ofstream(file.wstr().c_str(), mode);
+#else
+	std::string filenameAnsi = IBK::WstringToANSI(file.wstr(), false);
+	return new std::ofstream(filenameAnsi.c_str(), mode);
+#endif // _MSC_VER
+
+#else //_WIN32
+	return new std::ofstream(file.c_str(), mode);
+#endif // _WIN32
+}
+
+std::ifstream * open_ifstream(const IBK::Path& file, std::ios_base::openmode mode) {
+#if defined(_WIN32)
+
+#if defined(_MSC_VER)
+		return new std::ifstream(file.wstr().c_str(), mode);
+#else
+		std::string filenameAnsi = IBK::WstringToANSI(file.wstr(), false);
+		return new std::ifstream(filenameAnsi.c_str(), mode);
+#endif // _MSC_VER
+
+#else // _WIN32
+
+	return new std::ifstream(file.c_str(), mode);
+#endif
+}
+
 
 
 }  // namespace IBK

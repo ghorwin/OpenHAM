@@ -182,7 +182,17 @@ inline double f_pow4(double x) { double x2(x); x2*=x2; x2*=x2; return x2; }
 
 /*! Tests if a is equal to b including a certain range for potential rounding errors. */
 inline bool near_equal(double a, double b) {
-	return (a + NEAR_ZERO > b  &&  a < b + NEAR_ZERO);
+	return (a + NEAR_ZERO >= b  &&  a <= b + NEAR_ZERO);
+}
+
+/*! Tests if a is equal to b including a certain range for potential rounding errors. */
+inline bool near_equal(double a, double b, const double eps) {
+	return (a + eps >= b  &&  a <= b + eps);
+}
+
+/*! Tests if a is equal to b including a certain range for potential rounding errors. */
+inline bool near_zero(double a) {
+	return (a  >= -NEAR_ZERO  &&  a <= NEAR_ZERO);
 }
 
 /*! Meta template struct for calulating 10 power N with positiv N.
@@ -198,25 +208,24 @@ template <int N> struct pow10Pos {
 
 /*! Meta template struct spezialisation for N=1 for calulating 10 power N with positiv N.*/
 template <> struct pow10Pos<1> {
-	/*! Power constant to speed up power calculation, specialization for N=10. */
+	/*! Power constant to speed up power calculation, specialization for N=1. */
 	static const int pow = 10;
 };
 
 /*! Meta template struct spezialisation for N=0 for calulating 10 power N with positiv N.*/
 template <> struct pow10Pos<0> {
-	/*! Power constant to speed up power calculation, specialization for N=1. */
+	/*! Power constant to speed up power calculation, specialization for N=0. */
 	static const int pow = 1;
 };
 
-/*! Compares equality of a and b while using a certain number of digits.
-*/
+/*! Compares equality of a and b while using a certain number of digits. */
 template<int digits>
 bool nearly_equal(double x, double y) {
 	if( x == y ) //-V550
 		return true;
 
 	const double eps = 1.0 / pow10Pos<digits>::pow;
-	return (x + eps > y  &&  x < y + eps);
+	return (x + eps >= y  &&  x <= y + eps);
 }
 
 

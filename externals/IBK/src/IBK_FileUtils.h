@@ -42,6 +42,8 @@
 #include <vector>
 #include <string>
 #include <cstring>
+#include <fstream>
+#include <memory>
 
 namespace IBK {
 
@@ -93,6 +95,24 @@ std::vector<unsigned char> read_some_bytes(const IBK::Path& filename, unsigned i
 */
 std::string file2String(const IBK::Path & fname);
 
+/*! Reads first line of an ASCII file into string.
+	\param fname Name of the file.
+	\return First line as string.
+
+	Throws an exception if reading fails.
+*/
+std::string read_one_line(const IBK::Path & fname);
+
+/*! Takes a filename in format 'file.ext?12' and splits this into 'file.exe' and a number converted to integer.
+	\param fname The original filename.
+	\param adjustedFileName If the file extension contains a '?', adjustedFileName will contain everything in front of the '?',
+		otherwise it will contain the entire unmodified fname.
+	\param number The number following the '?' (only modified if the parsing was successful).
+	\return Returns true, if a number was successfully parsed.
+*/
+bool extract_number_suffix(const IBK::Path & fname, IBK::Path & adjustedFileName, int & number);
+
+
 /*! Converts a sentence of bytes given by \a bytes to the given value.
 	No check for vector size take place.
 	\param bytes Vector for reading.
@@ -111,6 +131,16 @@ unsigned int bytes2value(const std::vector<unsigned char>& bytes, T& value, unsi
 	\return Directory as UTF8 encoded string according POSIX standard.
 */
 IBK::Path userDirectory();
+
+/*! Create a output file stream for the given file (with utf8-filename support).
+	The calling function must take ownership.
+*/
+std::ofstream * create_ofstream(const IBK::Path& file, std::ios_base::openmode = std::ios_base::trunc);
+
+/*! Create a input file stream for the given file (with utf8-filename support).
+	The calling function must take ownership.
+*/
+std::ifstream * create_ifstream(const IBK::Path& file, std::ios_base::openmode = std::ios_base::in);
 
 }  // namespace IBK
 

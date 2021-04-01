@@ -30,46 +30,36 @@
 	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+	Based on:
+	IOGP Publication 373-7-2 – Geomatics Guidance Note number 7, part 2 – September 2019
+	To facilitate improvement, this document is subject to revision.
+	The current version is available at www.epsg.org
+	https://www.bbsr.bund.de/BBSR/DE/FP/ZB/Auftragsforschung/5EnergieKlimaBauen/2013/testreferenzjahre/01-start.html?nn=436654&notFirst=true&docId=1595620
 
-	This library contains derivative work based on other open-source libraries.
-	See OTHER_LICENCES and source code headers for details.
 
 */
 
-#include "IBK_physics.h"
+#ifndef IBK_geographicH
+#define IBK_geographicH
 
 namespace IBK {
 
-const double PI = 3.141592653589793238;
-const double BOLTZMANN = 5.67e-08;
-const double FARADAY = 96485.3415;
-const double R_IDEAL_GAS = 8.314472;
-const double DEG2RAD = 0.01745329252;
-const double R_VAPOR = 461.89;
-const double R_AIR = 287.1;
+/*! Transform WSG84 values (longitude and latitude) in lambert projection values (north and east).
+	\param longitude Longitude in Deg
+	\param latitude Latitude in deg
+	\param lambertEast East coordinate for Lambert projection in m
+	\param lambertNorth East coordinate for Lambert projection in m
+*/
+void transformWSG84ToLambertProjection(double longitude, double latitude, double& lambertEast, double& lambertNorth);
 
-const double RHO_W = 1000;
-const double RHO_AIR = 1.205;
-const double RHO_ICE = 916.7;
-const double T_DEFAULT = 293.15;
-const double T_REF_23 = 296.15;
-const double C_WATER = 4180;
-const double C_ICE = 2108;
-const double C_VAPOR = 2050;
-const double C_AIR = 1006;
-const double LAMBDA_WATER = 0.556;
-const double LAMBDA_ICE = 2.33;
-const double LAMBDA_AIR = 0.0262;
-const double H_EVAP = 3.08e6;
-const double H_FREEZE = -232417;
-const double H_FREEZE_0C = 333500;
-const double KELVIN_FACTOR = 1.0/(1000.0 * 462.0 * T_DEFAULT);
-const double GASPRESS_REF = 101325;
-const double GRAVITY = 9.807;
-const double MIN_RH = 1e-10;
-const double MIN_PC_T = -23.02585093 * RHO_W * R_VAPOR;
-const double DV_AIR = 2.662e-5;
-const double SIGMA_W = 7.6E-2;
+/*! Transform lambert projection values (north and east) in WSG84 values (longitude and latitude).
+	\param lambertEast East coordinate for Lambert projection in m
+	\param lambertNorth East coordinate for Lambert projection in m
+	\param longitude Longitude in Deg
+	\param latitude Latitude in deg
+*/
+void transformLambertProjectionToWSG84(double lambertEast, double lambertNorth, double& longitude, double& latitude);
 
+} // end namespace
 
-} //namespace IBK
+#endif // IBK_geographicH
