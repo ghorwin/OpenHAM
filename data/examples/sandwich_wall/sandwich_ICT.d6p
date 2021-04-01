@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<DelphinProject xmlns="http://www.bauklimatik-dresden.de" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:IBK="http://www.bauklimatik-dresden.de/IBK" xsi:schemaLocation="http://www.bauklimatik-dresden.de DelphinProject.xsd" fileVersion="6.1">
+	<ProjectInfo created="Do. Apr. 1 07:50:26 2021" lastEdited="Do. Apr. 1 07:51:13 2021">
+		<Comment />
+	</ProjectInfo>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Model data, solver settings, general parameters-->
+	<Init>
+		<SimulationParameter>
+			<BalanceEquationModule>BEHeat</BalanceEquationModule>
+			<Interval>
+				<IBK:Parameter name="Duration" unit="d">20</IBK:Parameter>
+			</Interval>
+			<DefaultInitialCondition name="DefaultTemperature" unit="C">10</DefaultInitialCondition>
+			<LambdaSelection>LambdaDry</LambdaSelection>
+		</SimulationParameter>
+	</Init>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--List of all materials used in this construction-->
+	<Materials>
+		<MaterialReference name="EPS - Artikel [10006]" color="#ff555753" hatchCode="13">${Project Directory}/materials/EPS-11_10006.m6</MaterialReference>
+		<MaterialReference name="Concrete, Artikel [10007]" color="#ffafd5ee" hatchCode="13">${Project Directory}/materials/concrete-2300_10007.m6</MaterialReference>
+	</Materials>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Discretization data (grid and sketches)-->
+	<Discretization>
+		<XSteps unit="m">0.0762 0.1524 0.0762 </XSteps>
+		<YSteps unit="m">0.333333 </YSteps>
+	</Discretization>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Conditions data, specifies how construction interacts with environment-->
+	<Conditions>
+
+		<Interfaces>
+			<Interface name="Outside, Sinusoidal" type="Detailed">
+				<BCReference>Cold climate heat conduction</BCReference>
+			</Interface>
+			<Interface name="Inside, constant" type="Detailed">
+				<BCReference>Inside heat conduction</BCReference>
+			</Interface>
+		</Interfaces>
+
+		<ClimateConditions>
+
+			<ClimateCondition name="Cold climate - Sinusoidal" type="Temperature" kind="TabulatedData">
+				<Filename>${Project Directory}/climate/sinus_winter.tsv</Filename>
+				<IBK:Parameter name="ShiftValue" unit="K">0</IBK:Parameter>
+			</ClimateCondition>
+		</ClimateConditions>
+
+		<BoundaryConditions>
+
+			<BoundaryCondition name="Cold climate heat conduction" type="HeatConduction" kind="Exchange">
+				<IBK:Parameter name="ExchangeCoefficient" unit="W/m2K">33.33</IBK:Parameter>
+				<CCReference type="Temperature">Cold climate - Sinusoidal</CCReference>
+			</BoundaryCondition>
+
+			<BoundaryCondition name="Inside heat conduction" type="HeatConduction" kind="Exchange">
+				<IBK:Parameter name="ExchangeCoefficient" unit="W/m2K">8.33</IBK:Parameter>
+				<CCReference type="Temperature">20 C</CCReference>
+			</BoundaryCondition>
+		</BoundaryConditions>
+	</Conditions>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Contains definitions of output files and schedules for outputs.-->
+	<Outputs>
+		<!--General parameters-->
+		<IBK:Unit name="TimeUnit">h</IBK:Unit>
+		<!--List of all Output schedules-->
+		<OutputGrids>
+			<OutputGrid name="Fields/Profiles">
+				<Interval>
+					<IBK:Parameter name="Duration" unit="a">0</IBK:Parameter>
+					<IBK:Parameter name="StepSize" unit="h">1</IBK:Parameter>
+				</Interval>
+			</OutputGrid>
+			<OutputGrid name="Single values (1 h)">
+				<Interval>
+					<IBK:Parameter name="Duration" unit="a">0</IBK:Parameter>
+					<IBK:Parameter name="StepSize" unit="h">1</IBK:Parameter>
+				</Interval>
+			</OutputGrid>
+		</OutputGrids>
+		<!--List of all Output files-->
+		<OutputFiles>
+			<OutputFile name="Surface temperature - left side">
+				<Quantity unit="C">Temperature</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Mean</SpaceType>
+				<OutputGrid>Single values (1 h)</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Surface temperature - right side">
+				<Quantity unit="C">Temperature</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Mean</SpaceType>
+				<OutputGrid>Single values (1 h)</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Temperature profile">
+				<Quantity unit="C">Temperature</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Single</SpaceType>
+				<OutputGrid>Fields/Profiles</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Surface heat flux - outside">
+				<Quantity unit="W/m2">TotalFluxHeat</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Mean</SpaceType>
+				<OutputGrid>Single values (1 h)</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Surface heat flux - inside">
+				<Quantity unit="W/m2">TotalFluxHeat</Quantity>
+				<TimeType>None</TimeType>
+				<SpaceType>Mean</SpaceType>
+				<OutputGrid>Single values (1 h)</OutputGrid>
+			</OutputFile>
+			<OutputFile name="Surface heat flux integral - inside">
+				<Quantity unit="J/m2">TotalFluxHeat</Quantity>
+				<TimeType>Integral</TimeType>
+				<SpaceType>Mean</SpaceType>
+				<OutputGrid>Single values (1 h)</OutputGrid>
+			</OutputFile>
+		</OutputFiles>
+	</Outputs>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--List of all assignments of materials and conditions-->
+	<Assignments>
+
+		<Assignment type="Material" location="Element">
+			<Reference>Concrete, Artikel [10007]</Reference>
+			<Range>1 0 1 0</Range>
+		</Assignment>
+
+		<Assignment type="Material" location="Element">
+			<Reference>EPS - Artikel [10006]</Reference>
+			<Range>2 0 2 0</Range>
+		</Assignment>
+
+		<Assignment type="Material" location="Element">
+			<Reference>EPS - Artikel [10006]</Reference>
+			<Range>0 0 0 0</Range>
+		</Assignment>
+
+		<Assignment type="Interface" location="Right">
+			<Reference>Inside, constant</Reference>
+			<Range>2 0 2 0</Range>
+		</Assignment>
+
+		<Assignment type="Output" location="Element">
+			<Reference>Temperature profile</Reference>
+			<Range>0 0 2 0</Range>
+		</Assignment>
+
+		<Assignment type="Output" location="Left">
+			<Reference>Surface heat flux - outside</Reference>
+			<Range>0 0 0 0</Range>
+		</Assignment>
+
+		<Assignment type="Output" location="Right">
+			<Reference>Surface heat flux - inside</Reference>
+			<Range>2 0 2 0</Range>
+		</Assignment>
+
+		<Assignment type="Interface" location="Left">
+			<Reference>Outside, Sinusoidal</Reference>
+			<Range>0 0 0 0</Range>
+		</Assignment>
+
+		<Assignment type="Output" location="Right">
+			<Reference>Surface heat flux integral - inside</Reference>
+			<Range>2 0 2 0</Range>
+		</Assignment>
+	</Assignments>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+</DelphinProject>

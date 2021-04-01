@@ -1,0 +1,25 @@
+D6MARLZ! 006.001
+
+[IDENTIFICATION]
+  NAME                     = DE: Beton armiert (1% Stahl) 2300 (T1 2.1) |EN: Concrete, Artikel
+  AQUISITION_ID            = -1
+  LABORATORY               = DE: Literatur DIN 4108-4 und ISO 10465 |EN: Artikel, BS2021
+  DATE                     = 01.04.21
+  COLOUR                   = #ff42c05a
+  FLAGS                    = AIR_TIGHT VAPOR_TIGHT WATER_TIGHT 
+  CATEGORY                 = CONCRETE
+  COMMENTS                 = DE: DIN 4108-4 Tabelle 1 Zeile 2.1 verweist auf ISO 10456 Tabelle 3 |EN: DIN 4108-4 Table 1 Line 2.1 refers to ISO 10456 Table 3
+  DBTYPE                   = 1
+  HATCHING                 = 13
+
+
+[STORAGE_BASE_PARAMETERS]
+  RHO                      = 2300 kg/m3
+  CE                       = 880 J/kgK
+
+
+[TRANSPORT_BASE_PARAMETERS]
+  LAMBDA                   = 1.8 W/mK
+  MEW                      = 130 -
+  LAMBDA_DESIGN            = 1.8 W/mK
+

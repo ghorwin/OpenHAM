@@ -1,0 +1,25 @@
+D6MARLZ! 006.001
+
+[IDENTIFICATION]
+  NAME                     = DE: Expandierter Polystyrolschaum EPS 0.038 (T2 5.2) |EN: EPS - Artikel
+  AQUISITION_ID            = -1
+  LABORATORY               = DE: Literatur DIN 4108-4 |EN: Artikel, BS2021
+  DATE                     = 01.04.21
+  COLOUR                   = #ff42c05a
+  FLAGS                    = AIR_TIGHT VAPOR_TIGHT WATER_TIGHT 
+  CATEGORY                 = INSULATION
+  COMMENTS                 = DE: DIN 4108-4 Tabelle 2 Zeile 5.2, Expandierter Polystyrolschaum EPS nach DIN EN 13163a, Nennwert 0.038
+  DBTYPE                   = 1
+  HATCHING                 = 13
+
+
+[STORAGE_BASE_PARAMETERS]
+  RHO                      = 11.5 kg/m3
+  CE                       = 1450 J/kgK
+
+
+[TRANSPORT_BASE_PARAMETERS]
+  LAMBDA                   = 0.05 W/mK
+  MEW                      = 20 -
+  LAMBDA_DESIGN            = 0.05 W/mK
+
