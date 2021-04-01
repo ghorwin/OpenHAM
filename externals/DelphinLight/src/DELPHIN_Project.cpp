@@ -951,7 +951,8 @@ void Project::readCCData(const TiXmlNode * conditionsXmlElem, const TiXmlNode* b
 				throw IBK::Exception("Missing 'Filename' xml tag in 'ClimateCondition' tag of type 'TabulatedData'.", FUNC_ID);
 		}
 		else
-			throw IBK::Exception(IBK::FormatString("Unsupported 'kind' for ClimateCondition, currently only 'Constant' supported for now."), FUNC_ID);
+			throw IBK::Exception(IBK::FormatString("Unsupported 'kind' (%1) for ClimateCondition, currently only "
+												   "'Constant' and 'TabulatedData' are supported.").arg(attrib->ValueStr()), FUNC_ID);
 
 	}
 	catch (IBK::Exception & ex) {
