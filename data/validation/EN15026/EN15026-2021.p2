@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<PostProc version="2.2.4">
+	<!--List of all directories-->
+	<Directories>
+		<Directory>
+			<Path>.</Path>
+			<SubDir Color="#416fce" Checked="1">EN15026-2007</SubDir>
+			<SubDir Color="#ffaa00" Checked="0">EN15026-2007.gcc_linux</SubDir>
+			<SubDir Color="#ff007f" Checked="0">EN15026-2007.gcc_mac</SubDir>
+			<SubDir Color="#7141d1" Checked="0">EN15026-2007.win_VC14</SubDir>
+			<SubDir Color="#ffee00" Checked="0">reference_results</SubDir>
+			<ExpandedSubDir>.</ExpandedSubDir>
+		</Directory>
+	</Directories>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--All mappers.-->
+	<Mappers>
+		<Mapper name="$project - Total mass density of liquid water, water vapor and ice">
+			<Extractors>
+				<Extractor>
+					<DataIOFileName>EN15026-2007/results/Profile_MoistureMassDensity.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT locked="yes">7</CutIndexT>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>EN15026-2007/results/Profile_MoistureMassDensity.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT locked="yes">35</CutIndexT>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>EN15026-2007/results/Profile_MoistureMassDensity.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>reference_results/MoistField_min2.out</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT locked="yes">0</CutIndexT>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>reference_results/MoistField_min2.out</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT locked="yes">1</CutIndexT>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>reference_results/MoistField_min2.out</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT locked="yes">2</CutIndexT>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>reference_results/MoistField_max2.out</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT locked="yes">0</CutIndexT>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>reference_results/MoistField_max2.out</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT locked="yes">1</CutIndexT>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>reference_results/MoistField_max2.out</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT locked="yes">2</CutIndexT>
+				</Extractor>
+			</Extractors>
+			<ChartModel chartType="2D">
+				<SeriesProperties>
+					<Series>
+						<TitleText>t = 7 d</TitleText>
+						<PenColor>#204a87</PenColor>
+						<MarkerColor>#204a87</MarkerColor>
+					</Series>
+					<Series>
+						<TitleText>t = 30 d</TitleText>
+						<PenColor>#729fcf</PenColor>
+						<MarkerColor>#729fcf</MarkerColor>
+					</Series>
+					<Series>
+						<TitleText>t = 365 d</TitleText>
+						<PenColor>#97e0ff</PenColor>
+						<MarkerColor>#97e0ff</MarkerColor>
+					</Series>
+					<Series inLegend="0">
+						<TitleText>t = 7 d min</TitleText>
+						<MarkerStyle>0</MarkerStyle>
+						<PenStyle>0</PenStyle>
+						<PenColor>#204a87</PenColor>
+						<MarkerColor>#204a87</MarkerColor>
+					</Series>
+					<Series inLegend="0">
+						<TitleText>t = 30 d min</TitleText>
+						<MarkerStyle>0</MarkerStyle>
+						<PenStyle>0</PenStyle>
+						<PenColor>#729fcf</PenColor>
+						<MarkerColor>#729fcf</MarkerColor>
+					</Series>
+					<Series inLegend="0">
+						<TitleText>t = 365 d min</TitleText>
+						<MarkerStyle>0</MarkerStyle>
+						<PenStyle>0</PenStyle>
+						<PenColor>#97e0ff</PenColor>
+						<MarkerColor>#97e0ff</MarkerColor>
+					</Series>
+					<Series inLegend="0">
+						<TitleText>t = 7 d max</TitleText>
+						<MarkerStyle>1</MarkerStyle>
+						<PenStyle>0</PenStyle>
+						<PenColor>#204a87</PenColor>
+						<MarkerColor>#204a87</MarkerColor>
+					</Series>
+					<Series inLegend="0">
+						<TitleText>t = 30 d max</TitleText>
+						<MarkerStyle>1</MarkerStyle>
+						<PenStyle>0</PenStyle>
+						<PenColor>#729fcf</PenColor>
+						<MarkerColor>#729fcf</MarkerColor>
+					</Series>
+					<Series inLegend="0">
+						<TitleText>t = 365 d max</TitleText>
+						<MarkerStyle>1</MarkerStyle>
+						<PenStyle>0</PenStyle>
+						<PenColor>#97e0ff</PenColor>
+						<MarkerColor>#97e0ff</MarkerColor>
+					</Series>
+				</SeriesProperties>
+				<AxisProperties>
+					<Axis index="0" autoscale="0">
+						<TitleText>Coordinate [$unit]</TitleText>
+						<TitleFont>Roboto Condensed,9,-1,5,75,0,0,0,0,0</TitleFont>
+						<LabelFont>Roboto Condensed,9,-1,5,50,0,0,0,0,0</LabelFont>
+						<IBK:Unit name="AxisUnit">m</IBK:Unit>
+						<Maximum>0.10000000000000001</Maximum>
+						<GridPenStyle>1</GridPenStyle>
+						<MinorGridVisible>0</MinorGridVisible>
+					</Axis>
+					<Axis index="1" autoscale="0">
+						<TitleText>Moisture mass density [$unit]</TitleText>
+						<TitleFont>Roboto Condensed,9,-1,5,75,0,0,0,0,0</TitleFont>
+						<LabelFont>Roboto Condensed,9,-1,5,50,0,0,0,0,0</LabelFont>
+						<IBK:Unit name="AxisUnit">kg/m3</IBK:Unit>
+						<Maximum>140</Maximum>
+						<Minimum>40</Minimum>
+						<MinorGridVisible>0</MinorGridVisible>
+					</Axis>
+					<Axis index="2" enabled="0">
+						<TitleText>$quantity [$unit]</TitleText>
+					</Axis>
+				</AxisProperties>
+				<ChartProperties>
+					<TitleText>EN 15026 - Moisture Content Profiles</TitleText>
+					<TitleFont>Roboto Condensed,12,-1,5,75,0,0,0,0,0</TitleFont>
+					<AxisScalesInside>1</AxisScalesInside>
+					<Legend>
+						<Position>Inside</Position>
+						<MaxColumns>1</MaxColumns>
+						<Font>Roboto Condensed,9,-1,5,50,0,0,0,0,0</Font>
+					</Legend>
+				</ChartProperties>
+			</ChartModel>
+		</Mapper>
+		<Mapper name="$project - Moisture Mass Density">
+			<Extractors>
+				<Extractor>
+					<DataIOFileName>EN15026-2007/results/Profile_MoistureMassDensity.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT locked="yes">7</CutIndexT>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>EN15026-2007/results/Profile_MoistureMassDensity.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT locked="yes">35</CutIndexT>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>EN15026-2007/results/Profile_MoistureMassDensity.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+					<CutIndexT locked="yes">35</CutIndexT>
+				</Extractor>
+				<Extractor>
+					<DataIOFileName>EN15026-2007/results/Profile_MoistureMassDensity.d6o</DataIOFileName>
+					<CutType>TimeCut</CutType>
+					<DataFormat>DF_3D</DataFormat>
+				</Extractor>
+			</Extractors>
+			<ChartModel chartType="2D">
+				<SeriesProperties>
+					<Series>
+						<TitleText>t= 7.000 d: $quantity</TitleText>
+						<MarkerColor>#000000</MarkerColor>
+					</Series>
+					<Series>
+						<TitleText>t=35.000 d: t= 7.000 d: $quantity</TitleText>
+						<PenColor>#ff420e</PenColor>
+						<MarkerColor>#ff420e</MarkerColor>
+					</Series>
+					<Series>
+						<TitleText>t=35.000 d: t=35.000 d: t= 7.000 d: $quantity</TitleText>
+						<PenColor>#004586</PenColor>
+						<MarkerColor>#004586</MarkerColor>
+					</Series>
+					<Series>
+						<TitleText>t=35.000 d: t=35.000 d: t= 7.000 d: $quantity</TitleText>
+						<PenColor>#aecf00</PenColor>
+						<MarkerColor>#aecf00</MarkerColor>
+					</Series>
+				</SeriesProperties>
+				<AxisProperties>
+					<Axis index="0">
+						<TitleText>Coordinate [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">m</IBK:Unit>
+					</Axis>
+					<Axis index="1">
+						<TitleText>$quantity [$unit]</TitleText>
+						<IBK:Unit name="AxisUnit">kg/m3</IBK:Unit>
+					</Axis>
+					<Axis index="2" enabled="0">
+						<TitleText>$quantity [$unit]</TitleText>
+					</Axis>
+				</AxisProperties>
+				<ChartProperties>
+					<TitleText>$project - Moisture Mass Density</TitleText>
+					<Legend />
+				</ChartProperties>
+			</ChartModel>
+		</Mapper>
+	</Mappers>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+	<!--Split window state.-->
+	<Splitting>
+		<Widget id="1" parent="0" viewTable="0" mapperIndex="0" size1="1" size2="1" orientation="2" />
+		<FocusedWidget>0</FocusedWidget>
+	</Splitting>
+
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+</PostProc>

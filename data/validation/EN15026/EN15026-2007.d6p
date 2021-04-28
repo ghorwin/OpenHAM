@@ -33,7 +33,7 @@
 
 	<!--Discretization data (grid and sketches)-->
 	<Discretization>
-		<XSteps unit="m">20</XSteps>
+		<XSteps unit="m">10</XSteps>
 	</Discretization>
 
 	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
