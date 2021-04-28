@@ -13,7 +13,7 @@
 			<Interval>
 				<IBK:Parameter name="Duration" unit="d">365</IBK:Parameter>
 			</Interval>
-			<IBK:Flag name="UseKirchhoffPotential">false</IBK:Flag>
+			<IBK:Flag name="UseKirchhoffPotential">true</IBK:Flag>
 			<DefaultInitialCondition name="DefaultRelativeHumidity" unit="%">50</DefaultInitialCondition>
 		</SimulationParameter>
 		<SolverParameter>
