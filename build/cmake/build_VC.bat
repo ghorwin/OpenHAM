@@ -1,16 +1,16 @@
 @echo off
 
 :: setup VC environment variables
-set VCVARSALL_PATH="c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
+set VCVARSALL_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat"
 call %VCVARSALL_PATH%
 
 :: These environment variables can also be set externally
 if not defined JOM_PATH (
-	set JOM_PATH=c:\Qt\Qt5.10.1\Tools\QtCreator\bin
+	set JOM_PATH=c:\Qt\5.15.2\Tools\QtCreator\bin
 )
 
 if not defined CMAKE_PREFIX_PATH (
-	set CMAKE_PREFIX_PATH=c:\Qt\Qt5.10.1\5.10.1\msvc2015
+	set CMAKE_PREFIX_PATH=c:\Qt\5.15.2\msvc2019
 )
 
 :: add search path for jom.exe
