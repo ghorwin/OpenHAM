@@ -11,13 +11,13 @@ SUBDIRS += OpenHAMSolver \
 	TiCPP
 
 # where to find the sub projects
-OpenHAMSolver.file = ../../OpenHAMSolver/projects/Qt/OpenHAMSolver.pro
+OpenHAMSolver.file = OpenHAMSolver/projects/Qt/OpenHAMSolver.pro
 
-CCM.file = ../../externals/CCM/projects/Qt/CCM.pro
-DelphinLight.file = ../../externals/DelphinLight/projects/Qt/DelphinLight.pro
-DataIO.file = ../../externals/DataIO/projects/Qt/DataIO.pro
-IBK.file = ../../externals/IBK/projects/Qt/IBK.pro
-TiCPP.file = ../../externals/TiCPP/projects/Qt/TiCPP.pro
+CCM.file = externals/CCM/projects/Qt/CCM.pro
+DelphinLight.file = externals/DelphinLight/projects/Qt/DelphinLight.pro
+DataIO.file = externals/DataIO/projects/Qt/DataIO.pro
+IBK.file = externals/IBK/projects/Qt/IBK.pro
+TiCPP.file = externals/TiCPP/projects/Qt/TiCPP.pro
 
 # dependencies
 OpenHAMSolver.depends = DelphinLight CCM DataIO IBK TiCPP

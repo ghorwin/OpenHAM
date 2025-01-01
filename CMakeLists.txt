@@ -1,11 +1,11 @@
 # CMakeLists.txt file for OpenHAMSolverBundle library and applications
-# Author: Andreas Nicolai (andreas.nicolai -at- tu-dresden.de)
-
-# The project name
-project( OpenHAMSolverBundle )
+# Author: Andreas Nicolai (andreas.nicolai -at- gmx.net)
 
 # Require a fairly recent cmake version
 cmake_minimum_required( VERSION 2.8...3.10 )
+
+# The project name
+project( OpenHAMSolverBundle )
 
 # -------------------------------------------------------------
 # Initial commands
@@ -39,13 +39,13 @@ endif (MSVC)
 # Subdirectories and Subprojects
 # -------------------------------------------------------------
 
-add_subdirectory( ../../externals/CCM/projects/cmake_local CCM )
-add_subdirectory( ../../externals/IBK/projects/cmake_local IBK )
-add_subdirectory( ../../externals/DataIO/projects/cmake_local DataIO)
-add_subdirectory( ../../externals/TiCPP/projects/cmake_local TiCPP)
-add_subdirectory( ../../externals/DelphinLight/projects/cmake_local DelphinLight)
+add_subdirectory( externals/CCM/projects/cmake_local CCM )
+add_subdirectory( externals/IBK/projects/cmake_local IBK )
+add_subdirectory( externals/DataIO/projects/cmake_local DataIO)
+add_subdirectory( externals/TiCPP/projects/cmake_local TiCPP)
+add_subdirectory( externals/DelphinLight/projects/cmake_local DelphinLight)
 
 # add subdirectories for all builds
-add_subdirectory( ../../OpenHAMSolver/projects/cmake OpenHAMSolver )
+add_subdirectory( OpenHAMSolver/projects/cmake OpenHAMSolver )
 
 
