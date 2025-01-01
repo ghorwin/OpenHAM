@@ -19,7 +19,7 @@
 export PATH=~/Qt5.7.0/5.7/clang_64/bin:~/Qt/4.8.7/bin:$PATH
 
 CMAKELISTSDIR=$(pwd)/../..
-BUILDDIR="bb"
+BUILDDIR=$(pwd)/bb
 
 # set defaults
 CMAKE_BUILD_TYPE=" -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo"
@@ -145,12 +145,13 @@ fi
 
 cd $BUILDDIR && cmake $CMAKE_OPTIONS $CMAKE_BUILD_TYPE $CMAKE_COMPILER_OPTIONS $CMAKELISTSDIR && make -j$MAKE_CPUCOUNT && 
 cd $CMAKELISTSDIR &&
+mkdir -p bin/release &&
 
 echo "*** Copying OpenHAMSolver to bin/release ***" &&
-mkdir -p ../../bin/release &&
-cp $BUILDDIR/OpenHAMSolver/OpenHAMSolver ../../bin/release &&
+cp $BUILDDIR/OpenHAMSolver/OpenHAMSolver bin/release &&
 
 echo "*** Build OpenHAMSolver ***" &&
+cd $BUILDDIR/.. &&
 
 if [[ $SKIP_TESTS = "false"  ]]; 
 then

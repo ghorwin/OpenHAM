@@ -33,14 +33,14 @@ class SolverStats:
 				if tokens[0].find("Time") != -1:
 					self.timers[tokens[0]] = float(tokens[1])
 				else:
-					self.counters[tokens[0]] = long(tokens[1])
+					self.counters[tokens[0]] = int(tokens[1])
 		except Exception as e:
-			print "Error opening/reading file '{}', error: {}".format(statsFile, e)
+			print("Error opening/reading file '{}', error: {}".format(statsFile, e))
 			return False
 		return True
 
 	@staticmethod
-	def compareStats(s1, s2):
+	def compareStats(s1, s2, ignoredCounters):
 		"""Compares two sets of summary files (statistics counters).
 		
 		Parameters
@@ -54,19 +54,26 @@ class SolverStats:
 		"""
 		
 		# compare counters
-		print "  {:30s}  {:>12s}    {:>12s}".format("", "Reference", "New")
+		#print "  {:30s}  {:>12s}    {:>12s}".format("", "Reference", "New")
 		# print side-by-side differences
 		s1keys = s1.counters.keys()
 		s2keys = s2.counters.keys()
-		s1keys = list(set(s1keys + s2keys))
-		s1keys.sort()
-		fail = False
+		mergedKeys = set()
 		for k in s1keys:
-			if s1.counters.has_key(k):
-				if s2.counters.has_key(k):
+			mergedKeys.add(k)
+		for k in s2keys:
+			mergedKeys.add(k)
+		mergedKeys = sorted(mergedKeys)
+		fail = False
+		for k in mergedKeys:
+			# skip ignore counters
+			if k in ignoredCounters:
+				continue 
+			if k in s1.counters:
+				if k in s2.counters:
 					match = s1.counters[k] == s2.counters[k]
 					if match:
-						print "  {:30s}  {:12d} == {:12d}".format(k, s1.counters[k], s2.counters[k])
+						pass #print("  {:30s}  {:12d} == {:12d}".format(k, s1.counters[k], s2.counters[k]))
 					else:
 						printError("  {:30s}  {:12d} <> {:12d}".format(k, s1.counters[k], s2.counters[k]))
 						fail = True
@@ -80,28 +87,28 @@ class SolverStats:
 		# compare timings (with threshold)
 		s1keys = s1.timers.keys()
 		s2keys = s2.timers.keys()
-		s1keys = list(set(s1keys + s2keys))
-		s1keys.sort()
-		print "  --"
-		THRESHOLD = 0.1
+		mergedKeys = set()
 		for k in s1keys:
-			if s1.timers.has_key(k):
-				if s2.timers.has_key(k):
+			mergedKeys.add(k)
+		for k in s2keys:
+			mergedKeys.add(k)
+		mergedKeys = sorted(mergedKeys)
+		#print "  --"
+		THRESHOLD = 0.1 # 10 %
+		for k in mergedKeys:
+			if k in s1.timers:
+				if k in s2.timers:
 					val1 = s1.timers[k]
 					val2 = s2.timers[k]
 					match = val1*(1+THRESHOLD) > val2 and val2*(1+THRESHOLD) > val1
-					# if time is too small to be meaningful, always accept match
-					if abs(val1-val2) < 1:
-						match = True
-					if match:
-						print "  {:30s}  {:12.2f} ~~ {:12.2f}".format(k, s1.timers[k], s2.timers[k])
-					else:
+					# if time is too small to be meaningful, do not print warning
+					if abs(val1-val2) > 0.1:
 						printWarning("  {:30s}  {:12.2f} <> {:12.2f}".format(k, s1.timers[k], s2.timers[k]))
 				else:
 					printWarning("  {:30s}  {:12.2f} <> {:12s}".format(k, s1.timers[k], ""))
 			else:
 				printWarning("  {:30s}  {:12s} <> {:12.2f}".format(k, "", s2.timers[k]))
-		print "\n"
+		#print "\n"
 			
 		return not fail
 		
@@ -122,11 +129,18 @@ class SolverStats:
 			if fileParts[1] == ".d6o" or fileParts[1] == ".tsv":
 				if fileParts[1] == ".tsv":
 					# for tsv files we do binary comparison
-					if not filecmp.cmp(os.path.join(dir1,f), os.path.join(dir2,f), shallow=False):
+					# check if both files exist
+					if not(os.path.exists(os.path.join(dir1,f))):
+						printError("Missing file '{}'".format(os.path.join(dir1,f)))
+						fail = True
+					elif not(os.path.exists(os.path.join(dir2,f))):
+						printError("Missing file '{}'".format(os.path.join(dir2,f)))
+						fail = True
+					elif not filecmp.cmp(os.path.join(dir1,f), os.path.join(dir2,f), shallow=False):
 						printError("Mismatching content of file (byte difference) '{}'".format(f))
 						fail = True
 					else:
-						print f
+						pass#print f
 				else:
 					# try to open reference and result files
 					try:
@@ -149,7 +163,7 @@ class SolverStats:
 									printError("  '{}'".format(lines2[i].rstrip('\n')))
 									fail = True
 									break
-							print f
+							print(f)
 					except OSError as e:
 						printError("Error comparing files '{}'".format(f))
 						fail = True

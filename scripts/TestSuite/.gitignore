@@ -1,2 +1,2 @@
-*.pyc
-*.wpu
+/__pycache__/
+/TestSuiteDev.wpr
