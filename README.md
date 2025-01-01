@@ -7,6 +7,14 @@ The code base is based on my PhD thesis (see reference below) and uses the stand
 
 See [OpenHAM-wiki](../../wiki) for details.
 
+## Quality Assurance
+
+There is an automatic build and test script running (build-test of all C/C++ code):
+
+| Test | Result|
+|-----|-----|
+| CI - Linux 64-bit (Ubuntu 24.04 LTS) Solver and test suite |  |
+| CI - Windows 64-bit (Visual Studio 2019) |  |
 
 ## Building
 
