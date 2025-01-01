@@ -3,6 +3,8 @@
 OpenHAM is an open-source Heat, Air and Moisture transport model, initially written by *Andreas Nicolai (andreas.nicolai -at- gmx.net)* (formerly at Institut für Bauklimatik, TU Dresden, Germany). 
 It is meant as an **open source reference implementation** of the governing equations that are standardized, for example, in the HAMSTAD modeling document and the EN 15026 standard. It is specialized for 1D geometries and includes an automated grid generation algorithm.
 
+The code base is based on my PhD thesis (see reference below) and uses the standardized and documented data and output file formats of the (much more capable and advanced) [DELPHIN simulation software](https://bauklimatik-dresden.de/).
+
 See [OpenHAM-wiki](../../wiki) for details.
 
 
