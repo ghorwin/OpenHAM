@@ -52,23 +52,6 @@
 
 #include "IBK_Exception.h"
 
-#ifdef _WIN32
-
-  #ifndef _WIN64
-
-	#define IBK_USE_STOD
-
-  #else
-
-	#include "fast_double_parser/fast_double_parser.h"
-
-  #endif
-
-#else
-
-	#include "fast_double_parser/fast_double_parser.h"
-
-#endif
 
 #ifdef _MSC_VER
 #define TOLOWER(x) tolower(x)
@@ -102,6 +85,7 @@ enum ExplodeFlags {
 	EF_NoFlags          = 0x00,
 	EF_TrimTokens       = 0x01,
 	EF_KeepEmptyTokens  = 0x02,
+	/*! Strings in " " are not taken apart during split, even if a delimiter is found inside the quotation. */
 	EF_UseQuotes        = 0x04
 };
 
@@ -152,6 +136,14 @@ std::string val2string(const T val) {
 	strm << val;
 	return strm.str();
 }
+
+
+/*! Converts the boolean 'val' to a string. */
+template <>
+inline std::string val2string<bool>(const bool val) {
+	return (val ? "true" : "false");
+}
+
 
 /*! Converts the value 'val' to a string with given precision. */
 template <class T>
@@ -206,28 +198,10 @@ T string2val(const std::string& str) {
 
 
 template <>
-inline double string2val<double>(const std::string& str) {
-	double val;
-	if (str=="1.#QNAN")
-		return std::numeric_limits<double>::quiet_NaN();
-#ifdef IBK_USE_STOD
-	// for 32-bit, use std::stod()
-	size_t pos;
-	try {
-		val = std::stod(str, &pos); // may throw std::out_of_range or std::invalid_argument
-		if (str.find_first_not_of(" \t\n", pos) != std::string::npos)
-			throw std::exception();
-	}
-	catch (...) {
-		throw IBK::Exception(IBK::FormatString("Could not convert '%1' into value.").arg(str), "[IBK::string2val<double>]");
-	}
-#else
-	bool isok = fast_double_parser::decimal_separator_dot::parse_number(str.c_str(), &val);
-	if (!isok)
-		throw IBK::Exception(IBK::FormatString("Could not convert '%1' into value.").arg(str), "[IBK::string2val<double>]");
-#endif
-	return val;
-}
+double string2val<double>(const std::string& str);
+
+template <>
+bool string2val<bool>(const std::string& str);
 
 /*! Attempts to extract a numerical value from a string.
 	Returns the def value in case of non valid string.
@@ -251,30 +225,7 @@ T string2valDef(const std::string& str, const T& def) {
 	\endcode
 */
 template <>
-inline double string2valDef<double>(const std::string& str, const double & def) {
-	if (str=="1.#QNAN")
-		return std::numeric_limits<double>::quiet_NaN();
-	double val;
-#ifdef IBK_USE_STOD
-	// for 32-bit, use std::stod()
-	size_t pos;
-	if (std::locale().name() != "C")
-		setlocale(LC_ALL, "C");
-	try {
-		val = std::stod(str, &pos); // may throw std::out_of_range or std::invalid_argument
-		if (str.find_first_not_of(" \t\n", pos) != std::string::npos)
-			throw std::exception();
-	}
-	catch (...) {
-		throw IBK::Exception(IBK::FormatString("Could not convert '%1' into value.").arg(str), "[IBK::string2val<double>]");
-	}
-#else
-	bool isok = fast_double_parser::decimal_separator_dot::parse_number(str.c_str(), &val);
-	if (!isok)
-		return def;
-#endif
-	return val;
-}
+double string2valDef<double>(const std::string& str, const double & def);
 
 
 /*! Converts a string with white-space separated values into a vector.
@@ -356,6 +307,11 @@ std::pair<unsigned int, double> extractFromParenthesis(const std::string & src,
 													std::pair<unsigned int, double> defaultValue);
 
 
+/*! Takes a header in format 'text [h]' and extracts the unit.
+	Returns invalid unit if header does not have [] or does not contain a valid unit.
+*/
+IBK::Unit extract_unit(const std::string & headerLabel);
+
 /*! Reads in (\a src) until char (\a ch)
 	(\a src) stores the first part
 	\return Rest of the string
@@ -384,7 +340,7 @@ std::string& trim_keyword(std::string& keyword);
 	std::transform(strvec.begin(), strvec.end(), strvec.begin(), trimmer());
 	\endcode
 */
-class trimmer : public std::unary_function<std::string,std::string> {
+class trimmer {
 public:
 	/*! Evaluation operator, returns a trimmed copy of the string argument using default trim characters, see trim(). */
 	std::string operator()(const std::string& val) {
@@ -403,7 +359,7 @@ std::string& remove_comment(std::string& str);
 	bool equal = std::equal(vec1.begin(), vec1.end(), vec2.begin(), nocase_equal());
 	\endcode
 */
-class nocase_equal : public std::binary_function<char, char, bool> {
+class nocase_equal {
 public:
 	/*! Evaluation operator, returns whether left uppercased character equals right upper cased character. */
 	bool operator() (char lhs, char rhs) { return TOLOWER(lhs)==TOLOWER(rhs); }
@@ -617,6 +573,21 @@ std::string join(T c, char sepChar = ' ') {
 	return str;
 }
 
+/*! Joins a list of numbers (converting these into strings). */
+template <typename T>
+std::string join_numbers(const T & c, char sepChar = ' ') {
+	std::string str;
+	for (auto & t : c) {
+		str += IBK::val2string(t);
+		str += sepChar;
+	}
+	// remove trailing char
+	if (!str.empty())
+		str.erase(str.end()-1);
+	return str;
+}
+
+
 /*! Returns a string with the formatted double number.
 	Pass either ios_base::scientific or ios_base::fixed as optional third argument
 	to specify fixed or exponential format.
@@ -710,6 +681,8 @@ void decode_version_number(const std::string & versionString, unsigned int & maj
 */
 bool convertDosToUnix( const std::string& fname, std::stringstream& out, std::string& errmsg );
 
+/*! Takes an XML text and encodes it in HTML by replacing special characters with symbols. */
+std::string convertXml2Html(const std::string & xmlText);
 
 }   // namespace IBK
 

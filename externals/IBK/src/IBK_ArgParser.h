@@ -268,11 +268,17 @@ public:
 
 	/*! Application name, used in the syntax line of printHelp(). */
 	std::string								m_appname;
+	/*! If not empty, this string will be printed after the appname in the help/man page. */
+	std::string								m_syntaxArguments;
 
 	/*! Short description of the program. */
 	std::string								m_manVersionString;
+	/*! Manual name like "MasterSim Manual", printed cented at top of man page. */
+	std::string								m_manManualName;
 	/*! Short description of the program. */
 	std::string								m_manShortDescription;
+	/*! Set here the date string like "January 1, 2022" to be used on the man page. */
+	std::string								m_manReleaseDate;
 	/*! Long description of the program. */
 	std::string								m_manLongDescription;
 	/*! Author info to show in the man page. */

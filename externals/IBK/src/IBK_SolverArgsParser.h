@@ -171,16 +171,16 @@ public:
 	IBK::Path		m_projectFile;
 
 	/*! True if any form of restart was requested. */
-	bool			m_restart;
+	bool			m_restart = false;
 
 	/*! True if restart of the solver from some specified time was requested. */
-	bool			m_restartFrom;
+	bool			m_restartFrom = false;
 
 	/*! Time point in [s] to restart the simulation from if m_restartFrom is true. */
-	double			m_restartTime;
+	double			m_restartTime = -1;
 
 	/*! Parallel thread count. */
-	int				m_numParallelThreads;
+	int				m_numParallelThreads = 1;
 
 
 	/*! Holds LES solver name without optional parenthesis.*/

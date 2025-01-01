@@ -57,12 +57,7 @@ using namespace std;
 
 namespace IBK {
 
-SolverArgsParser::SolverArgsParser() :
-	m_restart(false),
-	m_restartFrom(false),
-	m_restartTime(-1),
-	m_numParallelThreads(1)
-{
+SolverArgsParser::SolverArgsParser() {
 	// automatically add flags and options based on defined keywords
 	for (int i=0; i<NUM_OverrideOptions; ++i) {
 		addOption(keywordChar(i),
@@ -364,6 +359,7 @@ std::string SolverArgsParser::keyword( int index ) const {
 
 
 std::string SolverArgsParser::description( int index ) const {
+	FUNCID(SolverArgsParser::description);
 	switch( index ) {
 		case DO_VERSION						: return "Show solver version info.";
 		case DO_STEP_STATS					: return "Enable statistics outputs after each completed solver step.";
@@ -383,12 +379,13 @@ std::string SolverArgsParser::description( int index ) const {
 		case OO_LES_SOLVER					: return "Specify an alternative linear equation system solver.";
 		case OO_PRECONDITIONER				: return "Specify an alternative preconditioner for iterative solver.";
 		default :
-			throw IBK::Exception("Missing implementation.", "[SolverArgsParser::description]");
+			throw IBK::Exception("Missing implementation.", FUNC_ID);
 	}
 }
 
 
 std::string SolverArgsParser::descriptionValue( int index ) const {
+	FUNCID(SolverArgsParser::descriptionValue);
 	switch( index ) {
 		case DO_VERSION						: return "true|false";
 		case DO_STEP_STATS					: return "true|false";
@@ -406,12 +403,13 @@ std::string SolverArgsParser::descriptionValue( int index ) const {
 		case OO_PRECONDITIONER				: return "auto|Band|ILU";
 		case OO_INTEGRATOR					: return "auto|CVode|ImplicitEuler";
 		default :
-			throw IBK::Exception("Missing implementation.", "[SolverArgsParser::descriptionValue]");
+			throw IBK::Exception("Missing implementation.", FUNC_ID);
 	}
 }
 
 
 std::string SolverArgsParser::defaultValue( int index ) const {
+	FUNCID(SolverArgsParser::defaultValue);
 	// an empty default value means user must provide a value when command-line argument is specified
 	switch( index ) {
 		case DO_VERSION						: return "false";
@@ -430,7 +428,7 @@ std::string SolverArgsParser::defaultValue( int index ) const {
 		case OO_LES_SOLVER					: return "auto";
 		case OO_PRECONDITIONER				: return "auto";
 		default :
-			throw IBK::Exception("Missing implementation.", "[SolverArgsParser::defaultValue]");
+			throw IBK::Exception("Missing implementation.", FUNC_ID);
 	}
 }
 
@@ -480,8 +478,6 @@ std::vector< std::string > SolverArgsParser::options( int index ) const {
 			vec.push_back( std::string("ILU") );
 		break;
 
-		default :
-		break;
 	}
 
 	return vec;

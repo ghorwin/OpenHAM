@@ -36,16 +36,12 @@
 
 */
 
-#include "IBK_configuration.h"
-
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <ctime>
 #include <algorithm>
 #include <string>
-#include <fstream>
-#include <locale>
 #include <cctype>
 #include <cmath>
 
@@ -62,14 +58,93 @@
 #include "IBK_StringUtils.h"
 #include "IBK_Unit.h"
 #include "IBK_UnitList.h"
-#include "IBK_messages.h"
 #include "IBK_Exception.h"
-#include "IBK_assert.h"
-#include "utf8/utf8.h"
+#include "utf8/core.h"
 
+#ifdef _WIN32
+
+  #include "utf8/utf8.h"
+  #ifndef _WIN64
+
+	#define IBK_USE_STOD
+
+  #else
+
+	#include "fast_float/fast_float.h"
+
+  #endif
+
+#else
+
+  #include "fast_float/fast_float.h"
+
+#endif
 
 
 namespace IBK {
+
+
+template <>
+double string2val<double>(const std::string& str) {
+	double val;
+	if (str=="1.#QNAN")
+		return std::numeric_limits<double>::quiet_NaN();
+#ifdef IBK_USE_STOD
+	// for 32-bit, use std::stod()
+	size_t pos;
+	try {
+		val = std::stod(str, &pos); // may throw std::out_of_range or std::invalid_argument
+		if (str.find_first_not_of(" \t\n", pos) != std::string::npos)
+			throw std::exception();
+	}
+	catch (...) {
+		throw IBK::Exception(IBK::FormatString("Could not convert '%1' into value.").arg(str), "[IBK::string2val<double>]");
+	}
+#else
+	auto answer = fast_float::from_chars(str.data(), str.data()+str.size(), val);
+	if (answer.ec != std::errc())
+		throw IBK::Exception(IBK::FormatString("Could not convert '%1' into value.").arg(str), "[IBK::string2val<double>]");
+#endif
+	return val;
+}
+
+template <>
+bool string2val<bool>(const std::string & str) {
+	// only allow 'true' and 'false'
+	if (str == "true" || str == "1")
+		return true;
+	else if (str == "false" || str == "0")
+		return false;
+	throw IBK::Exception(IBK::FormatString("Could not convert '%1' into bool.").arg(str), "[IBK::string2val<bool>]");
+}
+
+
+template <>
+double string2valDef<double>(const std::string& str, const double & def) {
+	if (str=="1.#QNAN")
+		return std::numeric_limits<double>::quiet_NaN();
+	double val;
+#ifdef IBK_USE_STOD
+	// for 32-bit, use std::stod()
+	size_t pos;
+	if (std::locale().name() != "C")
+		setlocale(LC_ALL, "C");
+	try {
+		val = std::stod(str, &pos); // may throw std::out_of_range or std::invalid_argument
+		if (str.find_first_not_of(" \t\n", pos) != std::string::npos)
+			throw std::exception();
+	}
+	catch (...) {
+		throw IBK::Exception(IBK::FormatString("Could not convert '%1' into value.").arg(str), "[IBK::string2val<double>]");
+	}
+#else
+	auto answer = fast_float::from_chars(str.data(), str.data()+str.size(), val);
+	if (answer.ec != std::errc())
+		return def;
+#endif
+	return val;
+}
+
 
 void string2valueVector(const std::string & origStr, std::vector<double> & vec) {
 	FUNCID(IBK::string2valueVector);
@@ -112,8 +187,8 @@ void string2valueVector(const std::string & origStr, std::vector<double> & vec) 
 #else
 				// try to parse from begin of number to this position
 				double val;
-				bool isok = fast_double_parser::decimal_separator_dot::parse_number(str.data()+numberStart, &val);
-				if (!isok)
+				auto answer = fast_float::from_chars(str.data()+numberStart, nullptr, val);
+				if (answer.ec != std::errc())
 					throw IBK::Exception(IBK::FormatString("'%1' at character pos #2 is not a valid number.").arg(str.data()+numberStart).arg(numberStart), FUNC_ID);
 				vec.push_back(val);
 #endif // IBK_USE_STOD
@@ -142,8 +217,8 @@ void string2valueVector(const std::string & origStr, std::vector<double> & vec) 
 		}
 #else
 		double val;
-		bool isok = fast_double_parser::decimal_separator_dot::parse_number(str.data()+numberStart, &val);
-		if (!isok)
+		auto answer = fast_float::from_chars(str.data()+numberStart, nullptr, val);
+		if (answer.ec != std::errc())
 			throw IBK::Exception(IBK::FormatString("'%1' at character pos #2 is not a valid number.").arg(str.data()+numberStart).arg(numberStart), FUNC_ID);
 		vec.push_back(val);
 #endif // IBK_USE_STOD
@@ -297,13 +372,13 @@ std::pair<unsigned int, double> extractFromParenthesis(const std::string & src,
 		if(tokens.size() == 1)
 		{
 			try {
-#		if _MSC_VER >= 1700 //Visual Studio 2012
+#if defined(_MSC_VER) && _MSC_VER >= 1700 //Visual Studio 2012
 				defaultValue = std::make_pair
 				(IBK::string2val<unsigned int>(tokens.front()), defaultValue.second);
-#		else
+#else
 				defaultValue = std::make_pair<unsigned int, double>
 				(IBK::string2val<unsigned int>(tokens.front()), (double)defaultValue.second);
-#		endif
+#endif
 
 			}
 			catch (...) {}
@@ -311,15 +386,15 @@ std::pair<unsigned int, double> extractFromParenthesis(const std::string & src,
 		else if(tokens.size() == 2)
 		{
 			try {
-#		if _MSC_VER >= 1700 //Visual Studio 2012
+#if defined(_MSC_VER) && _MSC_VER >= 1700 //Visual Studio 2012
 				defaultValue = std::make_pair
 				(IBK::string2val<unsigned int>(tokens.front()),
 				IBK::string2val<double>(tokens.back()) );
-#		else
+#else
 				defaultValue = std::make_pair<unsigned int, double>
 				(IBK::string2val<unsigned int>(tokens.front()),
 				IBK::string2val<double>(tokens.back()) );
-#		endif
+#endif
 
 			}
 			catch (...) {}
@@ -328,6 +403,28 @@ std::pair<unsigned int, double> extractFromParenthesis(const std::string & src,
 	return defaultValue;
 }
 // ---------------------------------------------------------------------------
+
+
+Unit extract_unit(const std::string & headerLabel) {
+	std::string::size_type openBracketPos = headerLabel.rfind("[");
+	std::string::size_type closeBracketPos = headerLabel.rfind("]");
+	if (openBracketPos != std::string::npos &&
+		closeBracketPos != std::string::npos &&
+		openBracketPos < closeBracketPos)
+	{
+		std::string ustr = headerLabel.substr(openBracketPos+1, closeBracketPos-openBracketPos-1);
+		try {
+			IBK::Unit u = IBK::Unit(ustr); // may throw in case of invalid unit
+			return u;
+		}
+		catch (IBK::Exception &) {
+			return IBK::Unit();
+		}
+	}
+	return IBK::Unit();
+}
+// ---------------------------------------------------------------------------
+
 
 std::vector<std::string> explode(const std::string & str, char delim, int maxTokens) {
 	std::vector<std::string> tokens;
@@ -352,18 +449,29 @@ std::vector<std::string> explode(const std::string & str, char delim, int maxTok
 size_t explode(const std::string& str, std::vector<std::string>& tokens, const std::string& delims, int explodeFlags) {
 	tokens.clear();
 	std::string tmp;
+	std::string trimChars = " \t\r\n";
+	if (explodeFlags & EF_UseQuotes)
+		trimChars += "\"";
 
+	// if we are using quotes, we only allow splitting when we are not within quotes
+	bool inQuotation = false;
 	for (std::string::const_iterator it=str.begin(); it!=str.end(); ++it) {
+		// toggle inQuotation flag if we are considering quotes
+		if (explodeFlags & EF_UseQuotes && *it=='\"')
+			inQuotation = !inQuotation;
 		bool delim_found = false;
-		for (std::string::const_iterator tit = delims.begin(); tit != delims.end(); ++tit) {
-			if (*it==*tit) {
-				if (explodeFlags & EF_TrimTokens)
-					IBK::trim(tmp, " \t\r\n");
-				if (!tmp.empty() || (explodeFlags & EF_KeepEmptyTokens))
-					tokens.push_back(tmp);
-				tmp.clear();
-				delim_found = true;
-				break;
+		// only search for delimiters if we are not inside a quotation
+		if (!inQuotation) {
+			for (std::string::const_iterator tit = delims.begin(); tit != delims.end(); ++tit) {
+				if (*it==*tit) {
+					if (explodeFlags & EF_TrimTokens)
+						IBK::trim(tmp, trimChars); // may cause tmp to become empty
+					if (!tmp.empty() || (explodeFlags & EF_KeepEmptyTokens))
+						tokens.push_back(tmp);
+					tmp.clear();
+					delim_found = true;
+					break;
+				}
 			}
 		}
 		if (!delim_found)
@@ -371,7 +479,7 @@ size_t explode(const std::string& str, std::vector<std::string>& tokens, const s
 	}
 	if (!tmp.empty() || (explodeFlags & EF_KeepEmptyTokens)) {
 		if (explodeFlags & EF_TrimTokens)
-			IBK::trim(tmp, " \t\r\n"); // may cause tmp to become empty
+			IBK::trim(tmp, trimChars); // may cause tmp to become empty
 		if (!tmp.empty() || (explodeFlags & EF_KeepEmptyTokens))
 			tokens.push_back(tmp);
 	}
@@ -396,6 +504,9 @@ size_t explode(const std::string& str, std::list<std::string>& tokens, char deli
 	}
 	if (tmp.size())
 		tokens.push_back(tmp);
+	// if 'str' was empty, return also a vector with exactly one empty string
+	if (tokens.empty())
+		tokens.push_back("");
 	return tokens.size();
 }
 // ---------------------------------------------------------------------------
@@ -419,6 +530,9 @@ size_t explode(const std::string& str, std::vector<std::string>& tokens, char de
 			IBK::trim(tmp);
 		tokens.push_back(tmp);
 	}
+	// if 'str' was empty, return also a vector with exactly one empty string
+	if (tokens.empty())
+		tokens.push_back("");
 	return tokens.size();
 }
 // ---------------------------------------------------------------------------
@@ -489,6 +603,9 @@ size_t explode(const std::string& str, std::list<std::string>& tokens,
 		tokens.push_back(tmp);
 		delims[delim_count] = ' ';
 	}
+	// if 'str' was empty, return also a vector with exactly one empty string
+	if (tokens.empty())
+		tokens.push_back("");
 	return tokens.size();
 }
 // ---------------------------------------------------------------------------
@@ -570,7 +687,7 @@ void explode_sections(std::istream& in,
 
 		// check for new keyword
 		if (it != section_titles.end()) {
-			current_section = distance(section_titles.begin(), it);
+			current_section = (unsigned long)std::distance(section_titles.begin(), it);
 		}
 		else {
 
@@ -821,7 +938,7 @@ bool isInCharType(char ch, unsigned int types) {
 }
 
 /*! Functor for creating a random character in the given chart type range.*/
-struct random_char : std::unary_function<void,char> {
+struct random_char {
 public:
 	/*! Constructor set the char type.*/
 	random_char(unsigned int charTypes) :
@@ -1089,216 +1206,27 @@ void decode_version_number(const std::string & versionString, unsigned int & maj
 	}
 }
 
-//std::string latin9_to_utf8(const char *const string) {
-//    char   *result;
-//    size_t  n = 0;
-//
-//    if (string) {
-//        const unsigned char  *s = (const unsigned char *)string;
-//
-//        while (*s)
-//            if (*s < 128) {
-//                s++;
-//                n += 1;
-//            } else
-//            if (*s == 164) {
-//                s++;
-//                n += 3;
-//            } else {
-//                s++;
-//                n += 2;
-//            }
-//    }
-//
-//    /* Allocate n+1 (to n+7) bytes for the converted string. */
-//    result = malloc((n | 7) + 1);
-//    if (!result) {
-//        errno = ENOMEM;
-//        return NULL;
-//    }
-//
-//    /* Clear the tail of the string, setting the trailing NUL. */
-//    memset(result + (n | 7) - 7, 0, 8);
-//
-//    if (n) {
-//        const unsigned char  *s = (const unsigned char *)string;
-//        unsigned char        *d = (unsigned char *)result;
-//
-//        while (*s)
-//            if (*s < 128) {
-//                *(d++) = *(s++);
-//            } else
-//            if (*s < 192) switch (*s) {
-//                case 164: *(d++) = 226; *(d++) = 130; *(d++) = 172; s++; break;
-//                case 166: *(d++) = 197; *(d++) = 160; s++; break;
-//                case 168: *(d++) = 197; *(d++) = 161; s++; break;
-//                case 180: *(d++) = 197; *(d++) = 189; s++; break;
-//                case 184: *(d++) = 197; *(d++) = 190; s++; break;
-//                case 188: *(d++) = 197; *(d++) = 146; s++; break;
-//                case 189: *(d++) = 197; *(d++) = 147; s++; break;
-//                case 190: *(d++) = 197; *(d++) = 184; s++; break;
-//                default:  *(d++) = 194; *(d++) = *(s++); break;
-//            } else {
-//                *(d++) = 195;
-//                *(d++) = *(s++) - 64;
-//            }
-//    }
-//
-//    /* Done. Remember to free() the resulting string when no longer needed. */
-//    return result;
-//}
-//
-///* Create a dynamically allocated copy of string,
-// * changing the encoding from UTF-8 to ISO-8859-15.
-// * Unsupported code points are ignored.
-//*/
-//char *utf8_to_latin9(const char *const string) {
-//    size_t         size = 0;
-//    size_t         used = 0;
-//    unsigned char *result = NULL;
-//
-//    if (string) {
-//        const unsigned char  *s = (const unsigned char *)string;
-//
-//        while (*s) {
-//
-//            if (used >= size) {
-//                void *const old = result;
-//
-//                size = (used | 255) + 257;
-//                result = realloc(result, size);
-//                if (!result) {
-//                    if (old)
-//                        free(old);
-//                    errno = ENOMEM;
-//                    return NULL;
-//                }
-//            }
-//
-//            if (*s < 128) {
-//                result[used++] = *(s++);
-//                continue;
-//
-//            } else
-//            if (s[0] == 226 && s[1] == 130 && s[2] == 172) {
-//                result[used++] = 164;
-//                s += 3;
-//                continue;
-//
-//            } else
-//            if (s[0] == 194 && s[1] >= 128 && s[1] <= 191) {
-//                result[used++] = s[1];
-//                s += 2;
-//                continue;
-//
-//            } else
-//            if (s[0] == 195 && s[1] >= 128 && s[1] <= 191) {
-//                result[used++] = s[1] + 64;
-//                s += 2;
-//                continue;
-//
-//            } else
-//            if (s[0] == 197 && s[1] == 160) {
-//                result[used++] = 166;
-//                s += 2;
-//                continue;
-//
-//            } else
-//            if (s[0] == 197 && s[1] == 161) {
-//                result[used++] = 168;
-//                s += 2;
-//                continue;
-//
-//            } else
-//            if (s[0] == 197 && s[1] == 189) {
-//                result[used++] = 180;
-//                s += 2;
-//                continue;
-//
-//            } else
-//            if (s[0] == 197 && s[1] == 190) {
-//                result[used++] = 184;
-//                s += 2;
-//                continue;
-//
-//            } else
-//            if (s[0] == 197 && s[1] == 146) {
-//                result[used++] = 188;
-//                s += 2;
-//                continue;
-//
-//            } else
-//            if (s[0] == 197 && s[1] == 147) {
-//                result[used++] = 189;
-//                s += 2;
-//                continue;
-//
-//            } else
-//            if (s[0] == 197 && s[1] == 184) {
-//                result[used++] = 190;
-//                s += 2;
-//                continue;
-//
-//            }
-//
-//            if (s[0] >= 192 && s[0] < 224 &&
-//                s[1] >= 128 && s[1] < 192) {
-//                s += 2;
-//                continue;
-//            } else
-//            if (s[0] >= 224 && s[0] < 240 &&
-//                s[1] >= 128 && s[1] < 192 &&
-//                s[2] >= 128 && s[2] < 192) {
-//                s += 3;
-//                continue;
-//            } else
-//            if (s[0] >= 240 && s[0] < 248 &&
-//                s[1] >= 128 && s[1] < 192 &&
-//                s[2] >= 128 && s[2] < 192 &&
-//                s[3] >= 128 && s[3] < 192) {
-//                s += 4;
-//                continue;
-//            } else
-//            if (s[0] >= 248 && s[0] < 252 &&
-//                s[1] >= 128 && s[1] < 192 &&
-//                s[2] >= 128 && s[2] < 192 &&
-//                s[3] >= 128 && s[3] < 192 &&
-//                s[4] >= 128 && s[4] < 192) {
-//                s += 5;
-//                continue;
-//            } else
-//            if (s[0] >= 252 && s[0] < 254 &&
-//                s[1] >= 128 && s[1] < 192 &&
-//                s[2] >= 128 && s[2] < 192 &&
-//                s[3] >= 128 && s[3] < 192 &&
-//                s[4] >= 128 && s[4] < 192 &&
-//                s[5] >= 128 && s[5] < 192) {
-//                s += 6;
-//                continue;
-//            }
-//
-//            s++;
-//        }
-//    }
-//
-//    {
-//        void *const old = result;
-//
-//        size = (used | 7) + 1;
-//
-//        result = realloc(result, size);
-//        if (!result) {
-//            if (old)
-//                free(old);
-//            errno = ENOMEM;
-//            return NULL;
-//        }
-//
-//        memset(result + used, 0, size - used);
-//    }
-//
-//    return (char *)result;
-//}
+
+std::string convertXml2Html(const std::string & xmlText) {
+	static std::vector< std::pair<std::string, std::string> >substitutionTable;
+	if (substitutionTable.empty()) {
+		// Note: & must be replaced at the very begin!
+		substitutionTable.push_back( std::make_pair("&", "&amp;") );	//	ampersand
+		substitutionTable.push_back( std::make_pair("\"","&quot;") ); //	quotation mark
+//		substitutionTable["'"]	= "&apos;"; //	apostrophe
+		substitutionTable.push_back( std::make_pair("<","&lt;") ); //	less-than
+		substitutionTable.push_back( std::make_pair(">","&gt;") ); //	greater-than
+		substitutionTable.push_back( std::make_pair("\n", "<br>") ); //	line break
+//		substitutionTable.push_back( std::make_pair(" ", "&nbsp;") ); //	no-break-space
+	}
+
+	std::string newText = xmlText;
+	for (const auto & subst : substitutionTable)
+		newText = replace_string(newText, subst.first, subst.second);
+
+	return newText;
+}
+
 
 #ifdef _WIN32
 
@@ -1368,7 +1296,7 @@ std::string WstringToANSI(const std::wstring& wide, bool OEMPage) {
 	std::vector<char> str(reslength, '\0');
 	int writtenLength = WideCharToMultiByte(pageFlag, 0, wide.c_str(), -1, &str[0], reslength, 0, 0);
 	if(writtenLength == 0)
-		throw std::logic_error("Cannot create  UTF8 string from wide string.");
+		throw std::logic_error("Cannot create ansi string from wide string.");
 	return std::string(&str[0]);
 }
 
