@@ -2,7 +2,7 @@
 # Author: Andreas Nicolai (andreas.nicolai -at- gmx.net)
 
 # Require a fairly recent cmake version
-cmake_minimum_required( VERSION 2.8...3.10 )
+cmake_minimum_required( VERSION 2.8...3.13 )
 
 # The project name
 project( OpenHAMSolverBundle )

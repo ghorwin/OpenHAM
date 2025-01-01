@@ -2,8 +2,8 @@
 
 # Script to create a release of OpenHAM for Linux
 
-VERSION=0.3
-DISTRO=Ubuntu-18.04
+VERSION=0.3.1
+DISTRO=Ubuntu-24.04
 
 cd ../../build/cmake && 
 rm -rf bb-gcc && 

@@ -1,7 +1,5 @@
 # CMakeLists.txt file for DataIO library
 
-cmake_minimum_required( VERSION 2.6 )
-
 project( DataIO )
 
 # collect a list of all source files
