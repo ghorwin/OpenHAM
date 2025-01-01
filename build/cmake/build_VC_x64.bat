@@ -1,16 +1,29 @@
 @echo off
 
 :: setup VC environment variables
-set VCVARSALL_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
-call %VCVARSALL_PATH%
+if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat" (
+	echo Loading VCVars64 Community
+	call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+)
+
+if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat" (
+	echo Loading VCVars64 Enterprise
+	call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+)
+
+:: For different Qt installations, please set the environment variables JOM_PATH and CMAKE_PREFIX_PATH
+:: for the current Windows user. Also, make sure cmake is in the PATH variable.
+:: Mind: the dlls in the release/win/VC14_xxx subdirectories must match the Qt version for building.
+::       You must copy the Qt dlls used for building into these directories.
+::
+:: For debugging crashes on Windows, change the CMAKE_BUILD_TYPE to "RelWithDebInfo".
 
 :: These environment variables can also be set externally
 if not defined JOM_PATH (
-	set JOM_PATH=c:\Qt\5.15.2\Tools\QtCreator\bin
+	set JOM_PATH=c:\Qt\Tools\QtCreator\bin
 )
-
 if not defined CMAKE_PREFIX_PATH (
-	set CMAKE_PREFIX_PATH=c:\Qt\5.15.2\msvc2019_64
+	set CMAKE_PREFIX_PATH=C:\Qt\5.15.2\msvc2019_64
 )
 
 :: add search path for jom.exe
@@ -21,7 +34,7 @@ mkdir bb_VC_x64
 pushd bb_VC_x64
 
 :: configure makefiles and build
-cmake -G "NMake Makefiles JOM" ..\..\.. -DCMAKE_BUILD_TYPE:String="Release"
+cmake -G "NMake Makefiles JOM" ../../.. -DCMAKE_BUILD_TYPE:String="Release"
 jom
 if ERRORLEVEL 1 GOTO fail
 
@@ -32,6 +45,7 @@ popd
 xcopy /Y .\bb_VC_x64\OpenHAMSolver\OpenHAMSolver.exe ..\..\bin\release_x64
 
 exit /b 0
+
 
 :fail
 pause
