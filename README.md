@@ -34,5 +34,5 @@ For other VC versions, just copy the batch file and adjust paths.
 Open `OpenHAMSession.pro` in Qt Creator and you're ready to go.
 
 ----
-[![Github All Releases](https://img.shields.io/github/downloads/ghorwin/OpenHAM/total.svg)](https://github.com/ghorwin/OpenHAM/releases)
+- [Download stats (github)...](https://tooomm.github.io/github-release-stats/?username=ghorwin&repository=OpenHAM)
 
