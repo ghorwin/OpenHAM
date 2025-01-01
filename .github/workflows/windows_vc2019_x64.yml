@@ -1,0 +1,30 @@
+name: Windows VC2019 x64 - Release
+
+on:
+  # allow to be triggered on github webpage manually
+  workflow_dispatch:
+  # run whenever someone pushes data
+  # WARNING: this may give excessive build times which need to be paid!
+#  push:
+#    branches: [ "master" ]
+#  pull_request:
+#    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: windows-2019
+
+    steps:
+    - name: install jom
+      run: choco install jom -y
+    - uses: actions/checkout@v4
+    - name: build
+      working-directory: release/windows
+      shell: cmd
+      run: create_release.bat
+    - uses: actions/upload-artifact@v4
+      with:
+      name: OpenHAMSolver-win64-release
+      path: release/windows/OpenHAM-0.4.0-Win64/
+      
