@@ -25,6 +25,6 @@ jobs:
       run: create_release.bat
     - uses: actions/upload-artifact@v4
       with:
-      name: OpenHAMSolver-win64-release
-      path: release/windows/OpenHAM-0.4.0-Win64/
-      
+        name: OpenHAMSolver-win64-release
+        path: release/windows/OpenHAM-0.4.0-Win64/
+
