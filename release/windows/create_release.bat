@@ -1,6 +1,6 @@
 @echo off
 
-set RELDIR=OpenHAM-03-Win64
+set RELDIR=OpenHAM-0.4.0-Win64
 
 cd ..\..\build\cmake
 call build_VC_x64.bat

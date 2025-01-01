@@ -2,7 +2,7 @@
 
 # Script to create a release of OpenHAM for Linux
 
-VERSION=0.3.1
+VERSION=0.4.0
 DISTRO=Ubuntu-24.04
 
 cd ../../build/cmake && 
