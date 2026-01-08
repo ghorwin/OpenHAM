@@ -35,3 +35,4 @@ build/cmake/bb-gcc
 *.DS_Store
 /build/Desktop-*/
 *.pro.user
+*.pyc
