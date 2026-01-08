@@ -39,13 +39,13 @@ endif (MSVC)
 # Subdirectories and Subprojects
 # -------------------------------------------------------------
 
-add_subdirectory( externals/CCM/projects/cmake_local CCM )
-add_subdirectory( externals/IBK/projects/cmake_local IBK )
-add_subdirectory( externals/DataIO/projects/cmake_local DataIO)
-add_subdirectory( externals/TiCPP/projects/cmake_local TiCPP)
-add_subdirectory( externals/DelphinLight/projects/cmake_local DelphinLight)
+add_subdirectory( ../../externals/CCM CCM )
+add_subdirectory( ../../externals/IBK IBK )
+add_subdirectory( ../../externals/DataIO DataIO)
+add_subdirectory( ../../externals/TiCPP TiCPP)
+add_subdirectory( ../../externals/DelphinLight DelphinLight)
 
 # add subdirectories for all builds
-add_subdirectory( OpenHAMSolver/projects/cmake OpenHAMSolver )
+add_subdirectory( ../../OpenHAMSolver OpenHAMSolver )
 
 
